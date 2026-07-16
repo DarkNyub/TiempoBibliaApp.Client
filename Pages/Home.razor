@@ -1,0 +1,105 @@
+﻿@page "/"
+@using TiempoBiblia.Client.Models
+@inject HttpClient Http
+
+<MudPaper Class="pa-8 ma-4 d-flex flex-column align-center justify-center rounded-xl hero-banner" Elevation="2">
+    <MudText Typo="Typo.h3" Class="font-weight-bold mb-4 text-center">Encuentra tu paz diaria</MudText>
+    <MudText Typo="Typo.h6" Class="text-center">Recursos, devocionales y estudios diseñados para ti.</MudText>
+    <MudButton Variant="Variant.Filled" Color="Color.Surface" Class="mt-6 font-weight-bold" Style="color: #F48FB1; border-radius: 30px; padding: 10px 30px;">
+        Ver Novedades
+    </MudButton>
+</MudPaper>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-8 mb-8">
+    <div class="d-flex align-center mb-4">
+        <MudText Typo="Typo.h5" Class="font-weight-bold" Color="Color.Primary">Catálogo de Productos</MudText>
+        <MudSpacer />
+        <MudButton Variant="Variant.Text" Color="Color.Secondary" EndIcon="@Icons.Material.Filled.ArrowForward">Ver todos</MudButton>
+    </div>
+    
+    <div class="netflix-row">
+        @if (productos == null)
+        {
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" Class="ma-4"/>
+        }
+        else if (!productos.Any())
+        {
+            <MudText>No hay productos disponibles por el momento.</MudText>
+        }
+        else
+        {
+            @foreach (var producto in productos)
+            {
+                <MudCard Class="netflix-card rounded-lg" Elevation="1">
+                    <MudCardMedia Image="@(string.IsNullOrEmpty(producto.ImagenUrl) ? "https://via.placeholder.com/300x400/F8BBD0/FFFFFF?text=Sin+Imagen" : producto.ImagenUrl)" Height="220" />
+                    <MudCardContent>
+                        <MudText Typo="Typo.body1" Class="font-weight-bold">@producto.Nombre</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="font-weight-bold">@producto.Tipo</MudText>
+                        
+                        <div class="mt-2">
+                            @if (producto.EsGratuito)
+                            {
+                                <MudChip T="string" Color="Color.Success" Size="Size.Small">¡Gratis!</MudChip>
+                            }
+                            else
+                            {
+                                <MudText Typo="Typo.body2" Class="font-weight-bold" Style="color: #5D4037;">
+                                    $@(producto.Precio - producto.Descuento) 
+                                    @if(producto.Descuento > 0)
+                                    {
+                                        <span style="text-decoration: line-through; font-size: 0.8em; color: gray;">$@producto.Precio</span>
+                                    }
+                                </MudText>
+                            }
+                        </div>
+                    </MudCardContent>
+                </MudCard>
+            }
+        }
+    </div>
+</MudContainer>
+
+@code {
+    // Variable para guardar los datos de la API
+    private List<ProductoDto>? productos;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // ¡Magia! Llamamos al endpoint GET /api/Productos en Azure
+        // Como configuramos el BaseAddress en Program.cs, no hay que poner la URL completa aquí
+        productos = await Http.GetFromJsonAsync<List<ProductoDto>>("api/Productos");
+    }
+}
+
+<style>
+    /* Estilos del Banner y Scroll (Mantenemos los mismos de antes) */
+    .hero-banner {
+        background: linear-gradient(135deg, #F48FB1 0%, #B2EBF2 100%);
+        color: white; 
+        height: 350px;
+    }
+    .netflix-row {
+        display: flex;
+        overflow-x: auto;
+        gap: 16px;
+        padding-bottom: 16px; 
+        scroll-behavior: smooth;
+    }
+    .netflix-row::-webkit-scrollbar {
+        display: none;
+    }
+    .netflix-row {
+        scrollbar-width: none;
+    }
+    .netflix-card {
+        min-width: 220px; 
+        flex: 0 0 auto; 
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+    }
+    .netflix-card:hover {
+        transform: scale(1.04);
+        box-shadow: 0 10px 20px rgba(244, 143, 177, 0.3) !important; 
+        z-index: 10;
+    }
+</style>

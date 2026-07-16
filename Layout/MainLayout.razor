@@ -1,0 +1,40 @@
+﻿@inherits LayoutComponentBase
+
+<MudThemeProvider Theme="@MiTemaPastel" />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="0" Color="Color.Primary" Fixed="true">
+        <MudIcon Icon="@Icons.Material.Filled.AutoAwesome" Size="Size.Large" Class="mr-2" />
+        <MudText Typo="Typo.h5" Class="font-weight-bold">Tiempo Biblia</MudText>
+        
+        <MudSpacer /> 
+        
+        <MudButton Color="Color.Inherit" Variant="Variant.Text" Class="mr-2">Inicio</MudButton>
+        <MudButton Color="Color.Inherit" Variant="Variant.Text" Class="mr-2">Cursos</MudButton>
+        <MudIconButton Icon="@Icons.Material.Filled.FavoriteBorder" Color="Color.Inherit" />
+    </MudAppBar>
+
+    <MudMainContent>
+        @Body
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    // Aquí definimos tu identidad visual a nivel global
+    MudTheme MiTemaPastel = new MudTheme()
+    {
+        PaletteLight = new PaletteLight()
+        {
+            Primary = "#F48FB1", // Rosa pastel suave
+            Secondary = "#80CBC4", // Aguamarina contrastante
+            AppbarBackground = "#F48FB1", // La barra de arriba en rosa
+            Background = "#FFF8F9", // Un fondo blanco con una gotita imperceptible de rosa
+            Surface = "#FFFFFF", // Las tarjetas 100% blancas para que destaquen
+            TextPrimary = "#5D4037", // Texto marrón suave (menos agresivo que el negro puro)
+            TextSecondary = "#8D6E63", 
+            ActionDefault = "#F48FB1" // Los iconos por defecto en rosa
+        }
+    };
+}

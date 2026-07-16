@@ -1,0 +1,36 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ] # Cámbialo a 'master' si esa es tu rama principal
+
+permissions:
+  contents: write # Requerido para que el script pueda crear la rama de publicación
+
+jobs:
+  deploy-to-github-pages:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Clonar el código del repositorio
+      - uses: actions/checkout@v4
+
+      # 2. Instalar el SDK de .NET
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x' # Ajusta a '7.0.x' si usas .NET 7
+
+      # 3. Publicar el proyecto en modo Release
+      - name: Publish Blazor WebAssembly
+        run: dotnet publish -c Release -o release
+
+      # 4. Asegurar el enrutamiento para evitar errores 404 de GitHub Pages
+      - name: Copy index.html to 404.html
+        run: cp release/wwwroot/index.html release/wwwroot/404.html
+
+      # 5. Desplegar el contenido de wwwroot a la rama gh-pages
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: release/wwwroot
