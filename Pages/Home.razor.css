@@ -1,0 +1,75 @@
+/* --- HERO BANNER --- */
+.hero-container {
+    position: relative;
+    height: 60vh;
+    min-height: 400px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(to top, rgba(18, 18, 18, 1) 0%, rgba(18, 18, 18, 0) 100%);
+    z-index: 1;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 3rem;
+    width: 100%;
+    max-width: 800px;
+}
+
+/* --- FILAS TIPO NETFLIX (Carousels) --- */
+.netflix-row-container {
+    margin-bottom: 2rem;
+}
+
+.netflix-row {
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: 1rem;
+    padding: 1rem 0 2rem 0;
+    scroll-behavior: smooth;
+    /* Ocultar barra de scroll estándar */
+    scrollbar-width: none; /* Firefox */
+}
+
+.netflix-row::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
+}
+
+/* --- TARJETAS CON ZOOM --- */
+.netflix-card-wrapper {
+    flex: 0 0 auto;
+    width: 220px; /* Ancho de la tarjeta */
+    transition: transform 0.3s ease;
+    cursor: pointer;
+    position: relative;
+}
+
+/* El efecto mágico de Zoom al pasar el ratón */
+.netflix-card-wrapper:hover {
+    transform: scale(1.08);
+    z-index: 10;
+}
+
+.card-image-container {
+    height: 300px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}

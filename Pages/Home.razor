@@ -2,14 +2,10 @@
 @using TiempoBiblia.Client.Models
 @inject HttpClient Http
 
-<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-6">
-    <MudText Typo="Typo.h3" Align="Align.Center" GutterBottom="true" Color="Color.Primary">
-        Explora la Biblioteca
-    </MudText>
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
 
     @if (categorias == null || productos == null)
     {
-        <!-- Spinner de carga elegante -->
         <MudStack AlignItems="AlignItems.Center" Class="mt-10">
             <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Large" />
             <MudText>Cargando catálogo...</MudText>
@@ -17,82 +13,94 @@
     }
     else
     {
-        <!-- 1. FILTRO DE CATEGORÍAS (Píldoras) -->
-        <MudStack AlignItems="AlignItems.Center" Class="mb-8">
-            <MudChipSet T="int" Value="@categoriaSeleccionada" ValueChanged="FiltrarPorCategoria">
-                <MudChip T="int" Value="0" Color="Color.Primary" Variant="@(categoriaSeleccionada == 0 ? Variant.Filled : Variant.Outlined)">
-                    Todas
-                </MudChip>
-                @foreach (var cat in categorias)
-                {
-                    <MudChip T="int" Value="@cat.Id" Color="Color.Secondary" Variant="@(categoriaSeleccionada == cat.Id ? Variant.Filled : Variant.Outlined)">
-                        @cat.Nombre
-                    </MudChip>
-                }
-            </MudChipSet>
-        </MudStack>
+        <!-- 1. HERO BANNER (Producto Destacado) -->
+        @if (productoDestacado != null)
+        {
+            var heroImage = string.IsNullOrEmpty(productoDestacado.ImagenUrl) 
+                ? "https://images.unsplash.com/photo-1504052434569-70ad5836ab65?q=80&w=2000&auto=format&fit=crop" 
+                : productoDestacado.ImagenUrl;
 
-        <!-- 2. GRID DE PRODUCTOS -->
-        <MudGrid>
-            @foreach (var prod in productosVisibles)
-            {
-                <MudItem xs="12" sm="6" md="4" lg="3">
-                    <MudCard Elevation="4" Class="h-100 d-flex flex-column">
-                        <MudCardMedia Image="@(string.IsNullOrEmpty(prod.ImagenUrl) ? "https://dummyimage.com/600x400/e0e0e0/000000.png&text=Portada" : prod.ImagenUrl)" Height="200" />
+            <div class="hero-container" style="background-image: url('@heroImage');">
+                <div class="hero-overlay"></div>
+                <div class="hero-content">
+                    <MudText Typo="Typo.h2" Style="color: white; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">
+                        @productoDestacado.Nombre
+                    </MudText>
+                    <MudText Typo="Typo.body1" Class="mt-2 mb-4" Style="color: #e0e0e0; font-size: 1.2rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">
+                        @productoDestacado.Descripcion
+                    </MudText>
+                    
+                    <MudStack Row="true" Spacing="4">
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" StartIcon="@Icons.Material.Filled.ShoppingCart">
+                            Adquirir $@productoDestacado.Precio
+                        </MudButton>
+                        <MudButton Variant="Variant.Outlined" Style="color: white; border-color: white; background-color: rgba(255,255,255,0.2);" Size="Size.Large" StartIcon="@Icons.Material.Filled.Info">
+                            Más Info
+                        </MudButton>
+                    </MudStack>
+                </div>
+            </div>
+        }
+
+        <!-- 2. FILAS DE CATEGORÍAS (Netflix Rows) -->
+        @foreach (var fila in productosPorCategoria)
+        {
+            <div class="netflix-row-container">
+                <MudText Typo="Typo.h5" Class="mb-2" Style="font-weight: bold;">@fila.Key</MudText>
+                
+                <div class="netflix-row">
+                    @foreach (var prod in fila.Value)
+                    {
+                        var poster = string.IsNullOrEmpty(prod.ImagenUrl) ? $"https://dummyimage.com/400x600/292929/ffffff.png&text={prod.Nombre}" : prod.ImagenUrl;
                         
-                        <MudCardContent Class="flex-grow-1">
-                            <MudText Typo="Typo.h6">@prod.Nombre</MudText>
-                            <MudText Typo="Typo.body2" Class="mb-3">@prod.Descripcion</MudText>
-                            
-                            <!-- Tags del producto -->
-                            <div class="mb-3">
-                                @foreach (var pt in prod.ProductoTags)
-                                {
-                                    <MudChip T="string" Size="Size.Small" Variant="Variant.Text">#@pt.Tag.Nombre</MudChip>
-                                }
-                            </div>
-
-                            <!-- Precio o Etiqueta Gratis -->
+                        <div class="netflix-card-wrapper">
+                            <MudPaper Elevation="4" Class="card-image-container">
+                                <img src="@poster" alt="@prod.Nombre" class="card-image" />
+                            </MudPaper>
+                            <MudText Typo="Typo.subtitle2" Class="mt-2" Style="font-weight: bold;" Align="Align.Center">
+                                @prod.Nombre
+                            </MudText>
                             @if(prod.EsGratuito)
                             {
-                                <MudChip T="string" Color="Color.Success" Size="Size.Small">¡Gratis!</MudChip>
+                                <MudText Typo="Typo.caption" Color="Color.Success" Align="Align.Center" Style="display: block;">Gratis</MudText>
                             }
                             else
                             {
-                                <MudText Typo="Typo.h6" Color="Color.Primary"><b>$@prod.Precio</b></MudText>
+                                <MudText Typo="Typo.caption" Color="Color.Primary" Align="Align.Center" Style="display: block;">$@prod.Precio</MudText>
                             }
-                        </MudCardContent>
-                        
-                        <MudCardActions>
-                            <MudButton Variant="Variant.Text" Color="Color.Primary">Ver Detalle</MudButton>
-                            <MudSpacer />
-                            <MudIconButton Icon="@Icons.Material.Filled.AddShoppingCart" Color="Color.Default" />
-                        </MudCardActions>
-                    </MudCard>
-                </MudItem>
-            }
-        </MudGrid>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
     }
+
 </MudContainer>
 
 @code {
     private List<CategoriaDto>? categorias;
     private List<ProductoDto>? productos;
-    private List<ProductoDto> productosVisibles = new();
     
-    private int categoriaSeleccionada = 0;
+    // El producto que saldrá en grande arriba
+    private ProductoDto? productoDestacado;
+    
+    // Un diccionario para agrupar las filas: "Nombre de Categoría" -> Lista de Productos
+    private Dictionary<string, List<ProductoDto>> productosPorCategoria = new();
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            // Ajusta las rutas según tus Controladores de la API (asumiendo api/Categorias y api/Productos)
             categorias = await Http.GetFromJsonAsync<List<CategoriaDto>>("api/Categorias");
             productos = await Http.GetFromJsonAsync<List<ProductoDto>>("api/Productos");
 
-            if (productos != null)
+            if (productos != null && productos.Any() && categorias != null)
             {
-                productosVisibles = productos;
+                // Tomamos el primer producto (o el más reciente) como Destacado
+                productoDestacado = productos.FirstOrDefault();
+
+                // Armamos las filas de Netflix
+                ArmarFilasCategorias();
             }
         }
         catch (Exception ex)
@@ -101,23 +109,22 @@
         }
     }
 
-    private void FiltrarPorCategoria(int idCategoria)
+    private void ArmarFilasCategorias()
     {
-        categoriaSeleccionada = idCategoria;
+        productosPorCategoria.Clear();
 
-        if (productos != null)
+        foreach (var cat in categorias!)
         {
-            if (idCategoria == 0)
+            // Buscamos productos donde esta categoría sea la principal O una de sus secundarias
+            var productosEnEstaCategoria = productos!.Where(p => 
+                p.CategoriaId == cat.Id || 
+                p.CategoriasSecundarias.Any(cs => cs.CategoriaId == cat.Id)
+            ).ToList();
+
+            // Solo creamos la fila si la categoría tiene al menos un producto
+            if (productosEnEstaCategoria.Any())
             {
-                productosVisibles = productos; // Mostrar todo
-            }
-            else
-            {
-                // 🔥 LA MAGIA: Buscamos si el idCategoria coincide con la principal O con alguna de las secundarias
-                productosVisibles = productos.Where(p => 
-                    p.CategoriaId == idCategoria || 
-                    p.CategoriasSecundarias.Any(cs => cs.CategoriaId == idCategoria)
-                ).ToList();
+                productosPorCategoria.Add(cat.Nombre, productosEnEstaCategoria);
             }
         }
     }
