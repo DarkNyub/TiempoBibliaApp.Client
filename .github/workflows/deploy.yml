@@ -18,17 +18,21 @@ jobs:
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x' # Ajusta a '7.0.x' si usas .NET 7
+          dotnet-version: '8.0.x' 
 
       # 3. Publicar el proyecto en modo Release
       - name: Publish Blazor WebAssembly
         run: dotnet publish -c Release -o release
 
-      # 4. Asegurar el enrutamiento para evitar errores 404 de GitHub Pages
+      # 4. 🔥 MAGIA: Cambiar la ruta base automáticamente solo para GitHub Pages
+      - name: Fix base href for GitHub Pages
+        run: sed -i 's|<base href="/" />|<base href="/TiempoBibliaApp.Client/" />|g' release/wwwroot/index.html
+
+      # 5. Asegurar el enrutamiento para evitar errores 404 de GitHub Pages
       - name: Copy index.html to 404.html
         run: cp release/wwwroot/index.html release/wwwroot/404.html
 
-      # 5. Desplegar el contenido de wwwroot a la rama gh-pages
+      # 6. Desplegar el contenido de wwwroot a la rama gh-pages
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
