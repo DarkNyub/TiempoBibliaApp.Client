@@ -1,6 +1,7 @@
 ﻿@page "/"
 @using TiempoBiblia.Client.Models
 @inject HttpClient Http
+@inject IDialogService _dialogService
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
 
@@ -54,7 +55,7 @@
                         var poster = string.IsNullOrEmpty(prod.ImagenUrl) ? $"https://dummyimage.com/400x600/292929/ffffff.png&text={prod.Nombre}" : prod.ImagenUrl;
                         
                         <!-- Agregamos el evento onclick a la tarjeta del producto -->
-                        <div class="netflix-card-wrapper" @onclick="() => AbrirModalProducto(prod)">>
+                        <div class="netflix-card-wrapper" @onclick="() => AbrirModalProducto(prod)">
                             <MudPaper Elevation="4" Class="card-image-container">
                                 <img src="@poster" alt="@prod.Nombre" class="card-image" />
                             </MudPaper>
@@ -154,21 +155,19 @@
         }
     }
     // 🔥 EL MÉTODO QUE ABRE EL POP-UP
-    private void AbrirModalProducto(ProductoDto producto)
+    private async Task AbrirModalProducto(ProductoDto producto)
     {
-        // Pasamos el producto al modal
         var parameters = new DialogParameters<ProductoDetalleModal> { { x => x.Producto, producto } };
         
-        // Configuramos visualmente el modal para que parezca Netflix (sin título, fondo oscuro)
         var options = new DialogOptions { 
             CloseButton = true, 
             MaxWidth = MaxWidth.Medium, 
             FullWidth = true, 
             NoHeader = true,
-            BackgroundClass = "netflix-modal-backdrop" // Opcional para oscurecer el fondo
+            BackgroundClass = "netflix-modal-backdrop" 
         };
 
-        // Lanzamos el diálogo
-        DialogService.Show<ProductoDetalleModal>("", parameters, options);
+        // Cambiamos Show por ShowAsync y agregamos await
+        await _dialogService.ShowAsync<ProductoDetalleModal>("", parameters, options);
     }
 }

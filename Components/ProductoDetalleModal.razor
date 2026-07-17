@@ -1,6 +1,8 @@
 @using TiempoBiblia.Client.Models
+@using MudBlazor
+@inject IJSRuntime _js
 
-<MudDialog DisableSidePadding="true" Class="netflix-modal-dialog">
+<MudDialog Class="netflix-modal-dialog">
     <DialogContent>
         <!-- CABECERA: Imagen a full ancho con gradiente oscuro -->
         <div class="modal-hero-container" style="background-image: url('@Producto.ImagenUrl');">
@@ -12,8 +14,11 @@
                 </MudText>
                 
                 <MudStack Row="true" Spacing="4" Class="mt-4">
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" StartIcon="@Icons.Material.Filled.PlayArrow" Style="background-color: white; color: black; font-weight: bold;">
-                        @(Producto.EsGratuito ? "Adquirir Gratis" : $"Comprar ${Producto.Precio}")
+                    <MudButton Variant="Variant.Filled" Size="Size.Large" 
+                               StartIcon="@(Producto.EsGratuito ? Icons.Material.Filled.Download : Icons.Custom.Brands.WhatsApp)" 
+                               Style="background-color: #25D366; color: white; font-weight: bold;"
+                               @onclick="PedirPorWhatsApp">
+                        @(Producto.EsGratuito ? "Obtener Gratis" : $"Pedir por WhatsApp ${Producto.Precio}")
                     </MudButton>
                     <MudIconButton Icon="@Icons.Material.Filled.AddShoppingCart" Color="Color.Inherit" Style="color: white; border: 2px solid gray;" />
                 </MudStack>
@@ -34,9 +39,12 @@
 
                     <MudText Typo="Typo.caption" Style="color: gray;">Temas:</MudText>
                     <div class="d-flex flex-wrap gap-1 mt-1">
-                        @foreach (var tag in Producto.ProductoTags.Take(5))
+                        @if(Producto.ProductoTags != null)
                         {
-                            <MudChip T="string" Size="Size.Small" Variant="Variant.Text" Style="color: #e5e5e5; padding: 0;">@tag.Tag.Nombre,</MudChip>
+                            @foreach (var tag in Producto.ProductoTags.Take(5))
+                            {
+                                <MudChip T="string" Size="Size.Small" Variant="Variant.Text" Style="color: #e5e5e5; padding: 0;">@tag.Tag.Nombre,</MudChip>
+                            }
                         }
                         <MudText Typo="Typo.caption" Style="align-self: center;">más...</MudText>
                     </div>
@@ -84,10 +92,24 @@
 </MudDialog>
 
 @code {
-    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = null!;
     
-    // Recibimos el producto al abrir el Modal
     [Parameter] public ProductoDto Producto { get; set; } = new();
 
     private void Cancelar() => MudDialog.Cancel();
+
+    private async Task PedirPorWhatsApp()
+    {
+        // 1. Coloca tu número de teléfono aquí (Con código de país, pero SIN el signo +)
+        string numeroTelefono = "573208897116"; 
+
+        // 2. Armamos el mensaje predeterminado
+        string mensaje = $"¡Hola! Estoy interesado en adquirir el producto *{Producto.Nombre}* por ${Producto.Precio}. ¿Me puedes dar más información sobre cómo hacer el pago?";
+        
+        // 3. Formateamos la URL para que los espacios y caracteres especiales no la rompan
+        string url = $"https://wa.me/{numeroTelefono}?text={Uri.EscapeDataString(mensaje)}";
+
+        // 4. Usamos JavaScript para abrir la pestaña
+        await _js.InvokeVoidAsync("open", url, "_blank");
+    }
 }
