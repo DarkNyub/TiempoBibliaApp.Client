@@ -53,7 +53,8 @@
                     {
                         var poster = string.IsNullOrEmpty(prod.ImagenUrl) ? $"https://dummyimage.com/400x600/292929/ffffff.png&text={prod.Nombre}" : prod.ImagenUrl;
                         
-                        <div class="netflix-card-wrapper">
+                        <!-- Agregamos el evento onclick a la tarjeta del producto -->
+                        <div class="netflix-card-wrapper" @onclick="() => AbrirModalProducto(prod)">>
                             <MudPaper Elevation="4" Class="card-image-container">
                                 <img src="@poster" alt="@prod.Nombre" class="card-image" />
                             </MudPaper>
@@ -73,6 +74,34 @@
                 </div>
             </div>
         }
+        <!-- 3. FILA DE PAQUETES (El gran final) -->
+        @if (paquetes != null && paquetes.Any())
+        {
+            <MudDivider Class="my-8" />
+            <div class="netflix-row-container">
+                <MudText Typo="Typo.h4" Class="mb-4" Style="font-weight: bold; color: #E50914;">Colecciones Especiales</MudText>
+                
+                <MudGrid>
+                    @foreach (var pack in paquetes)
+                    {
+                        var posterPack = string.IsNullOrEmpty(pack.ImagenUrl) ? "https://dummyimage.com/800x400/141414/ffffff.png&text=Paquete" : pack.ImagenUrl;
+                        
+                        <MudItem xs="12" sm="6" md="4">
+                            <MudPaper Elevation="6" Style="background-color: #222; border-radius: 10px; overflow: hidden; color: white; cursor: pointer; transition: transform 0.3s;" Class="paquete-card">
+                                <img src="@posterPack" style="width: 100%; height: 200px; object-fit: cover;" />
+                                <div style="padding: 1.5rem;">
+                                    <MudText Typo="Typo.h6" Style="font-weight: bold;">@pack.Nombre</MudText>
+                                    <MudText Typo="Typo.body2" Class="mb-3" Style="color: #ccc;">@pack.Descripcion</MudText>
+                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">
+                                        Adquirir por $@pack.Precio
+                                    </MudButton>
+                                </div>
+                            </MudPaper>
+                        </MudItem>
+                    }
+                </MudGrid>
+            </div>
+        }
     }
 
 </MudContainer>
@@ -80,11 +109,9 @@
 @code {
     private List<CategoriaDto>? categorias;
     private List<ProductoDto>? productos;
+    private List<PaqueteDto>? paquetes; // 🔥 Nueva variable para paquetes
     
-    // El producto que saldrá en grande arriba
     private ProductoDto? productoDestacado;
-    
-    // Un diccionario para agrupar las filas: "Nombre de Categoría" -> Lista de Productos
     private Dictionary<string, List<ProductoDto>> productosPorCategoria = new();
 
     protected override async Task OnInitializedAsync()
@@ -93,13 +120,11 @@
         {
             categorias = await Http.GetFromJsonAsync<List<CategoriaDto>>("api/Categorias");
             productos = await Http.GetFromJsonAsync<List<ProductoDto>>("api/Productos");
+            paquetes = await Http.GetFromJsonAsync<List<PaqueteDto>>("api/Paquetes"); // 🔥 Traer paquetes
 
             if (productos != null && productos.Any() && categorias != null)
             {
-                // Tomamos el primer producto (o el más reciente) como Destacado
                 productoDestacado = productos.FirstOrDefault();
-
-                // Armamos las filas de Netflix
                 ArmarFilasCategorias();
             }
         }
@@ -127,5 +152,23 @@
                 productosPorCategoria.Add(cat.Nombre, productosEnEstaCategoria);
             }
         }
+    }
+    // 🔥 EL MÉTODO QUE ABRE EL POP-UP
+    private void AbrirModalProducto(ProductoDto producto)
+    {
+        // Pasamos el producto al modal
+        var parameters = new DialogParameters<ProductoDetalleModal> { { x => x.Producto, producto } };
+        
+        // Configuramos visualmente el modal para que parezca Netflix (sin título, fondo oscuro)
+        var options = new DialogOptions { 
+            CloseButton = true, 
+            MaxWidth = MaxWidth.Medium, 
+            FullWidth = true, 
+            NoHeader = true,
+            BackgroundClass = "netflix-modal-backdrop" // Opcional para oscurecer el fondo
+        };
+
+        // Lanzamos el diálogo
+        DialogService.Show<ProductoDetalleModal>("", parameters, options);
     }
 }

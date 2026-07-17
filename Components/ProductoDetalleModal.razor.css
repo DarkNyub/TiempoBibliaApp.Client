@@ -1,0 +1,33 @@
+.netflix-modal-dialog {
+    background-color: #181818 !important;
+    color: white !important;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.modal-hero-container {
+    position: relative;
+    height: 400px;
+    background-size: cover;
+    background-position: center;
+}
+
+.modal-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, #181818 0%, transparent 60%);
+}
+
+.modal-hero-content {
+    position: absolute;
+    bottom: 2rem;
+    left: 2rem;
+    right: 2rem;
+    z-index: 2;
+}
+
+.modal-body-container {
+    padding: 2rem;
+    background-color: #181818;
+    color: white;
+}

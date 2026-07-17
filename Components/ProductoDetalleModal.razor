@@ -1,0 +1,93 @@
+@using TiempoBiblia.Client.Models
+
+<MudDialog DisableSidePadding="true" Class="netflix-modal-dialog">
+    <DialogContent>
+        <!-- CABECERA: Imagen a full ancho con gradiente oscuro -->
+        <div class="modal-hero-container" style="background-image: url('@Producto.ImagenUrl');">
+            <div class="modal-hero-overlay"></div>
+            
+            <div class="modal-hero-content">
+                <MudText Typo="Typo.h3" Style="color: white; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">
+                    @Producto.Nombre
+                </MudText>
+                
+                <MudStack Row="true" Spacing="4" Class="mt-4">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" StartIcon="@Icons.Material.Filled.PlayArrow" Style="background-color: white; color: black; font-weight: bold;">
+                        @(Producto.EsGratuito ? "Adquirir Gratis" : $"Comprar ${Producto.Precio}")
+                    </MudButton>
+                    <MudIconButton Icon="@Icons.Material.Filled.AddShoppingCart" Color="Color.Inherit" Style="color: white; border: 2px solid gray;" />
+                </MudStack>
+            </div>
+        </div>
+
+        <!-- CUERPO: Detalles y Tags -->
+        <div class="modal-body-container">
+            <MudGrid>
+                <MudItem xs="12" md="8">
+                    <MudText Typo="Typo.body1" Style="font-size: 1.1rem;">
+                        @Producto.Descripcion
+                    </MudText>
+                </MudItem>
+                <MudItem xs="12" md="4">
+                    <MudText Typo="Typo.caption" Style="color: gray;">Categoría:</MudText>
+                    <MudText Typo="Typo.body2" Class="mb-2">@Producto.Categoria?.Nombre</MudText>
+
+                    <MudText Typo="Typo.caption" Style="color: gray;">Temas:</MudText>
+                    <div class="d-flex flex-wrap gap-1 mt-1">
+                        @foreach (var tag in Producto.ProductoTags.Take(5))
+                        {
+                            <MudChip T="string" Size="Size.Small" Variant="Variant.Text" Style="color: #e5e5e5; padding: 0;">@tag.Tag.Nombre,</MudChip>
+                        }
+                        <MudText Typo="Typo.caption" Style="align-self: center;">más...</MudText>
+                    </div>
+                </MudItem>
+            </MudGrid>
+
+            <MudDivider Class="my-6" Style="background-color: #404040;" />
+
+            <!-- SECCIÓN: Relacionados (More Like This) -->
+            <MudText Typo="Typo.h6" Style="font-weight: bold; margin-bottom: 1rem;">Similares a este título</MudText>
+            
+            <MudGrid>
+                @if(Producto.ProductosRelacionadosOrigen != null && Producto.ProductosRelacionadosOrigen.Any())
+                {
+                    @foreach(var relacionado in Producto.ProductosRelacionadosOrigen)
+                    {
+                        var prodDestino = relacionado.ProductoRelacionadoDestino;
+                        var posterRelacionado = string.IsNullOrEmpty(prodDestino.ImagenUrl) ? "https://dummyimage.com/400x225/2f2f2f/ffffff.png&text=Relacionado" : prodDestino.ImagenUrl;
+
+                        <MudItem xs="6" sm="4">
+                            <MudPaper Elevation="4" Style="background-color: #2f2f2f; border-radius: 8px; overflow: hidden; color: white; cursor: pointer;">
+                                <img src="@posterRelacionado" style="width: 100%; height: 120px; object-fit: cover;" alt="@prodDestino.Nombre" />
+                                <div style="padding: 1rem;">
+                                    <MudText Typo="Typo.subtitle2" Style="font-weight: bold; line-height: 1.2;" Class="mb-1">@prodDestino.Nombre</MudText>
+                                    @if(prodDestino.EsGratuito)
+                                    {
+                                        <MudText Typo="Typo.caption" Color="Color.Success">Gratis</MudText>
+                                    }
+                                    else
+                                    {
+                                        <MudText Typo="Typo.caption" Style="color: #a3a3a3;">$@prodDestino.Precio</MudText>
+                                    }
+                                </div>
+                            </MudPaper>
+                        </MudItem>
+                    }
+                }
+                else
+                {
+                    <MudText Typo="Typo.body2" Style="color: gray;" Class="ml-4">No hay títulos similares en este momento.</MudText>
+                }
+            </MudGrid>
+        </div>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+    
+    // Recibimos el producto al abrir el Modal
+    [Parameter] public ProductoDto Producto { get; set; } = new();
+
+    private void Cancelar() => MudDialog.Cancel();
+}
