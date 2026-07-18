@@ -1,0 +1,74 @@
+@page "/descargar/{TokenId:guid}"
+@inject HttpClient Http
+@inject NavigationManager Nav
+
+<div class="descarga-container">
+    <MudPaper Elevation="6" Class="descarga-card">
+        <div class="icono-flotante">
+            <MudIcon Icon="@Icons.Material.Filled.CloudDownload" Size="Size.Large" Color="Color.Primary" />
+        </div>
+        
+        <MudText Typo="Typo.h4" Align="Align.Center" Style="font-weight: bold; color: #333;" Class="mt-6">
+            ¡Tu material está listo!
+        </MudText>
+        <MudText Typo="Typo.body1" Align="Align.Center" Class="mb-6 mt-2" Style="color: #666;">
+            Haz clic en el botón de abajo para iniciar la descarga segura. Recuerda que este enlace es personal y de un solo uso.
+        </MudText>
+
+        <!-- Redirigimos directamente al endpoint de la API que escupe el PDF -->
+        <MudButton Variant="Variant.Filled" 
+                   Size="Size.Large" 
+                   FullWidth="true" 
+                   Href="@($"{Http.BaseAddress}api/descargas/{TokenId}")" 
+                   Target="_blank"
+                   Style="background: linear-gradient(45deg, #FFB6C1, #A8E6CF); color: #333; font-weight: bold; height: 60px; font-size: 1.2rem; border-radius: 30px;">
+            Descargar Archivo Ahora
+        </MudButton>
+        
+        <MudText Typo="Typo.caption" Align="Align.Center" Class="d-block mt-6" Style="color: #999;">
+            Tiempo Biblia &copy; @DateTime.Now.Year. Todos los derechos reservados.
+        </MudText>
+    </MudPaper>
+</div>
+
+<style>
+    /* El diseño pastel inmersivo de la página de descarga */
+    .descarga-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #FFF0F5 0%, #E0F7FA 100%);
+        padding: 1rem;
+        /* Aseguramos que ocupe toda la pantalla restando el menú superior si lo hay */
+        margin-top: -20px; 
+    }
+
+    .descarga-card {
+        max-width: 500px;
+        width: 100%;
+        padding: 3rem 2rem 2rem 2rem;
+        border-radius: 20px;
+        position: relative;
+        background-color: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+    }
+
+    .icono-flotante {
+        position: absolute;
+        top: -30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: white;
+        border-radius: 50%;
+        padding: 1rem;
+        box-shadow: 0 10px 20px rgba(168, 230, 207, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+@code {
+    [Parameter]
+    public Guid TokenId { get; set; }
+}

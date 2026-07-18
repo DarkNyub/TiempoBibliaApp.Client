@@ -32,11 +32,12 @@ namespace TiempoBiblia.Client.Models
         public bool EsGratuito { get; set; }
         public string ImagenUrl { get; set; } = string.Empty;
         
-        // Relación Principal
+        // 🔥 NUEVA LÍNEA: Agregamos el Tipo que nos faltaba
+        public string Tipo { get; set; } = string.Empty;
+        
         public int CategoriaId { get; set; }
         public CategoriaDto Categoria { get; set; } = new();
         
-        // Relaciones Múltiples
         public List<ProductoCategoriaSecundariaDto> CategoriasSecundarias { get; set; } = new();
         public List<ProductoTagDto> ProductoTags { get; set; } = new();
         public List<ProductoRelacionadoDto> ProductosRelacionadosOrigen { get; set; } = new();
@@ -56,5 +57,18 @@ namespace TiempoBiblia.Client.Models
         public int ProductoRelacionadoId { get; set; }
         // Traemos el producto destino para poder dibujar su tarjeta en el Pop-up
         public ProductoDto ProductoRelacionadoDestino { get; set; } = new(); 
+    }
+    // DTO para enviar la petición de creación de link
+    public class GenerarLinkRequestDto
+    {
+        public int ProductoId { get; set; }
+        public string CorreoCliente { get; set; } = string.Empty;
+    }
+
+    // DTO para recibir el link seguro del backend
+    public class GenerarLinkResponseDto
+    {
+        public string UrlSegura { get; set; } = string.Empty;
+        public DateTime ExpiraEn { get; set; }
     }
 }

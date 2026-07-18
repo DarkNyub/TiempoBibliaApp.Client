@@ -1,0 +1,161 @@
+@page "/admin/productos"
+@using TiempoBiblia.Client.Models
+@inject HttpClient Http
+@inject IJSRuntime _js
+@inject NavigationManager Nav
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-8">
+    <MudText Typo="Typo.h4" Style="font-weight: bold; color: #333;" Class="mb-6">
+        Gestión de Productos y Links 📦
+    </MudText>
+
+    @if (productos == null)
+    {
+        <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
+    }
+    else
+    {
+        <!-- TABLA DE PRODUCTOS -->
+        <MudTable Items="@productos" Filter="new Func<ProductoDto,bool>(Filtrar)" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="4" Style="border-radius: 12px; overflow: hidden;">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Catálogo</MudText>
+                <MudSpacer />
+                <MudTextField @bind-Value="textoBusqueda" Immediate="true" Placeholder="Buscar producto..." Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" />
+            </ToolBarContent>
+            
+            <HeaderContent>
+                <MudTh>Nombre</MudTh>
+                <MudTh>Precio</MudTh>
+                <MudTh>Tipo</MudTh>
+                <MudTh Style="text-align: right;">Acción Rápida</MudTh>
+            </HeaderContent>
+            
+            <RowTemplate>
+                <MudTd DataLabel="Nombre"><strong>@context.Nombre</strong></MudTd>
+                <MudTd DataLabel="Precio">
+                    @(context.EsGratuito ? "Gratis" : $"${context.Precio}")
+                </MudTd>
+                <MudTd DataLabel="Tipo">
+                    <MudChip T="string" Color="Color.Info" Size="Size.Small">@context.Tipo</MudChip>
+                </MudTd>
+                <MudTd DataLabel="Acción Rápida" Style="text-align: right;">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" StartIcon="@Icons.Material.Filled.Link" OnClick="() => PrepararGeneracionLink(context)">
+                        Generar Link
+                    </MudButton>
+                </MudTd>
+            </RowTemplate>
+            
+            <PagerContent>
+                <MudTablePager HideRowsPerPage="true" />
+            </PagerContent>
+        </MudTable>
+    }
+</MudContainer>
+
+<!-- MODAL PARA GENERAR EL LINK (Se abre al darle al botón de la tabla) -->
+<MudDialog @bind-Visible="mostrarModal" Options="dialogOptions">
+    <TitleContent>
+        <MudText Typo="Typo.h6">Generar acceso para: <strong>@productoSeleccionado?.Nombre</strong></MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudText Typo="Typo.body2" Class="mb-4" Style="color: gray;">
+            Ingresa el número de WhatsApp o nombre del cliente para identificar este link.
+        </MudText>
+        
+        <MudTextField @bind-Value="request.CorreoCliente" Label="Referencia (Ej: +57 300...)" Variant="Variant.Outlined" AutoFocus="true" />
+
+        @if (cargandoLink)
+        {
+            <MudProgressLinear Color="Color.Secondary" Indeterminate="true" Class="mt-4" />
+        }
+
+        @if (!string.IsNullOrEmpty(linkGenerado))
+        {
+            <MudDivider Class="my-4" />
+            <MudAlert Severity="Severity.Success" Class="mb-4">Link mágico creado (Expira en 24h)</MudAlert>
+            
+            <MudStack Row="true" AlignItems="AlignItems.Center">
+                <MudTextField Value="@linkGenerado" Variant="Variant.Outlined" ReadOnly="true" Margin="Margin.Dense" />
+                <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" Color="Color.Primary" Variant="Variant.Filled" OnClick="CopiarAlPortapapeles" title="Copiar" />
+            </MudStack>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="CerrarModal" Color="Color.Default">Cerrar</MudButton>
+        <MudButton OnClick="GenerarLinkSeguro" Color="Color.Primary" Variant="Variant.Filled" Disabled="@(string.IsNullOrWhiteSpace(request.CorreoCliente) || cargandoLink)">
+            Crear Link
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private List<ProductoDto>? productos;
+    private string textoBusqueda = "";
+
+    // Variables para el Modal
+    private bool mostrarModal = false;
+    private ProductoDto? productoSeleccionado;
+    private GenerarLinkRequestDto request = new();
+    private bool cargandoLink = false;
+    private string linkGenerado = "";
+    
+    private DialogOptions dialogOptions = new() { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Cargamos la grilla
+        productos = await Http.GetFromJsonAsync<List<ProductoDto>>("api/Productos");
+    }
+
+    // Filtro para el buscador de la tabla
+    private bool Filtrar(ProductoDto prod) => 
+        string.IsNullOrWhiteSpace(textoBusqueda) || 
+        prod.Nombre.Contains(textoBusqueda, StringComparison.OrdinalIgnoreCase);
+
+    // 1. Abre la ventanita cuando le das al botón en la tabla
+    private void PrepararGeneracionLink(ProductoDto producto)
+    {
+        productoSeleccionado = producto;
+        request = new GenerarLinkRequestDto { ProductoId = producto.Id, CorreoCliente = "" };
+        linkGenerado = "";
+        mostrarModal = true;
+    }
+
+    // 2. Llama al backend para fabricar el link de 24h
+    private async Task GenerarLinkSeguro()
+    {
+        cargandoLink = true;
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/descargas/generar", request);
+            if (response.IsSuccessStatusCode)
+            {
+                var resultado = await response.Content.ReadFromJsonAsync<GenerarLinkResponseDto>();
+                if (resultado != null)
+                {
+                    var uri = new Uri(resultado.UrlSegura);
+                    var tokenId = uri.Segments.Last(); 
+                    
+                    // Aquí se arma tu link final.
+                    // OJO: Si usas Github Pages, asegúrate de poner tu dominio real aquí si difiere.
+                    linkGenerado = $"{Nav.BaseUri}descargar/{tokenId}"; 
+                }
+            }
+        }
+        finally
+        {
+            cargandoLink = false;
+        }
+    }
+
+    // 3. Botón para copiar al portapapeles sin tener que sombrear el texto
+    private async Task CopiarAlPortapapeles()
+    {
+        await _js.InvokeVoidAsync("navigator.clipboard.writeText", linkGenerado);
+    }
+
+    private void CerrarModal()
+    {
+        mostrarModal = false;
+    }
+}
