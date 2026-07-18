@@ -1,6 +1,5 @@
 @page "/descargar/{TokenId:guid}"
 @inject HttpClient Http
-@inject NavigationManager Nav
 
 <div class="descarga-container">
     <MudPaper Elevation="6" Class="descarga-card">
@@ -11,11 +10,19 @@
         <MudText Typo="Typo.h4" Align="Align.Center" Style="font-weight: bold; color: #333;" Class="mt-6">
             ¡Tu material está listo!
         </MudText>
+
+        <!-- Aquí leemos el nombre mágicamente desde la URL -->
+        @if (!string.IsNullOrEmpty(NombreProducto))
+        {
+            <MudText Typo="Typo.h6" Align="Align.Center" Style="color: #E91E63; font-weight: bold;" Class="mt-2 mb-2">
+                Vas a descargar: <strong>@NombreProducto</strong>
+            </MudText>
+        }
+
         <MudText Typo="Typo.body1" Align="Align.Center" Class="mb-6 mt-2" Style="color: #666;">
-            Haz clic en el botón de abajo para iniciar la descarga segura. Recuerda que este enlace es personal y de <strong>UN SOLO USO</strong>.            
+            Haz clic en el botón de abajo para iniciar la descarga segura. Recuerda que este enlace es personal y de <strong>UN SOLO USO</strong>.
         </MudText>
 
-        <!-- Redirigimos directamente al endpoint de la API que escupe el PDF -->
         <MudButton Variant="Variant.Filled" 
                    Size="Size.Large" 
                    FullWidth="true" 
@@ -26,13 +33,13 @@
         </MudButton>
         
         <MudText Typo="Typo.caption" Align="Align.Center" Class="d-block mt-6" Style="color: #999;">
-            Tiempo Biblia . Luzy &copy; @DateTime.Now.Year. Todos los derechos reservados.
+            Tiempo Biblia &copy; @DateTime.Now.Year. Todos los derechos reservados.
         </MudText>
     </MudPaper>
 </div>
 
 <style>
-    /* El diseño pastel inmersivo de la página de descarga */
+    /* Tu CSS de siempre va aquí... */
     .descarga-container {
         min-height: 100vh;
         display: flex;
@@ -40,20 +47,17 @@
         justify-content: center;
         background: linear-gradient(135deg, #FFF0F5 0%, #E0F7FA 100%);
         padding: 1rem;
-        /* Aseguramos que ocupe toda la pantalla restando el menú superior si lo hay */
         margin-top: -20px; 
     }
-
     .descarga-card {
         max-width: 500px;
         width: 100%;
-        padding: 3rem 2rem 2rem 2rem;
+        padding: 3rem 1rem 1.5rem 1rem; /* El padding ajustado que hablamos antes */
         border-radius: 20px;
         position: relative;
         background-color: rgba(255, 255, 255, 0.9);
         backdrop-filter: blur(10px);
     }
-
     .icono-flotante {
         position: absolute;
         top: -30px;
@@ -68,7 +72,12 @@
         justify-content: center;
     }
 </style>
+
 @code {
     [Parameter]
     public Guid TokenId { get; set; }
+
+    // Este atributo atrapa automáticamente el ?nombre= del link
+    [SupplyParameterFromQuery(Name = "nombre")]
+    public string? NombreProducto { get; set; }
 }
