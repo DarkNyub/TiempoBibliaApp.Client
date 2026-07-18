@@ -1,7 +1,10 @@
 /* /Components/ProductoDetalleModal.razor.rz.scp.css */
+/* Fondo general del modal en rosado pastel */
 .netflix-modal-dialog[b-vdavzh5gps] {
-    background-color: #181818 !important;
-    color: white !important;
+    background-color: #FFF0F5 !important;
+    /* Lavender Blush */
+    color: #333 !important;
+    /* Texto oscuro para que se lea */
     border-radius: 12px;
     overflow: hidden;
 }
@@ -13,10 +16,11 @@
     background-position: center;
 }
 
+/* Gradiente que sube desde el rosado pastel */
 .modal-hero-overlay[b-vdavzh5gps] {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, #181818 0%, transparent 60%);
+    background: linear-gradient(to top, #FFF0F5 0%, transparent 70%);
 }
 
 .modal-hero-content[b-vdavzh5gps] {
@@ -29,8 +33,8 @@
 
 .modal-body-container[b-vdavzh5gps] {
     padding: 2rem;
-    background-color: #181818;
-    color: white;
+    background-color: #FFF0F5;
+    color: #333;
 }
 /* /Layout/MainLayout.razor.rz.scp.css */
 .page[b-pqk1ij2xm6] {
@@ -111,7 +115,7 @@ main[b-pqk1ij2xm6] {
     }
 }
 /* /Pages/Home.razor.rz.scp.css */
-/* --- HERO BANNER --- */
+/* --- HERO BANNER (Estilo Pastel) --- */
 .hero-container[b-qcp9gwj68k] {
     position: relative;
     height: 60vh;
@@ -125,10 +129,14 @@ main[b-pqk1ij2xm6] {
     align-items: flex-end;
 }
 
+/* Gradiente de Agua Marina a Rosado transparente */
 .hero-overlay[b-qcp9gwj68k] {
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: linear-gradient(to top, rgba(18, 18, 18, 1) 0%, rgba(18, 18, 18, 0) 100%);
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to top, rgba(255, 209, 220, 1) 0%, rgba(168, 230, 207, 0.4) 100%);
     z-index: 1;
 }
 
@@ -140,9 +148,12 @@ main[b-pqk1ij2xm6] {
     max-width: 800px;
 }
 
-/* --- FILAS TIPO NETFLIX (Carousels) --- */
+/* --- FILAS (Carousels) --- */
 .netflix-row-container[b-qcp9gwj68k] {
     margin-bottom: 2rem;
+    padding: 1rem;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(168, 230, 207, 0.15) 50%, rgba(255, 255, 255, 0) 100%);
+    border-radius: 12px;
 }
 
 .netflix-row[b-qcp9gwj68k] {
@@ -152,33 +163,35 @@ main[b-pqk1ij2xm6] {
     gap: 1rem;
     padding: 1rem 0 2rem 0;
     scroll-behavior: smooth;
-    /* Ocultar barra de scroll estándar */
-    scrollbar-width: none; /* Firefox */
+    scrollbar-width: none;
 }
 
 .netflix-row[b-qcp9gwj68k]::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Edge */
+    display: none;
 }
 
 /* --- TARJETAS CON ZOOM --- */
 .netflix-card-wrapper[b-qcp9gwj68k] {
     flex: 0 0 auto;
-    width: 220px; /* Ancho de la tarjeta */
-    transition: transform 0.3s ease;
+    width: 220px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
     cursor: pointer;
     position: relative;
 }
 
-/* El efecto mágico de Zoom al pasar el ratón */
 .netflix-card-wrapper:hover[b-qcp9gwj68k] {
     transform: scale(1.08);
     z-index: 10;
+    /* Sombra rosada suave al pasar el mouse */
+    box-shadow: 0px 10px 20px rgba(255, 182, 193, 0.6);
 }
 
 .card-image-container[b-qcp9gwj68k] {
     height: 300px;
     border-radius: 8px;
     overflow: hidden;
+    background-color: white;
+    /* Para que resalte del fondo pastel */
 }
 
 .card-image[b-qcp9gwj68k] {
