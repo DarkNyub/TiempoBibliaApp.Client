@@ -41,63 +41,68 @@
             </div>
         }
 
-        <!-- 2. FILAS DE CATEGORÍAS (Netflix Rows) -->
+        <!-- 2. FILAS DE CATEGORÍAS (Grilla Responsiva) -->
         @foreach (var fila in productosPorCategoria)
         {
             <div class="netflix-row-container">
-                <MudText Typo="Typo.h5" Class="mb-2" Style="font-weight: bold;">@fila.Key</MudText>
+                <MudText Typo="Typo.h5" Class="mb-4" Style="font-weight: bold;">@fila.Key</MudText>
                 
-                <div class="netflix-row">
+                <MudGrid Spacing="2">
                     @foreach (var prod in fila.Value)
                     {
                         var poster = string.IsNullOrEmpty(prod.ImagenUrl) ? $"https://dummyimage.com/400x600/292929/ffffff.png&text={prod.Nombre}" : prod.ImagenUrl;
                         
-                        <div class="netflix-card-wrapper" @onclick="() => AbrirModalProducto(prod)">
-                            <MudPaper Elevation="4" Class="card-image-container">
-                                <img src="@poster" alt="@prod.Nombre" class="card-image" />
-                            </MudPaper>
-                            <MudText Typo="Typo.subtitle2" Class="mt-2" Style="font-weight: bold;" Align="Align.Center">
-                                @prod.Nombre
-                            </MudText>
-                            @if(prod.EsGratuito)
-                            {
-                                <MudText Typo="Typo.caption" Color="Color.Success" Align="Align.Center" Style="display: block;">Gratis</MudText>
-                            }
-                            else
-                            {
-                                <MudText Typo="Typo.caption" Color="Color.Primary" Align="Align.Center" Style="display: block;">$@prod.Precio</MudText>
-                            }
-                        </div>
+                        <!-- xs="6" significa 2 por fila en celular. md="3" significa 4 por fila en PC -->
+                        <MudItem xs="6" sm="4" md="3" lg="2">
+                            <div class="netflix-card-wrapper-responsive" @onclick="() => AbrirModalProducto(prod)">
+                                <MudPaper Elevation="4" Class="card-image-container-responsive">
+                                    <!-- Agregamos loading="lazy" para que carguen súper rápido -->
+                                    <img src="@poster" alt="@prod.Nombre" class="card-image" loading="lazy" />
+                                </MudPaper>
+                                <MudText Typo="Typo.subtitle2" Class="mt-2" Style="font-weight: bold;" Align="Align.Center">
+                                    @prod.Nombre
+                                </MudText>
+                                @if(prod.EsGratuito)
+                                {
+                                    <MudText Typo="Typo.caption" Color="Color.Success" Align="Align.Center" Style="display: block;">Gratis</MudText>
+                                }
+                                else
+                                {
+                                    <MudText Typo="Typo.caption" Color="Color.Primary" Align="Align.Center" Style="display: block;">$@prod.Precio</MudText>
+                                }
+                            </div>
+                        </MudItem>
                     }
-                </div>
+                </MudGrid>
             </div>
         }
 
-        <!-- 3. FILA DE PAQUETES (Homologada visualmente a las categorías) -->
+        <!-- 3. FILA DE PAQUETES (Grilla Responsiva) -->
         @if (paquetes != null && paquetes.Any())
         {
             <div class="netflix-row-container mt-4">
-                <MudText Typo="Typo.h5" Class="mb-2" Style="font-weight: bold">Colecciones Especiales</MudText>
+                <MudText Typo="Typo.h5" Class="mb-4" Style="font-weight: bold">Colecciones Especiales</MudText>
                 
-                <div class="netflix-row">
+                <MudGrid Spacing="2">
                     @foreach (var pack in paquetes)
                     {
-                        // Usamos dimensiones verticales para mantener la estética de Netflix
                         var posterPack = string.IsNullOrEmpty(pack.ImagenUrl) ? $"https://dummyimage.com/400x600/141414/ffffff.png&text={pack.Nombre}" : pack.ImagenUrl;
                         
-                        <div class="netflix-card-wrapper">
-                            <MudPaper Elevation="4" Class="card-image-container">
-                                <img src="@posterPack" alt="@pack.Nombre" class="card-image" />
-                            </MudPaper>
-                            <MudText Typo="Typo.subtitle2" Class="mt-2" Style="font-weight: bold;" Align="Align.Center">
-                                @pack.Nombre
-                            </MudText>
-                            <MudText Typo="Typo.caption" Color="Color.Primary" Align="Align.Center" Style="display: block;">
-                                $@pack.Precio
-                            </MudText>
-                        </div>
+                        <MudItem xs="6" sm="4" md="3" lg="2">
+                            <div class="netflix-card-wrapper-responsive">
+                                <MudPaper Elevation="4" Class="card-image-container-responsive">
+                                    <img src="@posterPack" alt="@pack.Nombre" class="card-image" loading="lazy" />
+                                </MudPaper>
+                                <MudText Typo="Typo.subtitle2" Class="mt-2" Style="font-weight: bold;" Align="Align.Center">
+                                    @pack.Nombre
+                                </MudText>
+                                <MudText Typo="Typo.caption" Color="Color.Primary" Align="Align.Center" Style="display: block;">
+                                    $@pack.Precio
+                                </MudText>
+                            </div>
+                        </MudItem>
                     }
-                </div>
+                </MudGrid>
             </div>
         }
     }
