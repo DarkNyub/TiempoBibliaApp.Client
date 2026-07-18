@@ -24,7 +24,7 @@
             <div class="hero-container" style="background-image: url('@heroImage');">
                 <div class="hero-overlay"></div>
                 <div class="hero-content">
-                    <MudText Typo="Typo.h2" Style="color: white; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">
+                    <MudText Typo="Typo.h2" Style="color: #333; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">
                         @productoDestacado.Nombre
                     </MudText>
                     <MudText Typo="Typo.body1" Class="mt-2 mb-4" Style="color: #e0e0e0; font-size: 1.2rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">
@@ -33,7 +33,7 @@
                     
                     <MudStack Row="true" Spacing="4">
                         <!-- Botón homologado: Ahora abre el mismo Modal que los demás -->
-                        <MudButton Variant="Variant.Outlined" Style="color: white; border-color: white; background-color: rgba(255,255,255,0.2);" Size="Size.Large" StartIcon="@Icons.Material.Filled.Info" @onclick="() => AbrirModalProducto(productoDestacado)">
+                        <MudButton Variant="Variant.Outlined" Style="color: #333; border-color: white; background-color: rgba(255,255,255,0.2);" Size="Size.Large" StartIcon="@Icons.Material.Filled.Info" @onclick="() => AbrirModalProducto(productoDestacado)">
                             Más Info
                         </MudButton>
                     </MudStack>
@@ -77,7 +77,7 @@
         @if (paquetes != null && paquetes.Any())
         {
             <div class="netflix-row-container mt-4">
-                <MudText Typo="Typo.h5" Class="mb-2" Style="font-weight: bold; color: #E50914;">Colecciones Especiales</MudText>
+                <MudText Typo="Typo.h5" Class="mb-2" Style="font-weight: bold">Colecciones Especiales</MudText>
                 
                 <div class="netflix-row">
                     @foreach (var pack in paquetes)

@@ -1,4 +1,4 @@
-/* --- HERO BANNER --- */
+/* --- HERO BANNER (Estilo Pastel) --- */
 .hero-container {
     position: relative;
     height: 60vh;
@@ -12,10 +12,14 @@
     align-items: flex-end;
 }
 
+/* Gradiente de Agua Marina a Rosado transparente */
 .hero-overlay {
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: linear-gradient(to top, rgba(18, 18, 18, 1) 0%, rgba(18, 18, 18, 0) 100%);
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to top, rgba(255, 209, 220, 1) 0%, rgba(168, 230, 207, 0.4) 100%);
     z-index: 1;
 }
 
@@ -27,9 +31,12 @@
     max-width: 800px;
 }
 
-/* --- FILAS TIPO NETFLIX (Carousels) --- */
+/* --- FILAS (Carousels) --- */
 .netflix-row-container {
     margin-bottom: 2rem;
+    padding: 1rem;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(168, 230, 207, 0.15) 50%, rgba(255, 255, 255, 0) 100%);
+    border-radius: 12px;
 }
 
 .netflix-row {
@@ -39,33 +46,35 @@
     gap: 1rem;
     padding: 1rem 0 2rem 0;
     scroll-behavior: smooth;
-    /* Ocultar barra de scroll estándar */
-    scrollbar-width: none; /* Firefox */
+    scrollbar-width: none;
 }
 
 .netflix-row::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Edge */
+    display: none;
 }
 
 /* --- TARJETAS CON ZOOM --- */
 .netflix-card-wrapper {
     flex: 0 0 auto;
-    width: 220px; /* Ancho de la tarjeta */
-    transition: transform 0.3s ease;
+    width: 220px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
     cursor: pointer;
     position: relative;
 }
 
-/* El efecto mágico de Zoom al pasar el ratón */
 .netflix-card-wrapper:hover {
     transform: scale(1.08);
     z-index: 10;
+    /* Sombra rosada suave al pasar el mouse */
+    box-shadow: 0px 10px 20px rgba(255, 182, 193, 0.6);
 }
 
 .card-image-container {
     height: 300px;
     border-radius: 8px;
     overflow: hidden;
+    background-color: white;
+    /* Para que resalte del fondo pastel */
 }
 
 .card-image {

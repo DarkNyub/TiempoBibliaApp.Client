@@ -1,6 +1,9 @@
+/* Fondo general del modal en rosado pastel */
 .netflix-modal-dialog {
-    background-color: #181818 !important;
-    color: white !important;
+    background-color: #FFF0F5 !important;
+    /* Lavender Blush */
+    color: #333 !important;
+    /* Texto oscuro para que se lea */
     border-radius: 12px;
     overflow: hidden;
 }
@@ -12,10 +15,11 @@
     background-position: center;
 }
 
+/* Gradiente que sube desde el rosado pastel */
 .modal-hero-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, #181818 0%, transparent 60%);
+    background: linear-gradient(to top, #FFF0F5 0%, transparent 70%);
 }
 
 .modal-hero-content {
@@ -28,6 +32,6 @@
 
 .modal-body-container {
     padding: 2rem;
-    background-color: #181818;
-    color: white;
+    background-color: #FFF0F5;
+    color: #333;
 }
