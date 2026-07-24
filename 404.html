@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>TiempoBiblia.Client</title>
     <base href="/" />
-    <link href="_framework/dotnet.nnos9t86ae.js" rel="preload" as="script" fetchpriority="high" crossorigin="anonymous" integrity="sha256-06h/6c1qyHZlSk69kMezbqQ4ivqBefaKuOdQ3JEEGeQ=" />
+    <link href="_framework/dotnet.h5p5qn6qpb.js" rel="preload" as="script" fetchpriority="high" crossorigin="anonymous" integrity="sha256-lQSFJxTx5thE2zREncqTRFQsdi/PhE0oQUcG357gUkQ=" />
     <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="css/app.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
@@ -14,18 +14,18 @@
     <script type="importmap">{
   "imports": {
     "./_framework/blazor.webassembly.js": "./_framework/blazor.webassembly.958z1vx7fr.js",
+    "./_framework/dotnet.js": "./_framework/dotnet.h5p5qn6qpb.js",
     "./_framework/dotnet.native.js": "./_framework/dotnet.native.puryxhmhq9.js",
-    "./_framework/dotnet.js": "./_framework/dotnet.nnos9t86ae.js",
     "./_framework/dotnet.runtime.js": "./_framework/dotnet.runtime.web2r9gqbh.js"
   },
   "scopes": {},
   "integrity": {
     "./_framework/blazor.webassembly.958z1vx7fr.js": "sha256-A59Tr9HqEhHMu8kU7kruLI9ayw5MRS6Lvc6z7jCbghk=",
     "./_framework/blazor.webassembly.js": "sha256-A59Tr9HqEhHMu8kU7kruLI9ayw5MRS6Lvc6z7jCbghk=",
-    "./_framework/dotnet.js": "sha256-06h/6c1qyHZlSk69kMezbqQ4ivqBefaKuOdQ3JEEGeQ=",
+    "./_framework/dotnet.h5p5qn6qpb.js": "sha256-lQSFJxTx5thE2zREncqTRFQsdi/PhE0oQUcG357gUkQ=",
+    "./_framework/dotnet.js": "sha256-lQSFJxTx5thE2zREncqTRFQsdi/PhE0oQUcG357gUkQ=",
     "./_framework/dotnet.native.js": "sha256-gQbHHzCnWx8iDOC65EKbql7bEltJkfao7lmkAbIRajw=",
     "./_framework/dotnet.native.puryxhmhq9.js": "sha256-gQbHHzCnWx8iDOC65EKbql7bEltJkfao7lmkAbIRajw=",
-    "./_framework/dotnet.nnos9t86ae.js": "sha256-06h/6c1qyHZlSk69kMezbqQ4ivqBefaKuOdQ3JEEGeQ=",
     "./_framework/dotnet.runtime.js": "sha256-SOUHEQ3FhDAibBSR2u90NWZpoBjPuWRmH0BAATUlhJU=",
     "./_framework/dotnet.runtime.web2r9gqbh.js": "sha256-SOUHEQ3FhDAibBSR2u90NWZpoBjPuWRmH0BAATUlhJU="
   }
@@ -50,6 +50,16 @@
     </div>
     <script src="_framework/blazor.webassembly.958z1vx7fr.js"></script>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
+    <script>
+        window.descargarArchivoBase64 = (nombreArchivo, base64Data) => {
+            const link = document.createElement('a');
+            link.download = nombreArchivo;
+            link.href = "data:application/octet-stream;base64," + base64Data;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+    </script>
 </body>
 
 </html>
