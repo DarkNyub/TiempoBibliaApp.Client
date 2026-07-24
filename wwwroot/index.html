@@ -33,13 +33,36 @@
     <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
     <script>
-        window.descargarArchivoBase64 = (nombreArchivo, base64Data) => {
-            const link = document.createElement('a');
-            link.download = nombreArchivo;
-            link.href = "data:application/octet-stream;base64," + base64Data;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+        window.descargarBlobSeguro = (byteBase64, nombreArchivo, mimeType) => {
+            try {
+                // Convertimos el base64 a un array de bytes
+                const byteCharacters = atob(byteBase64);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+
+                // Creamos el Blob nativo en la memoria del celular
+                const blob = new Blob([byteArray], { type: mimeType || 'application/pdf' });
+                const blobUrl = URL.createObjectURL(blob);
+
+                // Creamos un enlace invisible para simular el clic nativo
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = nombreArchivo;
+                document.body.appendChild(a);
+                a.click();
+
+                // Limpiamos la memoria
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(blobUrl);
+                }, 100);
+            } catch (e) {
+                console.error("Error al procesar la descarga nativa:", e);
+                alert("Tu celular bloqueó la descarga automática. Por favor abre este enlace en Chrome o Safari.");
+            }
         };
     </script>
 </body>

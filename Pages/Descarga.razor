@@ -105,36 +105,51 @@
             _descargando = true;
             _mensajeError = null;
 
-            // 1. Pedimos el archivo a la API por debajo de la mesa
-            var response = await Http.GetAsync($"api/descargas/{TokenId}");
-
-            if (response.IsSuccessStatusCode)
-            {
-                // Leemos los bytes del archivo
-                var bytes = await response.Content.ReadAsByteArrayAsync();
-                
-                // Intentamos obtener el nombre real desde los headers de la API, si no, usamos uno por defecto
-                var nombreFinal = NombreProducto != null ? $"{NombreProducto}.pdf" : "Material_TiempoBiblia.pdf";
-                
-                // Convertimos a base64
-                var base64 = Convert.ToBase64String(bytes);
-
-                // 2. Disparamos la descarga en el celular sin salir de tiempobiblia-luzy.online
-                await JS.InvokeVoidAsync("descargarArchivoBase64", nombreFinal, base64);
-            }
-            else
+            // -------------------------------------------------------------
+            // PASO 1: AJAX de validación (Consultar si el link está activo)
+            // -------------------------------------------------------------
+            var validacionResponse = await Http.GetAsync($"api/descargas/validar/{TokenId}");
+            
+            if (!validacionResponse.IsSuccessStatusCode)
             {
                 _mensajeError = "Este enlace ya fue utilizado o ha expirado.";
+                return;
             }
+
+            // -------------------------------------------------------------
+            // PASO 2: AJAX de descarga (Obtener el archivo desde Drive/API)
+            // -------------------------------------------------------------
+            var archivoResponse = await Http.GetAsync($"api/descargas/obtener-archivo/{TokenId}");
+            
+            if (!archivoResponse.IsSuccessStatusCode)
+            {
+                _mensajeError = "No se pudo recuperar el archivo desde el servidor.";
+                return;
+            }
+
+            // Leemos los bytes del archivo que envió la API
+            var bytes = await archivoResponse.Content.ReadAsByteArrayAsync();
+            var base64 = Convert.ToBase64String(bytes);
+            var nombreFinal = string.IsNullOrEmpty(NombreProducto) ? "Material_TiempoBiblia.pdf" : $"{NombreProducto}.pdf";
+
+            // -------------------------------------------------------------
+            // PASO 3: AJAX de actualización (Marcar el link como consumido)
+            // -------------------------------------------------------------
+            // Se envía la orden a la API para invalidar el token en la base de datos
+            await Http.PostAsync($"api/descargas/marcar-usado/{TokenId}", null);
+
+            // -------------------------------------------------------------
+            // ENTREGAR EL ARCHIVO AL NAVEGADOR
+            // -------------------------------------------------------------
+            await JS.InvokeVoidAsync("descargarBlobSeguro", base64, nombreFinal, "application/pdf");
         }
         catch (Exception ex)
         {
-            _mensajeError = "Ocurrió un error al intentar descargar el archivo. Inténtalo de nuevo.";
-            Console.WriteLine($"Error descarga: {ex.Message}");
+            _mensajeError = "Ocurrió un error inesperado durante la descarga.";
+            Console.WriteLine($"Error en flujo: {ex.Message}");
         }
         finally
         {
             _descargando = false;
         }
     }
-}
