@@ -25,8 +25,8 @@ jobs:
         run: dotnet publish -c Release -o release
 
       # 4. 🔥 MAGIA: Cambiar la ruta base automáticamente solo para GitHub Pages
-      - name: Fix base href for GitHub Pages
-        run: sed -i 's|<base href="/" />|<base href="/TiempoBibliaApp.Client/" />|g' release/wwwroot/index.html
+      #- name: Fix base href for GitHub Pages
+       # run: sed -i 's|<base href="/" />|<base href="/TiempoBibliaApp.Client/" />|g' release/wwwroot/index.html
 
       # 5. Asegurar el enrutamiento para evitar errores 404 de GitHub Pages
       - name: Copy index.html to 404.html
