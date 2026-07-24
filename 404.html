@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>TiempoBiblia.Client</title>
     <base href="/" />
-    <link href="_framework/dotnet.h5p5qn6qpb.js" rel="preload" as="script" fetchpriority="high" crossorigin="anonymous" integrity="sha256-lQSFJxTx5thE2zREncqTRFQsdi/PhE0oQUcG357gUkQ=" />
+    <link href="_framework/dotnet.sn1tsm0lhn.js" rel="preload" as="script" fetchpriority="high" crossorigin="anonymous" integrity="sha256-WF7btNM3Zwf8hxKlJ4tu2rr0YLacWfzLlXEG0uprf1Y=" />
     <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="css/app.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
@@ -14,20 +14,20 @@
     <script type="importmap">{
   "imports": {
     "./_framework/blazor.webassembly.js": "./_framework/blazor.webassembly.958z1vx7fr.js",
-    "./_framework/dotnet.js": "./_framework/dotnet.h5p5qn6qpb.js",
     "./_framework/dotnet.native.js": "./_framework/dotnet.native.puryxhmhq9.js",
-    "./_framework/dotnet.runtime.js": "./_framework/dotnet.runtime.web2r9gqbh.js"
+    "./_framework/dotnet.runtime.js": "./_framework/dotnet.runtime.web2r9gqbh.js",
+    "./_framework/dotnet.js": "./_framework/dotnet.sn1tsm0lhn.js"
   },
   "scopes": {},
   "integrity": {
     "./_framework/blazor.webassembly.958z1vx7fr.js": "sha256-A59Tr9HqEhHMu8kU7kruLI9ayw5MRS6Lvc6z7jCbghk=",
     "./_framework/blazor.webassembly.js": "sha256-A59Tr9HqEhHMu8kU7kruLI9ayw5MRS6Lvc6z7jCbghk=",
-    "./_framework/dotnet.h5p5qn6qpb.js": "sha256-lQSFJxTx5thE2zREncqTRFQsdi/PhE0oQUcG357gUkQ=",
-    "./_framework/dotnet.js": "sha256-lQSFJxTx5thE2zREncqTRFQsdi/PhE0oQUcG357gUkQ=",
+    "./_framework/dotnet.js": "sha256-WF7btNM3Zwf8hxKlJ4tu2rr0YLacWfzLlXEG0uprf1Y=",
     "./_framework/dotnet.native.js": "sha256-gQbHHzCnWx8iDOC65EKbql7bEltJkfao7lmkAbIRajw=",
     "./_framework/dotnet.native.puryxhmhq9.js": "sha256-gQbHHzCnWx8iDOC65EKbql7bEltJkfao7lmkAbIRajw=",
     "./_framework/dotnet.runtime.js": "sha256-SOUHEQ3FhDAibBSR2u90NWZpoBjPuWRmH0BAATUlhJU=",
-    "./_framework/dotnet.runtime.web2r9gqbh.js": "sha256-SOUHEQ3FhDAibBSR2u90NWZpoBjPuWRmH0BAATUlhJU="
+    "./_framework/dotnet.runtime.web2r9gqbh.js": "sha256-SOUHEQ3FhDAibBSR2u90NWZpoBjPuWRmH0BAATUlhJU=",
+    "./_framework/dotnet.sn1tsm0lhn.js": "sha256-WF7btNM3Zwf8hxKlJ4tu2rr0YLacWfzLlXEG0uprf1Y="
   }
 }</script>
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
@@ -51,13 +51,36 @@
     <script src="_framework/blazor.webassembly.958z1vx7fr.js"></script>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
     <script>
-        window.descargarArchivoBase64 = (nombreArchivo, base64Data) => {
-            const link = document.createElement('a');
-            link.download = nombreArchivo;
-            link.href = "data:application/octet-stream;base64," + base64Data;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+        window.descargarBlobSeguro = (byteBase64, nombreArchivo, mimeType) => {
+            try {
+                // Convertimos el base64 a un array de bytes
+                const byteCharacters = atob(byteBase64);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+
+                // Creamos el Blob nativo en la memoria del celular
+                const blob = new Blob([byteArray], { type: mimeType || 'application/pdf' });
+                const blobUrl = URL.createObjectURL(blob);
+
+                // Creamos un enlace invisible para simular el clic nativo
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = nombreArchivo;
+                document.body.appendChild(a);
+                a.click();
+
+                // Limpiamos la memoria
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(blobUrl);
+                }, 100);
+            } catch (e) {
+                console.error("Error al procesar la descarga nativa:", e);
+                alert("Tu celular bloqueó la descarga automática. Por favor abre este enlace en Chrome o Safari.");
+            }
         };
     </script>
 </body>
