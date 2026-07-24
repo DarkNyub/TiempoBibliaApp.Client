@@ -1,5 +1,6 @@
 @page "/descargar/{TokenId:guid}"
 @inject HttpClient Http
+@inject IJSRuntime JS
 
 <div class="descarga-container">
     <MudPaper Elevation="6" Class="descarga-card">
@@ -11,7 +12,6 @@
             ¡Tu material está listo!
         </MudText>
 
-        <!-- Aquí leemos el nombre mágicamente desde la URL -->
         @if (!string.IsNullOrEmpty(NombreProducto))
         {
             <MudText Typo="Typo.h6" Align="Align.Center" Style="color: #E91E63; font-weight: bold;" Class="mt-2 mb-2">
@@ -23,14 +23,30 @@
             Haz clic en el botón de abajo para iniciar la descarga segura. Recuerda que este enlace es personal y de <strong>UN SOLO USO</strong>.
         </MudText>
 
+        <!-- Cambiamos Href por OnClick para procesar la descarga en silencio -->
         <MudButton Variant="Variant.Filled" 
                    Size="Size.Large" 
                    FullWidth="true" 
-                   Href="@($"{Http.BaseAddress}api/descargas/{TokenId}")" 
-                   Target="_blank"
+                   OnClick="IniciarDescargaSegura"
+                   Disabled="_descargando"
                    Style="background: linear-gradient(45deg, #FFB6C1, #A8E6CF); color: #333; font-weight: bold; height: 60px; font-size: 1.2rem; border-radius: 30px;">
-            Descargar Archivo Ahora
+            @if (_descargando)
+            {
+                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                <MudText Class="ms-2">Descargando archivo...</MudText>
+            }
+            else
+            {
+                <MudText>Descargar Archivo Ahora</MudText>
+            }
         </MudButton>
+
+        @if (!string.IsNullOrEmpty(_mensajeError))
+        {
+            <MudText Typo="Typo.body2" Align="Align.Center" Color="Color.Error" Class="mt-3">
+                @_mensajeError
+            </MudText>
+        }
         
         <MudText Typo="Typo.caption" Align="Align.Center" Class="d-block mt-6" Style="color: #999;">
             Tiempo Biblia &copy; @DateTime.Now.Year. Todos los derechos reservados.
@@ -39,7 +55,6 @@
 </div>
 
 <style>
-    /* Tu CSS de siempre va aquí... */
     .descarga-container {
         min-height: 100vh;
         display: flex;
@@ -52,7 +67,7 @@
     .descarga-card {
         max-width: 500px;
         width: 100%;
-        padding: 3rem 1rem 1.5rem 1rem; /* El padding ajustado que hablamos antes */
+        padding: 3rem 1rem 1.5rem 1rem;
         border-radius: 20px;
         position: relative;
         background-color: rgba(255, 255, 255, 0.9);
@@ -77,7 +92,49 @@
     [Parameter]
     public Guid TokenId { get; set; }
 
-    // Este atributo atrapa automáticamente el ?nombre= del link
     [SupplyParameterFromQuery(Name = "nombre")]
     public string? NombreProducto { get; set; }
+
+    private bool _descargando = false;
+    private string? _mensajeError;
+
+    private async Task IniciarDescargaSegura()
+    {
+        try
+        {
+            _descargando = true;
+            _mensajeError = null;
+
+            // 1. Pedimos el archivo a la API por debajo de la mesa
+            var response = await Http.GetAsync($"api/descargas/{TokenId}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                // Leemos los bytes del archivo
+                var bytes = await response.Content.ReadAsByteArrayAsync();
+                
+                // Intentamos obtener el nombre real desde los headers de la API, si no, usamos uno por defecto
+                var nombreFinal = NombreProducto != null ? $"{NombreProducto}.pdf" : "Material_TiempoBiblia.pdf";
+                
+                // Convertimos a base64
+                var base64 = Convert.ToBase64String(bytes);
+
+                // 2. Disparamos la descarga en el celular sin salir de tiempobiblia-luzy.online
+                await JS.InvokeVoidAsync("descargarArchivoBase64", nombreFinal, base64);
+            }
+            else
+            {
+                _mensajeError = "Este enlace ya fue utilizado o ha expirado.";
+            }
+        }
+        catch (Exception ex)
+        {
+            _mensajeError = "Ocurrió un error al intentar descargar el archivo. Inténtalo de nuevo.";
+            Console.WriteLine($"Error descarga: {ex.Message}");
+        }
+        finally
+        {
+            _descargando = false;
+        }
+    }
 }
