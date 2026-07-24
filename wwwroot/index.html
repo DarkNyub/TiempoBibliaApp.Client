@@ -32,6 +32,16 @@
     </div>
     <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
+    <script>
+        window.descargarArchivoBase64 = (nombreArchivo, base64Data) => {
+            const link = document.createElement('a');
+            link.download = nombreArchivo;
+            link.href = "data:application/octet-stream;base64," + base64Data;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+    </script>
 </body>
 
 </html>
