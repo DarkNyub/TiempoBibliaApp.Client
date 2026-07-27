@@ -105,52 +105,57 @@
             _descargando = true;
             _mensajeError = null;
 
-            // -------------------------------------------------------------
-            // PASO 1: AJAX de validación (Consultar si el link está activo)
-            // -------------------------------------------------------------
-            var validacionResponse = await Http.GetAsync($"api/descargas/validar/{TokenId}");
+            // -----------------------------------------------------------------
+            // PASO 1 (API): Validar token y obtener la URL de Google Drive
+            // -----------------------------------------------------------------
+            var respValidar = await Http.GetAsync($"api/descargas/validar/{TokenId}");
             
-            if (!validacionResponse.IsSuccessStatusCode)
+            if (!respValidar.IsSuccessStatusCode)
             {
                 _mensajeError = "Este enlace ya fue utilizado o ha expirado.";
                 return;
             }
 
-            // -------------------------------------------------------------
-            // PASO 2: AJAX de descarga (Obtener el archivo desde Drive/API)
-            // -------------------------------------------------------------
-            var archivoResponse = await Http.GetAsync($"api/descargas/obtener-archivo/{TokenId}");
+            var resultado = await respValidar.Content.ReadFromJsonAsync<ValidacionRespuestaDto>();
             
-            if (!archivoResponse.IsSuccessStatusCode)
+            if (resultado == null || !resultado.Valido || string.IsNullOrEmpty(resultado.UrlDirecta))
             {
-                _mensajeError = "No se pudo recuperar el archivo desde el servidor.";
+                _mensajeError = "No se pudo obtener el archivo solicitado.";
                 return;
             }
 
-            // Leemos los bytes del archivo que envió la API
-            var bytes = await archivoResponse.Content.ReadAsByteArrayAsync();
-            var base64 = Convert.ToBase64String(bytes);
-            var nombreFinal = string.IsNullOrEmpty(NombreProducto) ? "Material_TiempoBiblia.pdf" : $"{NombreProducto}.pdf";
+            // -----------------------------------------------------------------
+            // PASO 2 (API): Invalidad / Quemar el token en la BD (marcar-usado)
+            // -----------------------------------------------------------------
+            var respMarcar = await Http.PostAsync($"api/descargas/marcar-usado/{TokenId}", null);
+            
+            if (!respMarcar.IsSuccessStatusCode)
+            {
+                _mensajeError = "Ocurrió un error al procesar el enlace.";
+                return;
+            }
 
-            // -------------------------------------------------------------
-            // PASO 3: AJAX de actualización (Marcar el link como consumido)
-            // -------------------------------------------------------------
-            // Se envía la orden a la API para invalidar el token en la base de datos
-            await Http.PostAsync($"api/descargas/marcar-usado/{TokenId}", null);
+            // -----------------------------------------------------------------
+            // PASO 3 (Navegador): Redirección directa a la URL de Google Drive
+            // -----------------------------------------------------------------
+            await JS.InvokeVoidAsync("eval", $"window.location.href = '{resultado.UrlDirecta}'");
 
-            // -------------------------------------------------------------
-            // ENTREGAR EL ARCHIVO AL NAVEGADOR
-            // -------------------------------------------------------------
-            await JS.InvokeVoidAsync("descargarBlobSeguro", base64, nombreFinal, "application/pdf");
         }
         catch (Exception ex)
         {
-            _mensajeError = "Ocurrió un error inesperado durante la descarga.";
+            _mensajeError = "Ocurrió un error inesperado al procesar la descarga.";
             Console.WriteLine($"Error en flujo: {ex.Message}");
         }
         finally
         {
             _descargando = false;
         }
+    }
+
+    // DTO para mapear la respuesta de la API
+    public class ValidacionRespuestaDto
+    {
+        public bool Valido { get; set; }
+        public string? UrlDirecta { get; set; }
     }
 }
