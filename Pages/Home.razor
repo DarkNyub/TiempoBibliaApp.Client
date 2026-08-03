@@ -3,9 +3,9 @@
 @inject HttpClient Http
 @inject IDialogService _dialogService
 
-<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
+<MudContainer MaxWidth="MaxWidth.Large" Class="pt-8 pb-16">
 
-    @if (categorias == null || productos == null)
+    @if (productos == null)
     {
         <MudStack AlignItems="AlignItems.Center" Class="mt-10">
             <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Large" />
@@ -14,121 +14,143 @@
     }
     else
     {
-        <!-- 1. HERO BANNER (Producto Destacado) -->
-        @if (productoDestacado != null)
-        {
-            var heroImage = string.IsNullOrEmpty(productoDestacado.ImagenUrl) 
-                ? "https://images.unsplash.com/photo-1504052434569-70ad5836ab65?q=80&w=2000&auto=format&fit=crop" 
-                : productoDestacado.ImagenUrl;
+        @* ==========================================
+           SECCIÓN 1: BIENVENIDA Y LOGO
+           ========================================== *@
+        <div class="d-flex flex-column align-center mb-12">
+            <MudText Typo="Typo.h3" Align="Align.Center" Style="font-weight: bold; color: #5D4037;">
+                ¡Bienvenida(o)!
+            </MudText>
+            <MudText Typo="Typo.body1" Align="Align.Center" Class="mb-6" Style="color: #8D6E63;">
+                Sigue creando hábitos para acercarte a lo eterno.
+            </MudText>
+            <!-- Sustituye este src por el logo real de Creando Hábitos Eternos -->
+            <img src="images/logo-creando-habitos.png" alt="Creando Hábitos Eternos" style="max-width: 350px; width: 100%;" />
+        </div>
 
-            <div class="hero-container" style="background-image: url('@heroImage');">
-                <div class="hero-overlay"></div>
-                <div class="hero-content">
-                    <MudText Typo="Typo.h2" Style="color: #333; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">
-                        @productoDestacado.Nombre
-                    </MudText>
-                    <MudText Typo="Typo.body1" Class="mt-2 mb-4" Style="color: #e0e0e0; font-size: 1.2rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">
-                        @productoDestacado.Descripcion
-                    </MudText>
-                    
-                    <MudStack Row="true" Spacing="4">
-                        <!-- Botón homologado: Ahora abre el mismo Modal que los demás -->
-                        <MudButton Variant="Variant.Outlined" Style="color: #333; border-color: white; background-color: rgba(255,255,255,0.2);" Size="Size.Large" StartIcon="@Icons.Material.Filled.Info" @onclick="() => AbrirModalProducto(productoDestacado)">
-                            Más Info
+        @* ==========================================
+           SECCIÓN 2: NOVEDADES (Destacados)
+           ========================================== *@
+        <div class="d-flex justify-center mb-6">
+            <MudChip T="string" Color="Color.Primary" Size="Size.Large" Style="font-weight: bold;">
+                ¡Novedades!
+            </MudChip>
+        </div>
+        
+        <MudGrid Class="mb-12" Spacing="4">
+            @if (productoDestacado != null)
+            {
+                <!-- Cajita 1: Texto Novedad -->
+                <MudItem xs="12" md="6">
+                    <MudPaper Elevation="2" Class="pa-8 d-flex flex-column justify-center align-center h-100" Style="background: linear-gradient(to bottom, #FFE4E1, #FFF); border-radius: 20px;">
+                        <MudText Typo="Typo.subtitle1" Style="color: #8D6E63;">Novedad principal</MudText>
+                        <MudText Typo="Typo.h4" Align="Align.Center" Style="font-weight: bold; color: #5D4037;" Class="mb-4">
+                            @productoDestacado.Nombre.ToUpper()
+                        </MudText>
+                        <MudText Align="Align.Center" Class="mb-6" Style="color: #666;">
+                            @productoDestacado.Descripcion
+                        </MudText>
+                        <MudButton Variant="Variant.Outlined" Color="Color.Primary" Style="border-radius: 20px; width: 80%; border-width: 2px;" @onclick="() => AbrirModalProducto(productoDestacado)">
+                            Ver más
                         </MudButton>
-                    </MudStack>
-                </div>
-            </div>
-        }
+                    </MudPaper>
+                </MudItem>
 
-        <!-- 2. FILAS DE CATEGORÍAS (Grilla Responsiva) -->
-        @foreach (var fila in productosPorCategoria)
-        {
-            <div class="netflix-row-container">
-                <MudText Typo="Typo.h5" Class="mb-4" Style="font-weight: bold;">@fila.Key</MudText>
-                
-                <MudGrid Spacing="2">
-                    @foreach (var prod in fila.Value)
-                    {
-                        var poster = string.IsNullOrEmpty(prod.ImagenUrl) ? $"https://dummyimage.com/400x600/292929/ffffff.png&text={prod.Nombre}" : prod.ImagenUrl;
-                        
-                        <!-- xs="6" significa 2 por fila en celular. md="3" significa 4 por fila en PC -->
-                        <MudItem xs="6" sm="4" md="3" lg="2">
-                            <div class="netflix-card-wrapper-responsive" @onclick="() => AbrirModalProducto(prod)">
-                                <MudPaper Elevation="4" Class="card-image-container-responsive">
-                                    <!-- Agregamos loading="lazy" para que carguen súper rápido -->
-                                    <img src="@poster" alt="@prod.Nombre" class="card-image" loading="lazy" />
-                                </MudPaper>
-                                <MudText Typo="Typo.subtitle2" Class="mt-2" Style="font-weight: bold;" Align="Align.Center">
-                                    @prod.Nombre
-                                </MudText>
-                                @if(prod.EsGratuito)
-                                {
-                                    <MudText Typo="Typo.caption" Color="Color.Success" Align="Align.Center" Style="display: block;">Gratis</MudText>
-                                }
-                                else
-                                {
-                                    <MudText Typo="Typo.caption" Color="Color.Primary" Align="Align.Center" Style="display: block;">$@prod.Precio</MudText>
-                                }
-                            </div>
-                        </MudItem>
-                    }
-                </MudGrid>
-            </div>
-        }
+                <!-- Cajita 2: Imagen Novedad -->
+                <MudItem xs="12" md="6">
+                    <MudPaper Elevation="2" Style="border-radius: 20px; overflow: hidden; background-color: #f7f7f7;" Class="h-100 d-flex align-center justify-center">
+                        <img src="@productoDestacado.ImagenUrl" alt="@productoDestacado.Nombre" style="width: 100%; height: 100%; object-fit: cover;" />
+                    </MudPaper>
+                </MudItem>
+            }
+        </MudGrid>
 
-        <!-- 3. FILA DE PAQUETES (Grilla Responsiva) -->
-        @if (paquetes != null && paquetes.Any())
-        {
-            <div class="netflix-row-container mt-4">
-                <MudText Typo="Typo.h5" Class="mb-4" Style="font-weight: bold">Colecciones Especiales</MudText>
+        @* ==========================================
+           SECCIÓN 3: ¡HOLA SOY GISELA! (Fondo Rosado)
+           ========================================== *@
+        <div style="background-color: #FCE4EC; border-radius: 20px;" class="pa-8 mb-16">
+            <MudGrid Spacing="4">
+                <!-- Texto en PC izquierda, Celular arriba -->
+                <MudItem xs="12" md="6" Class="d-flex flex-column justify-center">
+                    <MudText Typo="Typo.h4" Style="font-weight: bold; color: #F48FB1;" Class="mb-4">
+                        ¡Hola soy Gisela!
+                    </MudText>
+                    <MudText Typo="Typo.body1" Class="mb-6" Style="color: #5D4037;">
+                        De manera creativa, ayudo a mujeres a estudiar temas bíblicos. Mi deseo es proporcionar recursos que te animen a profundizar en la Palabra de Dios. 
+                        ¡Acompáñame en esta aventura de crecimiento espiritual!
+                    </MudText>
+                    <MudButton Variant="Variant.Filled" Color="Color.Secondary" Style="border-radius: 20px; width: fit-content; color: white; font-weight: bold;">
+                        Conóceme
+                    </MudButton>
+                </MudItem>
                 
-                <MudGrid Spacing="2">
-                    @foreach (var pack in paquetes)
-                    {
-                        var posterPack = string.IsNullOrEmpty(pack.ImagenUrl) ? $"https://dummyimage.com/400x600/141414/ffffff.png&text={pack.Nombre}" : pack.ImagenUrl;
-                        
-                        <MudItem xs="6" sm="4" md="3" lg="2">
-                            <div class="netflix-card-wrapper-responsive">
-                                <MudPaper Elevation="4" Class="card-image-container-responsive">
-                                    <img src="@posterPack" alt="@pack.Nombre" class="card-image" loading="lazy" />
-                                </MudPaper>
-                                <MudText Typo="Typo.subtitle2" Class="mt-2" Style="font-weight: bold;" Align="Align.Center">
-                                    @pack.Nombre
-                                </MudText>
-                                <MudText Typo="Typo.caption" Color="Color.Primary" Align="Align.Center" Style="display: block;">
-                                    $@pack.Precio
-                                </MudText>
-                            </div>
-                        </MudItem>
-                    }
-                </MudGrid>
-            </div>
-        }
+                <!-- Imagen en PC derecha, Celular abajo -->
+                <MudItem xs="12" md="6" Class="d-flex justify-center">
+                    <img src="images/gisela.jpg" alt="Gisela" style="border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); width: 100%; max-width: 400px; object-fit: cover;" />
+                </MudItem>
+            </MudGrid>
+        </div>
+
+        @* ==========================================
+           SECCIÓN 4: RECURSOS (Catálogo Dinámico)
+           ========================================== *@
+        <div class="d-flex flex-column align-center mb-8">
+            <MudText Typo="Typo.h5" Align="Align.Center" Style="font-weight: bold; color: #5D4037;">
+                Accede a los recursos que acompañan
+            </MudText>
+            <MudText Typo="Typo.h5" Align="Align.Center" Style="font-weight: bold; color: #5D4037;" Class="mb-6">
+                tu crecimiento espiritual
+            </MudText>
+        </div>
+
+        <!-- xs="12" (1 por fila en celular), sm="6" (2 en tablet), md="4" (3 en PC) -->
+        <MudGrid Class="mb-12" Spacing="6">
+            @foreach (var prod in productos.Skip(1).Take(6)) // Saltamos el destacado y mostramos 6
+            {
+                var poster = string.IsNullOrEmpty(prod.ImagenUrl) ? $"https://dummyimage.com/400x400/f48fb1/ffffff.png&text={prod.Nombre}" : prod.ImagenUrl;
+
+                <MudItem xs="12" sm="6" md="4" Class="d-flex flex-column align-center">
+                    <MudPaper Elevation="0" Style="border-radius: 20px; overflow: hidden; background-color: transparent; cursor: pointer;" Class="mb-4 w-100" @onclick="() => AbrirModalProducto(prod)">
+                        <!-- Imagen cuadrada -->
+                        <div style="width: 100%; aspect-ratio: 1/1; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                            <img src="@poster" alt="@prod.Nombre" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease;" class="hover-zoom" />
+                        </div>
+                    </MudPaper>
+                    
+                    <MudText Typo="Typo.subtitle1" Align="Align.Center" Style="font-weight: bold; color: #5D4037;" Class="mb-2">
+                        @prod.Nombre
+                    </MudText>
+
+                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" Style="border-radius: 20px; border-width: 2px;" @onclick="() => AbrirModalProducto(prod)">
+                        @(prod.EsGratuito ? "Descargar" : "Más Información")
+                    </MudButton>
+                </MudItem>
+            }
+        </MudGrid>
     }
-
 </MudContainer>
 
+<style>
+    /* Pequeño efecto de zoom al pasar el mouse por las portadas */
+    .hover-zoom:hover {
+        transform: scale(1.05);
+    }
+</style>
+
 @code {
-    private List<CategoriaDto>? categorias;
     private List<ProductoDto>? productos;
-    private List<PaqueteDto>? paquetes;
-    
     private ProductoDto? productoDestacado;
-    private Dictionary<string, List<ProductoDto>> productosPorCategoria = new();
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            categorias = await Http.GetFromJsonAsync<List<CategoriaDto>>("api/Categorias");
+            // Usamos tu misma lógica de conexión a la API
             productos = await Http.GetFromJsonAsync<List<ProductoDto>>("api/Productos");
-            paquetes = await Http.GetFromJsonAsync<List<PaqueteDto>>("api/Paquetes");
 
-            if (productos != null && productos.Any() && categorias != null)
+            if (productos != null && productos.Any())
             {
                 productoDestacado = productos.FirstOrDefault();
-                ArmarFilasCategorias();
             }
         }
         catch (Exception ex)
@@ -137,24 +159,7 @@
         }
     }
 
-    private void ArmarFilasCategorias()
-    {
-        productosPorCategoria.Clear();
-
-        foreach (var cat in categorias!)
-        {
-            var productosEnEstaCategoria = productos!.Where(p => 
-                p.CategoriaId == cat.Id || 
-                p.CategoriasSecundarias.Any(cs => cs.CategoriaId == cat.Id)
-            ).ToList();
-
-            if (productosEnEstaCategoria.Any())
-            {
-                productosPorCategoria.Add(cat.Nombre, productosEnEstaCategoria);
-            }
-        }
-    }
-
+    // Reutilizamos tu modal exacto para que el proceso de compra por WhatsApp siga funcionando[cite: 8, 11]
     private async Task AbrirModalProducto(ProductoDto producto)
     {
         var parameters = new DialogParameters<ProductoDetalleModal> { { x => x.Producto, producto } };
@@ -164,7 +169,7 @@
             MaxWidth = MaxWidth.Medium, 
             FullWidth = true, 
             NoHeader = true,
-            BackgroundClass = "netflix-modal-backdrop" 
+            BackgroundClass = "netflix-modal-backdrop" // Puedes cambiar esta clase css luego si quieres
         };
 
         await _dialogService.ShowAsync<ProductoDetalleModal>("", parameters, options);
