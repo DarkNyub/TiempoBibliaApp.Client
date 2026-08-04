@@ -105,3 +105,18 @@
     height: 100%;
     object-fit: cover;
 }
+
+/* COMPORTAMIENTO POR DEFECTO (Celulares): Todo centrado */
+.seccion-luzy[b-qcp9gwj68k] {
+    align-items: center;
+    text-align: center;
+}
+
+/* COMPORTAMIENTO EN PC (Pantallas medianas/grandes): Todo a la izquierda */
+/* 960px es la medida exacta donde MudBlazor activa la columna "md" */
+@media (min-width: 960px) {
+    .seccion-luzy[b-qcp9gwj68k] {
+        align-items: flex-start;
+        text-align: left;
+    }
+}
