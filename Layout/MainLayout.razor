@@ -1,4 +1,7 @@
 ﻿@inherits LayoutComponentBase
+@inject TiempoBiblia.Client.Services.CarritoService Carrito
+@inject NavigationManager Nav
+@implements IDisposable
 
 <MudThemeProvider Theme="@MiTemaPastel" />
 <MudDialogProvider />
@@ -9,10 +12,32 @@
 
     <MudMainContent>
         @Body
+        <!-- BOTÓN FLOTANTE DEL CARRITO -->
+        @if (Carrito.ObtenerCantidadItems() > 0)
+        {
+            <div style="position: fixed; bottom: 30px; right: 30px; z-index: 9999;">
+                <MudBadge Content="Carrito.ObtenerCantidadItems()" Color="Color.Secondary" Overlap="true">
+                    <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.ShoppingCart" 
+                            Size="Size.Large" OnClick="@(() => Nav.NavigateTo("/carrito"))" 
+                            Style="box-shadow: 0 4px 15px rgba(244,143,177,0.6);" />
+                </MudBadge>
+            </div>
+        }
     </MudMainContent>
 </MudLayout>
 
 @code {
+    protected override void OnInitialized()
+    {
+        // Le decimos al layout que se actualice cada vez que el carrito cambie
+        Carrito.OnCarritoCambiado += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        // Buena práctica: desconectar el evento cuando se cierra la página
+        Carrito.OnCarritoCambiado -= StateHasChanged;
+    }
     // Aquí definimos tu identidad visual a nivel global
     MudTheme MiTemaPastel = new MudTheme()
     {

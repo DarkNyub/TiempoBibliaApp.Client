@@ -106,17 +106,40 @@
     object-fit: cover;
 }
 
-/* COMPORTAMIENTO POR DEFECTO (Celulares): Todo centrado */
+/* --- COMPORTAMIENTO CELULAR (Por defecto) --- */
 .seccion-luzy[b-qcp9gwj68k] {
-    align-items: center;
-    text-align: center;
+    align-items: center !important;
 }
 
-/* COMPORTAMIENTO EN PC (Pantallas medianas/grandes): Todo a la izquierda */
-/* 960px es la medida exacta donde MudBlazor activa la columna "md" */
+/* Regla nueva para el título */
+.titulo-luzy-wrapper[b-qcp9gwj68k] {
+    width: 100%;
+    display: flex;
+    justify-content: center !important;
+    /* Centra el título en celular */
+}
+
+.boton-luzy[b-qcp9gwj68k] {
+    width: 100%;
+    display: flex;
+    justify-content: center !important;
+    /* Centra el botón */
+}
+
+/* --- COMPORTAMIENTO PC (Pantallas medianas y grandes) --- */
 @media (min-width: 960px) {
     .seccion-luzy[b-qcp9gwj68k] {
-        align-items: flex-start;
-        text-align: left;
+        align-items: flex-start !important;
+    }
+
+    /* Regla nueva para el título en PC */
+    .titulo-luzy-wrapper[b-qcp9gwj68k] {
+        justify-content: flex-start !important;
+        /* Mueve el título a la izquierda */
+    }
+
+    .boton-luzy[b-qcp9gwj68k] {
+        justify-content: flex-start !important;
+        /* Mueve el botón a la izquierda */
     }
 }

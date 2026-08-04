@@ -1,0 +1,84 @@
+@page "/carrito"
+@inject TiempoBiblia.Client.Services.CarritoService CarritoService
+@inject NavigationManager Nav
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="pt-8 pb-16">
+    <MudText Typo="Typo.h4" Style="font-weight: bold; color: #5D4037;" Class="mb-6">
+        Tu Carrito de Compras 🛒
+    </MudText>
+
+    @if (!CarritoService.Items.Any())
+    {
+        <MudPaper Elevation="2" Class="pa-8 text-center" Style="border-radius: 20px;">
+            <MudIcon Icon="@Icons.Material.Filled.RemoveShoppingCart" Size="Size.Large" Color="Color.Default" Class="mb-4" />
+            <MudText Typo="Typo.h6">Tu carrito está vacío</MudText>
+            <MudText Typo="Typo.body2" Class="mb-6" Style="color: gray;">¡Descubre nuestros recursos y herramientas para tu crecimiento espiritual!</MudText>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Style="border-radius: 20px;" OnClick="@(() => Nav.NavigateTo("/"))">
+                Volver a la tienda
+            </MudButton>
+        </MudPaper>
+    }
+    else
+    {
+        <MudGrid>
+            <!-- LISTA DE PRODUCTOS -->
+            <MudItem xs="12" md="8">
+                @foreach (var item in CarritoService.Items)
+                {
+                    <MudPaper Elevation="1" Class="pa-4 mb-4 d-flex align-center" Style="border-radius: 12px;">
+                        <!-- Imagen pequeña -->
+                        <div style="width: 80px; height: 80px; border-radius: 8px; overflow: hidden; margin-right: 16px;">
+                            <img src="@(string.IsNullOrEmpty(item.Producto.ImagenUrl) ? "images/default.jpg" : item.Producto.ImagenUrl)" style="width: 100%; height: 100%; object-fit: cover;" />
+                        </div>
+                        
+                        <!-- Info del producto -->
+                        <div class="flex-grow-1">
+                            <MudText Typo="Typo.subtitle1" Style="font-weight: bold;">@item.Producto.Nombre</MudText>
+                            @if (item.Producto.EsGratuito)
+                            {
+                                <MudText Typo="Typo.body2" Color="Color.Success">¡Gratis!</MudText>
+                            }
+                            else
+                            {
+                                <MudText Typo="Typo.body2" Style="color: #8D6E63;">$@item.Producto.Precio</MudText>
+                            }
+                        </div>
+
+                        <!-- Controles de cantidad -->
+                        <div class="d-flex align-center mx-4">
+                            <MudIconButton Icon="@Icons.Material.Filled.Remove" Size="Size.Small" OnClick="@(() => CarritoService.ModificarCantidad(item.Producto.Id, item.Cantidad - 1))" />
+                            <MudText Class="mx-2">@item.Cantidad</MudText>
+                            <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small" OnClick="@(() => CarritoService.ModificarCantidad(item.Producto.Id, item.Cantidad + 1))" />
+                        </div>
+
+                        <!-- Botón eliminar -->
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => CarritoService.EliminarDelCarrito(item.Producto.Id))" />
+                    </MudPaper>
+                }
+            </MudItem>
+
+            <!-- RESUMEN DE COMPRA -->
+            <MudItem xs="12" md="4">
+                <MudPaper Elevation="2" Class="pa-6" Style="border-radius: 20px; background-color: #FCE4EC;">
+                    <MudText Typo="Typo.h6" Class="mb-4" Style="font-weight: bold;">Resumen</MudText>
+                    
+                    <div class="d-flex justify-space-between mb-2">
+                        <MudText>Total de artículos:</MudText>
+                        <MudText>@CarritoService.ObtenerCantidadItems()</MudText>
+                    </div>
+
+                    <MudDivider Class="my-4" />
+
+                    <div class="d-flex justify-space-between mb-6">
+                        <MudText Typo="Typo.h5" Style="font-weight: bold;">Total a Pagar:</MudText>
+                        <MudText Typo="Typo.h5" Style="font-weight: bold; color: #E91E63;">$@CarritoService.ObtenerTotal()</MudText>
+                    </div>
+
+                    <MudButton Variant="Variant.Filled" Color="Color.Secondary" FullWidth="true" Size="Size.Large" Style="border-radius: 20px; font-weight: bold; color: white;">
+                        Proceder a Pagar
+                    </MudButton>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+    }
+</MudContainer>

@@ -71,4 +71,10 @@ namespace TiempoBiblia.Client.Models
         public string UrlSegura { get; set; } = string.Empty;
         public DateTime ExpiraEn { get; set; }
     }
+    // Nueva clase para manejar el Producto + Su Cantidad
+    public class CarritoItem
+    {
+        public ProductoDto Producto { get; set; } = new();
+        public int Cantidad { get; set; } = 1;
+    }
 }

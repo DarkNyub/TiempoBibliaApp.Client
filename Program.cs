@@ -9,6 +9,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 // Conectamos el cliente directamente a tu API en producción
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://tiempobibliaappapi-hbb2bzgvc4fudkcw.canadacentral-01.azurewebsites.net/") });
+builder.Services.AddScoped<TiempoBiblia.Client.Services.CarritoService>();
 
 // INYECTA MUDBLAZOR AQUÍ
 builder.Services.AddMudServices(); 

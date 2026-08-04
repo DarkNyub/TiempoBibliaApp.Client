@@ -111,8 +111,12 @@
     align-items: center !important;
 }
 
-.titulo-luzy {
-    text-align: center !important;
+/* Regla nueva para el título */
+.titulo-luzy-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center !important;
+    /* Centra el título en celular */
 }
 
 .boton-luzy {
@@ -128,8 +132,10 @@
         align-items: flex-start !important;
     }
 
-    .titulo-luzy {
-        text-align: left !important;
+    /* Regla nueva para el título en PC */
+    .titulo-luzy-wrapper {
+        justify-content: flex-start !important;
+        /* Mueve el título a la izquierda */
     }
 
     .boton-luzy {
