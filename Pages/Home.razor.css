@@ -106,17 +106,34 @@
     object-fit: cover;
 }
 
-/* COMPORTAMIENTO POR DEFECTO (Celulares): Todo centrado */
+/* --- COMPORTAMIENTO CELULAR (Por defecto) --- */
 .seccion-luzy {
-    align-items: center;
-    text-align: center;
+    align-items: center !important;
 }
 
-/* COMPORTAMIENTO EN PC (Pantallas medianas/grandes): Todo a la izquierda */
-/* 960px es la medida exacta donde MudBlazor activa la columna "md" */
+.titulo-luzy {
+    text-align: center !important;
+}
+
+.boton-luzy {
+    width: 100%;
+    display: flex;
+    justify-content: center !important;
+    /* Centra el botón */
+}
+
+/* --- COMPORTAMIENTO PC (Pantallas medianas y grandes) --- */
 @media (min-width: 960px) {
     .seccion-luzy {
-        align-items: flex-start;
-        text-align: left;
+        align-items: flex-start !important;
+    }
+
+    .titulo-luzy {
+        text-align: left !important;
+    }
+
+    .boton-luzy {
+        justify-content: flex-start !important;
+        /* Mueve el botón a la izquierda */
     }
 }

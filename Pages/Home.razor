@@ -72,17 +72,22 @@
             <MudGrid Spacing="4">
                 <!-- Texto en PC izquierda, Celular arriba -->
                 <MudItem xs="12" md="6" Class="d-flex flex-column justify-center seccion-luzy">
-                    <MudText Typo="Typo.h4" Style="font-weight: bold; color: #F48FB1;" Class="mb-4">
+                    <!-- Clase extra para forzar el título -->
+                    <MudText Typo="Typo.h4" Style="font-weight: bold; color: #F48FB1;" Class="mb-4 titulo-luzy">
                         ¡Hola soy Luzy!
-                    </MudText>
-                    <!-- Aquí agregamos Align="Align.Justify" para que siempre esté justificado -->
+                    </MudText>                    
+                    <!-- Este sigue justificado siempre, está perfecto -->
                     <MudText Typo="Typo.body1" Align="Align.Justify" Class="mb-6" Style="color: #5D4037;">
                         De manera creativa, ayudo a mujeres a estudiar temas bíblicos. Mi deseo es proporcionar recursos que te animen a profundizar en la Palabra de Dios. 
                         ¡Acompáñame en esta aventura de crecimiento espiritual!
                     </MudText>                    
-                    <MudButton Variant="Variant.Filled" Color="Color.Secondary" Style="border-radius: 20px; width: fit-content; color: white; font-weight: bold;">
-                        Conóceme
-                    </MudButton>
+                    <!-- Envolvemos el botón en un div para dominar su alineación -->
+                    <div class="boton-luzy">
+                        <MudButton Variant="Variant.Filled" Color="Color.Secondary" Style="border-radius: 20px; color: white; font-weight: bold; padding: 8px 32px;">
+                            Conóceme
+                        </MudButton>
+                    </div>
+
                 </MudItem>
                 
                 <!-- Imagen en PC derecha, Celular abajo -->
