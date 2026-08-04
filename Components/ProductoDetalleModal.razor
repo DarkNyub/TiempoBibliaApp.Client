@@ -1,6 +1,8 @@
 @using TiempoBiblia.Client.Models
 @using MudBlazor
 @inject IJSRuntime _js
+@inject TiempoBiblia.Client.Services.CarritoService Carrito
+@inject ISnackbar Snackbar
 
 <MudDialog Class="netflix-modal-dialog">
     <DialogContent>
@@ -20,7 +22,10 @@
                                @onclick="PedirPorWhatsApp">
                         @(Producto.EsGratuito ? "Obtener Gratis" : $"Pedir por WhatsApp ${Producto.Precio}")
                     </MudButton>
-                    <MudIconButton Icon="@Icons.Material.Filled.AddShoppingCart" Color="Color.Inherit" Style="color: #333; border: 2px solid gray;" />
+                    <MudIconButton Icon="@Icons.Material.Filled.AddShoppingCart" 
+                        Color="Color.Inherit" 
+                        Style="color: #333; border: 2px solid gray;" 
+                        OnClick="AgregarYNotificar" />
                 </MudStack>
             </div>
         </div>
@@ -111,5 +116,16 @@
 
         // 4. Usamos JavaScript para abrir la pestaña
         await _js.InvokeVoidAsync("open", url, "_blank");
+    }
+    private void AgregarYNotificar()
+    {
+        // Agregamos el producto al cerebro del carrito
+        Carrito.AgregarAlCarrito(Producto);
+        
+        // Mostramos un mensaje de éxito en la esquina de la pantalla
+        Snackbar.Add($"¡{Producto.Nombre} se agregó al carrito!", Severity.Success);
+        
+        // Opcional: Cerramos el modal para que siga viendo el catálogo
+        //MudDialog.Cancel(); 
     }
 }

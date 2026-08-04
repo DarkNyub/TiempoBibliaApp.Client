@@ -29,7 +29,10 @@
 @code {
     protected override void OnInitialized()
     {
-        // Le decimos al layout que se actualice cada vez que el carrito cambie
+        // 1. Apenas se carga la página, recuperamos el carrito del Local Storage
+        Carrito.CargarCarritoGuardado();
+
+        // 2. Le decimos al layout que se actualice cada vez que el carrito cambie
         Carrito.OnCarritoCambiado += StateHasChanged;
     }
 
