@@ -139,7 +139,8 @@
             };
 
             // Llamamos a tu API
-            var response = await Http.PostAsJsonAsync("api/checkout/crear-preferencia", request);
+            //var response = await Http.PostAsJsonAsync("api/checkout/crear-preferencia", request);
+            var response = await Http.PostAsJsonAsync("api/checkout/crear-preferencia-sandbox", request);
             
             if (response.IsSuccessStatusCode)
             {
