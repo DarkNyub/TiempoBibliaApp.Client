@@ -77,4 +77,16 @@ namespace TiempoBiblia.Client.Models
         public ProductoDto Producto { get; set; } = new();
         public int Cantidad { get; set; } = 1;
     }
-}
+    // DTO para enviar el total a cobrar
+    public class SolicitudPagoDto
+    {
+        public string Titulo { get; set; } = "Recursos de Tiempo Biblia";
+        public decimal TotalAPagar { get; set; }
+    }
+
+    // DTO para recibir el link de Mercado Pago
+    public class RespuestaPagoDto
+    {
+        public string UrlPago { get; set; } = string.Empty;
+    }
+} // Fin del namespace

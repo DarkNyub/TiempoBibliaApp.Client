@@ -1,11 +1,22 @@
 @page "/carrito"
+@using TiempoBiblia.Client.Models
 @inject TiempoBiblia.Client.Services.CarritoService CarritoService
 @inject NavigationManager Nav
+@inject HttpClient Http
+@inject IJSRuntime JS
 
 <MudContainer MaxWidth="MaxWidth.Medium" Class="pt-8 pb-16">
-    <MudText Typo="Typo.h4" Style="font-weight: bold; color: #5D4037;" Class="mb-6">
-        Tu Carrito de Compras 🛒
-    </MudText>
+    
+    <!-- 🔥 CAMBIO 1: Agregamos un botón de flecha para regresar junto al título -->
+    <div class="d-flex align-center mb-6">
+        <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" 
+                       Color="Color.Default" 
+                       OnClick="@(() => Nav.NavigateTo("/"))" 
+                       Class="mr-2" />
+        <MudText Typo="Typo.h4" Style="font-weight: bold; color: #5D4037;" Class="mb-0">
+            Tu Carrito de Compras 🛒
+        </MudText>
+    </div>
 
     @if (!CarritoService.Items.Any())
     {
@@ -74,11 +85,83 @@
                         <MudText Typo="Typo.h5" Style="font-weight: bold; color: #E91E63;">$@CarritoService.ObtenerTotal()</MudText>
                     </div>
 
-                    <MudButton Variant="Variant.Filled" Color="Color.Secondary" FullWidth="true" Size="Size.Large" Style="border-radius: 20px; font-weight: bold; color: white;">
-                        Proceder a Pagar
+                    <MudButton Variant="Variant.Filled" Color="Color.Secondary" FullWidth="true" Size="Size.Large" 
+                        Style="border-radius: 20px; font-weight: bold; color: white;" 
+                        OnClick="ProcesarPago" Disabled="_procesandoPago">
+                        @if (_procesandoPago)
+                        {
+                            <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2"/>
+                            <MudText>Generando link...</MudText>
+                        }
+                        else
+                        {
+                            <MudText>Proceder a Pagar</MudText>
+                        }
                     </MudButton>
+
+                    <!-- 🔥 CAMBIO 2: Botón secundario para volver al catálogo sin vaciar el carrito -->
+                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" FullWidth="true" Size="Size.Large" 
+                               Class="mt-4"
+                               Style="border-radius: 20px; font-weight: bold; border-width: 2px;" 
+                               OnClick="@(() => Nav.NavigateTo("/"))">
+                        Seguir Comprando
+                    </MudButton>
+
                 </MudPaper>
             </MudItem>
         </MudGrid>
     }
 </MudContainer>
+
+@code {
+    private bool _procesandoPago = false;
+
+    private async Task ProcesarPago()
+    {
+        try
+        {
+            _procesandoPago = true;
+            
+            var total = CarritoService.ObtenerTotal();
+
+            if (total <= 0)
+            {
+                // AQUÍ INTEGRAMOS LA REDIRECCIÓN CUANDO ES GRATIS
+                Nav.NavigateTo("/descarga-gratuita-exitosa");
+                return;
+            }
+
+            // Armamos la solicitud con el total del carrito
+            var request = new SolicitudPagoDto 
+            { 
+                TotalAPagar = total, 
+                Titulo = "Tiempo Biblia - Recursos Digitales" 
+            };
+
+            // Llamamos a tu API
+            var response = await Http.PostAsJsonAsync("api/checkout/crear-preferencia", request);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<RespuestaPagoDto>();
+                if (result != null && !string.IsNullOrEmpty(result.UrlPago))
+                {
+                    // Redirigimos a la clienta a la página de Mercado Pago
+                    await JS.InvokeVoidAsync("window.location.assign", result.UrlPago);
+                }
+            }
+            else
+            {
+                Console.WriteLine("Error al generar el pago con Mercado Pago");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error crítico: {ex.Message}");
+        }
+        finally
+        {
+            _procesandoPago = false;
+        }
+    }
+}
