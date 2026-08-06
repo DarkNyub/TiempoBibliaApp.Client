@@ -65,6 +65,52 @@
             }
         };
     </script>
+    <!-- SDK de Mercado Pago -->
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
+
+    <!-- Nuestro ayudante para dibujar el Brick en Blazor -->
+    <script>
+        let cardPaymentBrickController;
+
+        window.renderMercadoPagoBrick = async (publicKey, amount, dotNetHelper) => {
+            // Inicializamos Mercado Pago con tu llave pública
+            const mp = new MercadoPago(publicKey, { locale: 'es-CO' });
+            const bricksBuilder = mp.bricks();
+
+            // Si ya había un formulario dibujado, lo borramos para no duplicar
+            if (cardPaymentBrickController) cardPaymentBrickController.unmount();
+
+            const settings = {
+                initialization: {
+                    amount: amount, // El total del carrito que manda C#
+                },
+                customization: {
+                    visual: { style: { theme: 'default' } },
+                    paymentMethods: { maxInstallments: 1 } // Sin cuotas complicadas
+                },
+                callbacks: {
+                    onReady: () => { console.log("¡Formulario de tarjeta listo!"); },
+                    onSubmit: (formData) => {
+                        // AQUÍ ESTÁ LA MAGIA: Cuando el cliente le da a pagar, 
+                        // JS le manda los datos encriptados de la tarjeta a tu método C# reciclado
+                        return new Promise((resolve, reject) => {
+                            dotNetHelper.invokeMethodAsync('ProcesarPago', formData)
+                                .then(() => resolve())
+                                .catch((error) => reject());
+                        });
+                    },
+                    onError: (error) => { console.error(error); }
+                }
+            };
+
+            // Dibujamos el formulario en el div que pusimos en Carrito.razor
+            cardPaymentBrickController = await bricksBuilder.create(
+                'payment',
+                'paymentBrick_container',
+                settings
+            );
+        };
+    </script>
 </body>
 
 </html>

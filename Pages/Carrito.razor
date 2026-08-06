@@ -1,13 +1,12 @@
 @page "/carrito"
 @using TiempoBiblia.Client.Models
+@using Microsoft.Extensions.Configuration
 @inject TiempoBiblia.Client.Services.CarritoService CarritoService
 @inject NavigationManager Nav
 @inject HttpClient Http
 @inject IJSRuntime JS
 
 <MudContainer MaxWidth="MaxWidth.Medium" Class="pt-8 pb-16">
-    
-    <!-- 🔥 CAMBIO 1: Agregamos un botón de flecha para regresar junto al título -->
     <div class="d-flex align-center mb-6">
         <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" 
                        Color="Color.Default" 
@@ -23,8 +22,7 @@
         <MudPaper Elevation="2" Class="pa-8 text-center" Style="border-radius: 20px;">
             <MudIcon Icon="@Icons.Material.Filled.RemoveShoppingCart" Size="Size.Large" Color="Color.Default" Class="mb-4" />
             <MudText Typo="Typo.h6">Tu carrito está vacío</MudText>
-            <MudText Typo="Typo.body2" Class="mb-6" Style="color: gray;">¡Descubre nuestros recursos y herramientas para tu crecimiento espiritual!</MudText>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" Style="border-radius: 20px;" OnClick="@(() => Nav.NavigateTo("/"))">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Style="border-radius: 20px;" OnClick="@(() => Nav.NavigateTo("/"))" Class="mt-4">
                 Volver a la tienda
             </MudButton>
         </MudPaper>
@@ -33,79 +31,46 @@
     {
         <MudGrid>
             <!-- LISTA DE PRODUCTOS -->
-            <MudItem xs="12" md="8">
+            <MudItem xs="12" md="7">
                 @foreach (var item in CarritoService.Items)
                 {
                     <MudPaper Elevation="1" Class="pa-4 mb-4 d-flex align-center" Style="border-radius: 12px;">
-                        <!-- Imagen pequeña -->
                         <div style="width: 80px; height: 80px; border-radius: 8px; overflow: hidden; margin-right: 16px;">
                             <img src="@(string.IsNullOrEmpty(item.Producto.ImagenUrl) ? "images/default.jpg" : item.Producto.ImagenUrl)" style="width: 100%; height: 100%; object-fit: cover;" />
                         </div>
-                        
-                        <!-- Info del producto -->
                         <div class="flex-grow-1">
                             <MudText Typo="Typo.subtitle1" Style="font-weight: bold;">@item.Producto.Nombre</MudText>
-                            @if (item.Producto.EsGratuito)
-                            {
-                                <MudText Typo="Typo.body2" Color="Color.Success">¡Gratis!</MudText>
-                            }
-                            else
-                            {
-                                <MudText Typo="Typo.body2" Style="color: #8D6E63;">$@item.Producto.Precio</MudText>
-                            }
+                            <MudText Typo="Typo.body2" Style="color: #8D6E63;">$@item.Producto.Precio</MudText>
                         </div>
-
-                        <!-- Controles de cantidad -->
-                        <div class="d-flex align-center mx-4">
-                            <MudIconButton Icon="@Icons.Material.Filled.Remove" Size="Size.Small" OnClick="@(() => CarritoService.ModificarCantidad(item.Producto.Id, item.Cantidad - 1))" />
-                            <MudText Class="mx-2">@item.Cantidad</MudText>
-                            <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small" OnClick="@(() => CarritoService.ModificarCantidad(item.Producto.Id, item.Cantidad + 1))" />
-                        </div>
-
-                        <!-- Botón eliminar -->
                         <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => CarritoService.EliminarDelCarrito(item.Producto.Id))" />
                     </MudPaper>
                 }
+                
+                <MudButton Variant="Variant.Outlined" Color="Color.Primary" FullWidth="true" Size="Size.Large" 
+                           Style="border-radius: 20px; font-weight: bold; border-width: 2px;" 
+                           OnClick="@(() => Nav.NavigateTo("/"))">
+                    Seguir Comprando
+                </MudButton>
             </MudItem>
 
-            <!-- RESUMEN DE COMPRA -->
-            <MudItem xs="12" md="4">
+            <!-- ZONA DE PAGO DIRECTO (BRICKS) -->
+            <MudItem xs="12" md="5">
                 <MudPaper Elevation="2" Class="pa-6" Style="border-radius: 20px; background-color: #FCE4EC;">
-                    <MudText Typo="Typo.h6" Class="mb-4" Style="font-weight: bold;">Resumen</MudText>
-                    
-                    <div class="d-flex justify-space-between mb-2">
-                        <MudText>Total de artículos:</MudText>
-                        <MudText>@CarritoService.ObtenerCantidadItems()</MudText>
-                    </div>
-
-                    <MudDivider Class="my-4" />
-
-                    <div class="d-flex justify-space-between mb-6">
+                    <div class="d-flex justify-space-between mb-4">
                         <MudText Typo="Typo.h5" Style="font-weight: bold;">Total a Pagar:</MudText>
                         <MudText Typo="Typo.h5" Style="font-weight: bold; color: #E91E63;">$@CarritoService.ObtenerTotal()</MudText>
                     </div>
 
-                    <MudButton Variant="Variant.Filled" Color="Color.Secondary" FullWidth="true" Size="Size.Large" 
-                        Style="border-radius: 20px; font-weight: bold; color: white;" 
-                        OnClick="ProcesarPago" Disabled="_procesandoPago">
-                        @if (_procesandoPago)
-                        {
-                            <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2"/>
-                            <MudText>Generando link...</MudText>
-                        }
-                        else
-                        {
-                            <MudText>Proceder a Pagar</MudText>
-                        }
-                    </MudButton>
+                    @if (_procesandoPago)
+                    {
+                        <div class="d-flex flex-column align-center my-4">
+                            <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
+                            <MudText Class="mt-2" Style="font-weight: bold;">Procesando tu pago...</MudText>
+                        </div>
+                    }
 
-                    <!-- 🔥 CAMBIO 2: Botón secundario para volver al catálogo sin vaciar el carrito -->
-                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" FullWidth="true" Size="Size.Large" 
-                               Class="mt-4"
-                               Style="border-radius: 20px; font-weight: bold; border-width: 2px;" 
-                               OnClick="@(() => Nav.NavigateTo("/"))">
-                        Seguir Comprando
-                    </MudButton>
+                    <!-- 🚀 AQUÍ SE DIBUJARÁ EL FORMULARIO DE TARJETA DE MERCADO PAGO -->
+                    <div id="paymentBrick_container" style="@(_procesandoPago ? "display: none;" : "")"></div>
 
                 </MudPaper>
             </MudItem>
@@ -114,46 +79,60 @@
 </MudContainer>
 
 @code {
-    private bool _procesandoPago = false;
+    // 🔥 Inyectamos IConfiguration para leer el appsettings.json
+    [Inject] private IConfiguration Config { get; set; } = default!;
 
-    private async Task ProcesarPago()
+    private bool _procesandoPago = false;
+    private DotNetObjectReference<Carrito>? _objRef;
+    private bool _brickRendered = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && CarritoService.Items.Any() && !_brickRendered)
+        {
+            var total = CarritoService.ObtenerTotal();
+            if (total > 0)
+            {
+                _objRef = DotNetObjectReference.Create(this);
+                
+                // 🌟 MAGIA: Leemos la llave pública desde appsettings.json sin hardcodear nada
+                string? publicKey = Config["MercadoPago:PublicKey"]; 
+                
+                if (string.IsNullOrEmpty(publicKey))
+                {
+                    Console.WriteLine("Error: No se encontró la PublicKey de Mercado Pago en appsettings.json");
+                    return;
+                }
+                
+                // Le decimos a JS que pinte el Brick
+                await JS.InvokeVoidAsync("renderMercadoPagoBrick", publicKey, total, _objRef);
+                _brickRendered = true;
+                StateHasChanged();
+            }
+        }
+    }
+
+    [JSInvokable] 
+    public async Task ProcesarPago(object formDataBricks) 
     {
         try
         {
             _procesandoPago = true;
-            
-            var total = CarritoService.ObtenerTotal();
+            StateHasChanged(); 
 
-            if (total <= 0)
-            {
-                // AQUÍ INTEGRAMOS LA REDIRECCIÓN CUANDO ES GRATIS
-                Nav.NavigateTo("/descarga-gratuita-exitosa");
-                return;
-            }
-
-            // Armamos la solicitud con el total del carrito
-            var request = new SolicitudPagoDto 
-            { 
-                TotalAPagar = total, 
-                Titulo = "Tiempo Biblia - Recursos Digitales" 
-            };
-
-            // Llamamos a tu API
-            var response = await Http.PostAsJsonAsync("api/checkout/crear-preferencia", request);
-            //var response = await Http.PostAsJsonAsync("api/checkout/crear-preferencia-sandbox", request);
+            // Mandamos los datos al backend
+            var response = await Http.PostAsJsonAsync("api/checkout/procesar-pago-brick", formDataBricks);
             
             if (response.IsSuccessStatusCode)
             {
-                var result = await response.Content.ReadFromJsonAsync<RespuestaPagoDto>();
-                if (result != null && !string.IsNullOrEmpty(result.UrlPago))
-                {
-                    // Redirigimos a la clienta a la página de Mercado Pago
-                    await JS.InvokeVoidAsync("window.location.assign", result.UrlPago);
-                }
+                CarritoService.VaciarCarrito();
+                Nav.NavigateTo("/descarga-gratuita-exitosa"); 
             }
             else
             {
-                Console.WriteLine("Error al generar el pago con Mercado Pago");
+                // Leer el error del backend para saber qué pasó
+                var error = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Error al procesar el pago: {error}");
             }
         }
         catch (Exception ex)
@@ -163,6 +142,12 @@
         finally
         {
             _procesandoPago = false;
+            StateHasChanged();
         }
+    }
+
+    public void Dispose()
+    {
+        _objRef?.Dispose();
     }
 }
