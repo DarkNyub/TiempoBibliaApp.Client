@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>TiempoBiblia.Client</title>
     <base href="/" />
-    <link href="_framework/dotnet.vxaa3vljdj.js" rel="preload" as="script" fetchpriority="high" crossorigin="anonymous" integrity="sha256-4yRSj6Ez6jIf7M1LIVkfCYvWQOLls5+CEjo+3oQc6XQ=" />
+    <link href="_framework/dotnet.rummfcvkw4.js" rel="preload" as="script" fetchpriority="high" crossorigin="anonymous" integrity="sha256-Mywg/bL8rQNMMPXH0w3HAJBEXp9uuWnaHgZtKEGj+AA=" />
     <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="css/app.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
@@ -15,19 +15,19 @@
   "imports": {
     "./_framework/blazor.webassembly.js": "./_framework/blazor.webassembly.958z1vx7fr.js",
     "./_framework/dotnet.native.js": "./_framework/dotnet.native.puryxhmhq9.js",
-    "./_framework/dotnet.runtime.js": "./_framework/dotnet.runtime.web2r9gqbh.js",
-    "./_framework/dotnet.js": "./_framework/dotnet.vxaa3vljdj.js"
+    "./_framework/dotnet.js": "./_framework/dotnet.rummfcvkw4.js",
+    "./_framework/dotnet.runtime.js": "./_framework/dotnet.runtime.web2r9gqbh.js"
   },
   "scopes": {},
   "integrity": {
     "./_framework/blazor.webassembly.958z1vx7fr.js": "sha256-A59Tr9HqEhHMu8kU7kruLI9ayw5MRS6Lvc6z7jCbghk=",
     "./_framework/blazor.webassembly.js": "sha256-A59Tr9HqEhHMu8kU7kruLI9ayw5MRS6Lvc6z7jCbghk=",
-    "./_framework/dotnet.js": "sha256-4yRSj6Ez6jIf7M1LIVkfCYvWQOLls5+CEjo+3oQc6XQ=",
+    "./_framework/dotnet.js": "sha256-Mywg/bL8rQNMMPXH0w3HAJBEXp9uuWnaHgZtKEGj+AA=",
     "./_framework/dotnet.native.js": "sha256-gQbHHzCnWx8iDOC65EKbql7bEltJkfao7lmkAbIRajw=",
     "./_framework/dotnet.native.puryxhmhq9.js": "sha256-gQbHHzCnWx8iDOC65EKbql7bEltJkfao7lmkAbIRajw=",
+    "./_framework/dotnet.rummfcvkw4.js": "sha256-Mywg/bL8rQNMMPXH0w3HAJBEXp9uuWnaHgZtKEGj+AA=",
     "./_framework/dotnet.runtime.js": "sha256-SOUHEQ3FhDAibBSR2u90NWZpoBjPuWRmH0BAATUlhJU=",
-    "./_framework/dotnet.runtime.web2r9gqbh.js": "sha256-SOUHEQ3FhDAibBSR2u90NWZpoBjPuWRmH0BAATUlhJU=",
-    "./_framework/dotnet.vxaa3vljdj.js": "sha256-4yRSj6Ez6jIf7M1LIVkfCYvWQOLls5+CEjo+3oQc6XQ="
+    "./_framework/dotnet.runtime.web2r9gqbh.js": "sha256-SOUHEQ3FhDAibBSR2u90NWZpoBjPuWRmH0BAATUlhJU="
   }
 }</script>
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
@@ -81,6 +81,52 @@
                 console.error("Error al procesar la descarga nativa:", e);
                 alert("Tu celular bloqueó la descarga automática. Por favor abre este enlace en Chrome o Safari.");
             }
+        };
+    </script>
+    <!-- SDK de Mercado Pago -->
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
+
+    <!-- Nuestro ayudante para dibujar el Brick en Blazor -->
+    <script>
+        let cardPaymentBrickController;
+
+        window.renderMercadoPagoBrick = async (publicKey, amount, dotNetHelper) => {
+            // Inicializamos Mercado Pago con tu llave pública
+            const mp = new MercadoPago(publicKey, { locale: 'es-CO' });
+            const bricksBuilder = mp.bricks();
+
+            // Si ya había un formulario dibujado, lo borramos para no duplicar
+            if (cardPaymentBrickController) cardPaymentBrickController.unmount();
+
+            const settings = {
+                initialization: {
+                    amount: amount, // El total del carrito que manda C#
+                },
+                customization: {
+                    visual: { style: { theme: 'default' } },
+                    paymentMethods: { maxInstallments: 1 } // Sin cuotas complicadas
+                },
+                callbacks: {
+                    onReady: () => { console.log("¡Formulario de tarjeta listo!"); },
+                    onSubmit: (formData) => {
+                        // AQUÍ ESTÁ LA MAGIA: Cuando el cliente le da a pagar, 
+                        // JS le manda los datos encriptados de la tarjeta a tu método C# reciclado
+                        return new Promise((resolve, reject) => {
+                            dotNetHelper.invokeMethodAsync('ProcesarPago', formData)
+                                .then(() => resolve())
+                                .catch((error) => reject());
+                        });
+                    },
+                    onError: (error) => { console.error(error); }
+                }
+            };
+
+            // Dibujamos el formulario en el div que pusimos en Carrito.razor
+            cardPaymentBrickController = await bricksBuilder.create(
+                'payment',
+                'paymentBrick_container',
+                settings
+            );
         };
     </script>
 </body>
