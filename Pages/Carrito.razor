@@ -61,6 +61,25 @@
                         <MudText Typo="Typo.h5" Style="font-weight: bold; color: #E91E63;">$@CarritoService.ObtenerTotal()</MudText>
                     </div>
 
+                    <MudDivider Class="my-4" />
+
+                    <!-- 🔥 CHECKBOX DE LEGALIDAD -->
+                    <MudCheckBox T="bool" CheckedChanged="AceptarTerminos" Color="Color.Primary" Class="mb-4">
+                        <MudText Typo="Typo.body2">
+                            Acepto el tratamiento de mis datos personales según la 
+                            <a href="javascript:void(0)" @onclick="AbrirTerminos" @onclick:preventDefault style="color: #E91E63; font-weight: bold; text-decoration: underline;">
+                                Política de Privacidad y Habeas Data
+                            </a>.
+                        </MudText>
+                    </MudCheckBox>
+
+                    @if (!_aceptaTerminos)
+                    {
+                        <MudAlert Severity="Severity.Info" Class="mb-4">
+                            Debes aceptar las políticas de privacidad para habilitar el formulario de pago seguro.
+                        </MudAlert>
+                    }
+
                     @if (_procesandoPago)
                     {
                         <div class="d-flex flex-column align-center my-4">
@@ -69,7 +88,8 @@
                         </div>
                     }
 
-                    <div id="paymentBrick_container" style="@(_procesandoPago ? "display: none;" : "")"></div>
+                    <!-- 🚀 CONTENEDOR DE MERCADO PAGO (Oculto hasta aceptar términos) -->
+                    <div id="paymentBrick_container" style="@(_procesandoPago || !_aceptaTerminos ? "display: none;" : "")"></div>
 
                 </MudPaper>
             </MudItem>
@@ -78,35 +98,40 @@
 </MudContainer>
 
 @code {
-    // 🔥 Inyectamos IConfiguration para leer el appsettings.json
     [Inject] private IConfiguration Config { get; set; } = default!;
+    [Inject] private IDialogService DialogService { get; set; } = default!; // 🔥 Inyectamos el servicio de modales
 
     private bool _procesandoPago = false;
-    private DotNetObjectReference<Carrito>? _objRef;
+    private bool _aceptaTerminos = false; // 🔥 Controla el checkbox
     private bool _brickRendered = false;
+    private DotNetObjectReference<Carrito>? _objRef;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    // 🔥 Abre el Pop-up de términos
+    private void AbrirTerminos()
     {
-        if (firstRender && CarritoService.Items.Any() && !_brickRendered)
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        DialogService.Show<TerminosCondicionesModal>("Términos y Condiciones", options);
+    }
+
+    // 🔥 Se ejecuta cuando el cliente marca o desmarca la casilla
+    private async Task AceptarTerminos(bool aceptado)
+    {
+        _aceptaTerminos = aceptado;
+
+        // Si aceptó los términos y el Brick no se ha dibujado aún, lo dibujamos
+        if (_aceptaTerminos && !_brickRendered)
         {
             var total = CarritoService.ObtenerTotal();
             if (total > 0)
             {
                 _objRef = DotNetObjectReference.Create(this);
-                
-                // 🌟 MAGIA: Leemos la llave pública desde appsettings.json sin hardcodear nada
                 string? publicKey = Config["MercadoPago:PublicKey"]; 
                 
-                if (string.IsNullOrEmpty(publicKey))
+                if (!string.IsNullOrEmpty(publicKey))
                 {
-                    Console.WriteLine("Error: No se encontró la PublicKey de Mercado Pago en appsettings.json");
-                    return;
+                    await JS.InvokeVoidAsync("renderMercadoPagoBrick", publicKey, total, _objRef);
+                    _brickRendered = true;
                 }
-                
-                // Le decimos a JS que pinte el Brick
-                await JS.InvokeVoidAsync("renderMercadoPagoBrick", publicKey, total, _objRef);
-                _brickRendered = true;
-                StateHasChanged();
             }
         }
     }
@@ -119,7 +144,6 @@
             _procesandoPago = true;
             StateHasChanged(); 
 
-            // Mandamos los datos al backend
             var response = await Http.PostAsJsonAsync("api/checkout/procesar-pago-brick", formDataBricks);
             
             if (response.IsSuccessStatusCode)
@@ -129,9 +153,7 @@
             }
             else
             {
-                // Leer el error del backend para saber qué pasó
-                var error = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"Error al procesar el pago: {error}");
+                Console.WriteLine("Error al procesar el pago");
             }
         }
         catch (Exception ex)

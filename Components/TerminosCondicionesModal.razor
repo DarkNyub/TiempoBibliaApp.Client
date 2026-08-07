@@ -1,0 +1,45 @@
+@using MudBlazor
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.h6" Style="font-weight: bold; color: #E91E63;" Class="mb-4">
+            Políticas de Privacidad y Seguridad
+        </MudText>
+
+        <MudText Typo="Typo.subtitle1" Style="font-weight: bold;" Class="mb-2">
+            1. Protección de Datos (Habeas Data - Ley 1581 de 2012)
+        </MudText>
+        <MudText Typo="Typo.body2" Class="mb-4" Style="text-align: justify; color: #555;">
+            En cumplimiento de la <strong>Ley 1581 de 2012</strong> y demás normas concordantes, te informamos que tus datos personales (nombre, correo electrónico y teléfono) serán recolectados únicamente con el fin de procesar tu compra, despachar los enlaces de descarga y brindarte soporte. No compartiremos, venderemos ni alquilaremos tu información a terceros. Tienes derecho a conocer, actualizar y rectificar tus datos en cualquier momento.
+        </MudText>
+
+        <MudText Typo="Typo.subtitle1" Style="font-weight: bold;" Class="mb-2">
+            2. Seguridad Bancaria y Encriptación
+        </MudText>
+        <MudText Typo="Typo.body2" Class="mb-4" Style="text-align: justify; color: #555;">
+            Para tu total tranquilidad, <strong>NUNCA almacenamos los datos de tu tarjeta de crédito, débito o códigos de seguridad (CVV) en nuestros servidores.</strong> 
+            Todo el proceso de pago es manejado directamente por <strong>Mercado Pago</strong>, una pasarela de pagos certificada internacionalmente. Los datos que ingreses viajan encriptados de extremo a extremo bajo estrictos estándares de seguridad (Certificación PCI-DSS).
+        </MudText>
+
+        <MudText Typo="Typo.subtitle1" Style="font-weight: bold;" Class="mb-2">
+            3. Entrega de Recursos Digitales
+        </MudText>
+        <MudText Typo="Typo.body2" Class="mb-2" Style="text-align: justify; color: #555;">
+            Al tratarse de productos digitales descargables, los enlaces generados son de un solo uso o cuentan con un límite de descargas para proteger los derechos de autor.
+        </MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Cerrar" Style="border-radius: 20px;">
+            Entendido
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = null!;
+
+    private void Cerrar()
+    {
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+}
