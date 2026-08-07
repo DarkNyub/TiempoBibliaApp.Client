@@ -95,11 +95,16 @@
                 callbacks: {
                     onReady: () => { console.log("¡Formulario de tarjeta listo!"); },
                     onSubmit: (formData) => {
-                        // AQUÍ ESTÁ LA MAGIA: Cuando el cliente le da a pagar, 
-                        // JS le manda los datos encriptados de la tarjeta a tu método C# reciclado
                         return new Promise((resolve, reject) => {
+                            // Recibimos un true o false desde C#
                             dotNetHelper.invokeMethodAsync('ProcesarPago', formData)
-                                .then(() => resolve())
+                                .then((pagoExitoso) => {
+                                    if (pagoExitoso) {
+                                        resolve(); // Todo bien, el Brick se cierra feliz
+                                    } else {
+                                        reject(); // Falló, el Brick hace una animación roja y se queda intacto
+                                    }
+                                })
                                 .catch((error) => reject());
                         });
                     },

@@ -114,10 +114,10 @@
                             <MudText Class="mt-2" Style="font-weight: bold;">Procesando tu pago...</MudText>
                         </div>
                     }
-
                     <!-- 🚀 CONTENEDOR DE MERCADO PAGO -->
-                    <div id="paymentBrick_container" style="@(_procesandoPago || !_aceptaTerminos ? "display: none;" : "")"></div>
-
+                    <div style="@(_procesandoPago || !_aceptaTerminos ? "display: none;" : "")">
+                        <div id="paymentBrick_container"></div>
+                    </div>
                 </MudPaper>
             </MudItem>
         </MudGrid>
@@ -168,7 +168,8 @@
     }
 
     [JSInvokable] 
-    public async Task ProcesarPago(object formDataBricks) 
+    // 🔥 CAMBIO: Ahora devuelve Task<bool>
+    public async Task<bool> ProcesarPago(object formDataBricks) 
     {
         try
         {
@@ -181,18 +182,18 @@
             {
                 CarritoService.VaciarCarrito();
                 Nav.NavigateTo("/descarga-gratuita-exitosa"); 
+                return true; // 🟢 Le decimos a JavaScript que todo salió perfecto
             }
             else
             {
-                // 🔥 AQUÍ ESTÁ LA TRAMPA PARA EL ERROR
                 var errorBackend = await response.Content.ReadAsStringAsync();
                 
-                // Disparamos la notificación de 10 segundos
                 Snackbar.Add($"Error al pagar: {errorBackend}", Severity.Error, config => 
                 { 
                     config.VisibleStateDuration = 10000; 
                     config.ShowCloseIcon = true;
                 });
+                return false; // 🔴 Falló en el banco/API, JavaScript mantiene el formulario intacto
             }
         }
         catch (Exception ex)
@@ -201,6 +202,7 @@
             { 
                 config.VisibleStateDuration = 10000; 
             });
+            return false; // 🔴 Falló por desconexión
         }
         finally
         {
