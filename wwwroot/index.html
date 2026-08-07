@@ -86,7 +86,11 @@
                 },
                 customization: {
                     visual: { style: { theme: 'default' } },
-                    paymentMethods: { maxInstallments: 1 } // Sin cuotas complicadas
+                    paymentMethods: {
+                        creditCard: "all", // 🔥 ¡Agrega esto! Permite crédito
+                        debitCard: "all",  // 🔥 ¡Agrega esto! Permite débito
+                        maxInstallments: 1 // Sin cuotas complicadas
+                    }
                 },
                 callbacks: {
                     onReady: () => { console.log("¡Formulario de tarjeta listo!"); },
