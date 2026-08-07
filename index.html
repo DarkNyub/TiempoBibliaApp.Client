@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>TiempoBiblia.Client</title>
     <base href="/" />
-    <link href="_framework/dotnet.rummfcvkw4.js" rel="preload" as="script" fetchpriority="high" crossorigin="anonymous" integrity="sha256-Mywg/bL8rQNMMPXH0w3HAJBEXp9uuWnaHgZtKEGj+AA=" />
+    <link href="_framework/dotnet.7mn6ilnf5a.js" rel="preload" as="script" fetchpriority="high" crossorigin="anonymous" integrity="sha256-8UwxOnJ5qJOg7TrorpCvIEB9GnWS1E1UqD97EMs9biY=" />
     <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="css/app.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
@@ -14,18 +14,18 @@
     <script type="importmap">{
   "imports": {
     "./_framework/blazor.webassembly.js": "./_framework/blazor.webassembly.958z1vx7fr.js",
+    "./_framework/dotnet.js": "./_framework/dotnet.7mn6ilnf5a.js",
     "./_framework/dotnet.native.js": "./_framework/dotnet.native.puryxhmhq9.js",
-    "./_framework/dotnet.js": "./_framework/dotnet.rummfcvkw4.js",
     "./_framework/dotnet.runtime.js": "./_framework/dotnet.runtime.web2r9gqbh.js"
   },
   "scopes": {},
   "integrity": {
     "./_framework/blazor.webassembly.958z1vx7fr.js": "sha256-A59Tr9HqEhHMu8kU7kruLI9ayw5MRS6Lvc6z7jCbghk=",
     "./_framework/blazor.webassembly.js": "sha256-A59Tr9HqEhHMu8kU7kruLI9ayw5MRS6Lvc6z7jCbghk=",
-    "./_framework/dotnet.js": "sha256-Mywg/bL8rQNMMPXH0w3HAJBEXp9uuWnaHgZtKEGj+AA=",
+    "./_framework/dotnet.7mn6ilnf5a.js": "sha256-8UwxOnJ5qJOg7TrorpCvIEB9GnWS1E1UqD97EMs9biY=",
+    "./_framework/dotnet.js": "sha256-8UwxOnJ5qJOg7TrorpCvIEB9GnWS1E1UqD97EMs9biY=",
     "./_framework/dotnet.native.js": "sha256-gQbHHzCnWx8iDOC65EKbql7bEltJkfao7lmkAbIRajw=",
     "./_framework/dotnet.native.puryxhmhq9.js": "sha256-gQbHHzCnWx8iDOC65EKbql7bEltJkfao7lmkAbIRajw=",
-    "./_framework/dotnet.rummfcvkw4.js": "sha256-Mywg/bL8rQNMMPXH0w3HAJBEXp9uuWnaHgZtKEGj+AA=",
     "./_framework/dotnet.runtime.js": "sha256-SOUHEQ3FhDAibBSR2u90NWZpoBjPuWRmH0BAATUlhJU=",
     "./_framework/dotnet.runtime.web2r9gqbh.js": "sha256-SOUHEQ3FhDAibBSR2u90NWZpoBjPuWRmH0BAATUlhJU="
   }
@@ -104,7 +104,11 @@
                 },
                 customization: {
                     visual: { style: { theme: 'default' } },
-                    paymentMethods: { maxInstallments: 1 } // Sin cuotas complicadas
+                    paymentMethods: {
+                        creditCard: "all", // 🔥 ¡Agrega esto! Permite crédito
+                        debitCard: "all",  // 🔥 ¡Agrega esto! Permite débito
+                        maxInstallments: 1 // Sin cuotas complicadas
+                    }
                 },
                 callbacks: {
                     onReady: () => { console.log("¡Formulario de tarjeta listo!"); },
