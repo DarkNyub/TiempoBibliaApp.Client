@@ -136,9 +136,8 @@
                     var uri = new Uri(resultado.UrlSegura);
                     var tokenId = uri.Segments.Last(); 
                     
-                    // Aquí se arma tu link final.
-                    // OJO: Si usas Github Pages, asegúrate de poner tu dominio real aquí si difiere.
-                    linkGenerado = $"{Nav.BaseUri}descargar/{tokenId}?nombre={Uri.EscapeDataString(productoSeleccionado.Nombre)}";
+                    // 🔥 CORRECCIÓN: Agregamos el "!" para prometerle al compilador que no será nulo
+                    linkGenerado = $"{Nav.BaseUri}descargar/{tokenId}?nombre={Uri.EscapeDataString(productoSeleccionado!.Nombre)}";
                 }
             }
         }

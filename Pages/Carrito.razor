@@ -63,8 +63,8 @@
 
                     <MudDivider Class="my-4" />
 
-                    <!-- 🔥 CHECKBOX DE LEGALIDAD -->
-                    <MudCheckBox T="bool" CheckedChanged="AceptarTerminos" Color="Color.Primary" Class="mb-4">
+                    <!-- 🔥 CORRECCIÓN: Cambiamos CheckedChanged por ValueChanged -->
+                    <MudCheckBox T="bool" ValueChanged="AceptarTerminos" Color="Color.Primary" Class="mb-4">
                         <MudText Typo="Typo.body2">
                             Acepto el tratamiento de mis datos personales según la 
                             <a href="javascript:void(0)" @onclick="AbrirTerminos" @onclick:preventDefault style="color: #E91E63; font-weight: bold; text-decoration: underline;">
@@ -107,12 +107,12 @@
     private DotNetObjectReference<Carrito>? _objRef;
 
     // 🔥 Abre el Pop-up de términos
-    private void AbrirTerminos()
+    private async Task AbrirTerminos()
     {
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-        DialogService.Show<TerminosCondicionesModal>("Términos y Condiciones", options);
+        // 🔥 CORRECCIÓN: Se debe usar ShowAsync y agregar el await
+        await DialogService.ShowAsync<TerminosCondicionesModal>("Términos y Condiciones", options);
     }
-
     // 🔥 Se ejecuta cuando el cliente marca o desmarca la casilla
     private async Task AceptarTerminos(bool aceptado)
     {
