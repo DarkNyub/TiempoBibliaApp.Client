@@ -12,21 +12,28 @@
 
     <MudMainContent>
         @Body
-        <!-- BOTÓN FLOTANTE DEL CARRITO -->
-        @if (Carrito.ObtenerCantidadItems() > 0)
+        
+        <!-- 🔥 BOTÓN FLOTANTE DEL CARRITO (Siempre visible, excepto en /carrito) -->
+        @if (!EsPaginaCarrito)
         {
-            <div style="position: fixed; bottom: 30px; right: 30px; z-index: 9999;">
-                <MudBadge Content="Carrito.ObtenerCantidadItems()" Color="Color.Secondary" Overlap="true">
+            <div class="carrito-flotante-container">
+                <MudBadge Content="Carrito.ObtenerCantidadItems()" Color="Color.Secondary" Overlap="true" Visible="@(Carrito.ObtenerCantidadItems() > 0)">
                     <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.ShoppingCart" 
                             Size="Size.Large" OnClick="@(() => Nav.NavigateTo("/carrito"))" 
-                            Style="box-shadow: 0 4px 15px rgba(244,143,177,0.6);" />
+                            Class="btn-carrito-flotante" />
                 </MudBadge>
             </div>
         }
     </MudMainContent>
 </MudLayout>
 
+<style>
+</style>
+
 @code {
+    // Detectamos si estamos en la página del carrito
+    private bool EsPaginaCarrito => Nav.Uri.Contains("/carrito", StringComparison.OrdinalIgnoreCase);
+
     protected override void OnInitialized()
     {
         // 1. Apenas se carga la página, recuperamos el carrito del Local Storage
@@ -34,13 +41,23 @@
 
         // 2. Le decimos al layout que se actualice cada vez que el carrito cambie
         Carrito.OnCarritoCambiado += StateHasChanged;
+        
+        // 3. Le decimos al layout que se actualice si cambiamos de página (para ocultar/mostrar el carrito)
+        Nav.LocationChanged += ActualizarVista;
+    }
+
+    private void ActualizarVista(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        StateHasChanged();
     }
 
     public void Dispose()
     {
-        // Buena práctica: desconectar el evento cuando se cierra la página
+        // Buena práctica: desconectar los eventos
         Carrito.OnCarritoCambiado -= StateHasChanged;
+        Nav.LocationChanged -= ActualizarVista;
     }
+    
     // Aquí definimos tu identidad visual a nivel global
     MudTheme MiTemaPastel = new MudTheme()
     {
