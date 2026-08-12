@@ -130,10 +130,10 @@ main[b-pqk1ij2xm6] {
     box-shadow: 0 4px 15px rgba(244, 143, 177, 0.6) !important;
 }
 
-/* 🔥 Borde oscuro solo en celulares para que no se difumine */
+/* 🔥 Borde oscuro de 1px solo en celulares para que resalte */
 @media (max-width: 600px) {
-    .btn-carrito-flotante[b-pqk1ij2xm6] {
-        border: 2px solid #333 !important;
+    [b-pqk1ij2xm6] .btn-carrito-flotante {
+        border: 1px solid black !important;
     }
 }
 /* /Pages/Home.razor.rz.scp.css */
