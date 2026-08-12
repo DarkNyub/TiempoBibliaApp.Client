@@ -1,0 +1,119 @@
+@page "/resultado-pago"
+@inject TiempoBiblia.Client.Services.CarritoService CarritoService
+@inject NavigationManager Nav
+@inject HttpClient Http
+@inject ISnackbar Snackbar
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="pt-16 pb-16">
+    <MudPaper Elevation="4" Class="pa-8 d-flex flex-column align-center text-center" Style="border-radius: 20px;">
+        
+        @if (Status == "approved")
+        {
+            <!-- PANTALLA DE ÉXITO -->
+            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Style="font-size: 6rem;" Class="mb-4" />
+            <MudText Typo="Typo.h4" Style="font-weight: bold; color: #5D4037;" Class="mb-2">¡Pago Aprobado! 🎉</MudText>
+            <MudText Typo="Typo.body1" Class="mb-6" Style="color: #8D6E63;">
+                Tu compra se registró bajo el pedido <strong>#@PaymentId</strong>. Por favor, indícanos a qué correo electrónico debemos enviar los recursos.
+            </MudText>
+
+            <div style="width: 100%; max-width: 400px;">
+                <MudTextField @bind-Value="_correoCliente" Label="Tu correo electrónico" Variant="Variant.Outlined" InputType="InputType.Email" Required="true" Class="mb-3" />
+                
+                <!-- 🔥 NUEVO: Confirmación de correo -->
+                <MudTextField @bind-Value="_confirmacionCorreo" Label="Confirma tu correo" Variant="Variant.Outlined" InputType="InputType.Email" Required="true" Class="mb-4" />
+
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Size="Size.Large" OnClick="ReclamarRecursos" Disabled="_procesando">
+                    @if (_procesando)
+                    {
+                        <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2"/>
+                        <MudText>Validando y Enviando...</MudText>
+                    }
+                    else
+                    {
+                        <MudText>Enviar mis recursos</MudText>
+                    }
+                </MudButton>
+            </div>
+        }
+        else
+        {
+            <!-- PANTALLA DE RECHAZO O PENDIENTE -->
+            <MudIcon Icon="@Icons.Material.Filled.ErrorOutline" Color="Color.Error" Style="font-size: 6rem;" Class="mb-4" />
+            <MudText Typo="Typo.h4" Style="font-weight: bold; color: #d32f2f;" Class="mb-2">Pago Rechazado</MudText>
+            <MudText Typo="Typo.body1" Class="mb-6" Style="color: #8D6E63;">
+                El banco no autorizó la transacción o está pendiente de revisión manual. No te preocupes, no se te ha cobrado nada.
+            </MudText>
+            
+            <MudButton Variant="Variant.Filled" Color="Color.Dark" FullWidth="true" Size="Size.Large" OnClick="@(() => Nav.NavigateTo("/carrito"))">
+                Volver al Carrito e intentar de nuevo
+            </MudButton>
+        }
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private string _correoCliente = string.Empty;
+    private string _confirmacionCorreo = string.Empty;
+    private bool _procesando = false;
+
+    // Leemos los parámetros que C# o JS nos manden en la URL
+    [SupplyParameterFromQuery(Name = "payment_id")] public string? PaymentId { get; set; }
+    [SupplyParameterFromQuery(Name = "status")] public string? Status { get; set; } = "approved"; // Asumimos aprobado si no viene para pagos gratuitos
+
+    protected override void OnInitialized()
+    {
+        if (Status == "approved" && !CarritoService.Items.Any())
+        {
+            Nav.NavigateTo("/"); // Redirige si entran directo sin carrito
+        }
+    }
+
+    private async Task ReclamarRecursos()
+    {
+        if (string.IsNullOrWhiteSpace(_correoCliente) || !_correoCliente.Contains("@"))
+        {
+            Snackbar.Add("Por favor ingresa un correo válido.", Severity.Warning);
+            return;
+        }
+
+        if (_correoCliente.Trim().ToLower() != _confirmacionCorreo.Trim().ToLower())
+        {
+            Snackbar.Add("Los correos no coinciden. Por favor, verifícalos.", Severity.Error);
+            return;
+        }
+
+        try
+        {
+            _procesando = true;
+
+            var solicitud = new
+            {
+                Correo = _correoCliente.Trim().ToLower(), // Se guarda limpio
+                PagoId = PaymentId ?? "pago_cero",
+                ProductosIds = CarritoService.Items.Select(i => i.Producto.Id).ToList()
+            };
+
+            var response = await Http.PostAsJsonAsync("api/descargas/despachar-pedido", solicitud);
+
+            if (response.IsSuccessStatusCode)
+            {
+                CarritoService.VaciarCarrito(); //[cite: 20] Limpiamos el carrito local
+                Snackbar.Add("¡Enlaces enviados! Revisa tu bandeja de entrada y Spam.", Severity.Success);
+                await Task.Delay(2500);
+                Nav.NavigateTo("/");
+            }
+            else
+            {
+                Snackbar.Add("Hubo un problema al enlazar tu pedido. Contáctanos.", Severity.Error);
+            }
+        }
+        catch
+        {
+            Snackbar.Add("Error de conexión. Intenta nuevamente.", Severity.Error);
+        }
+        finally
+        {
+            _procesando = false;
+        }
+    }
+}

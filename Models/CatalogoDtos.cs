@@ -111,4 +111,12 @@ namespace TiempoBiblia.Client.Models
         public string Type { get; set; } = string.Empty;
         public string Number { get; set; } = string.Empty;
     }
+    
+    public class RespuestaPagoBrickDto
+    {
+        public bool Aprobado { get; set; }
+        public string Estado { get; set; } = string.Empty;
+        public string IdPago { get; set; } = string.Empty;
+        public string Mensaje { get; set; } = string.Empty;
+    }
 } // Fin del namespace

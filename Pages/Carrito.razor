@@ -180,9 +180,13 @@
             
             if (response.IsSuccessStatusCode)
             {
-                CarritoService.VaciarCarrito();
-                Nav.NavigateTo("/descarga-gratuita-exitosa"); 
-                return true; // 🟢 Le decimos a JavaScript que todo salió perfecto
+                // 🔥 Extraemos la respuesta para leer el ID de la transacción y pasarlo a la URL
+                var resultado = await response.Content.ReadFromJsonAsync<RespuestaPagoBrickDto>();
+                string idPago = resultado?.IdPago ?? "desconocido";
+
+                // 🔥 Redirigimos a la pantalla genérica de resultados, OJO: NO VACIAR EL CARRITO AQUÍ.
+                Nav.NavigateTo($"/resultado-pago?status=approved&payment_id={idPago}"); 
+                return true; 
             }
             else
             {
@@ -193,7 +197,7 @@
                     config.VisibleStateDuration = 10000; 
                     config.ShowCloseIcon = true;
                 });
-                return false; // 🔴 Falló en el banco/API, JavaScript mantiene el formulario intacto
+                return false; 
             }
         }
         catch (Exception ex)
@@ -202,7 +206,7 @@
             { 
                 config.VisibleStateDuration = 10000; 
             });
-            return false; // 🔴 Falló por desconexión
+            return false; 
         }
         finally
         {

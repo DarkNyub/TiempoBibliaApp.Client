@@ -3,6 +3,8 @@
 @inject HttpClient Http
 @inject IJSRuntime _js
 @inject NavigationManager Nav
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="mt-8">
     <MudText Typo="Typo.h4" Style="font-weight: bold; color: #333;" Class="mb-6">
@@ -27,21 +29,19 @@
                 <MudTh>Nombre</MudTh>
                 <MudTh>Precio</MudTh>
                 <MudTh>Tipo</MudTh>
-                <MudTh Style="text-align: right;">Acción Rápida</MudTh>
+                <MudTh Style="text-align: right;">Acciones</MudTh>
             </HeaderContent>
             
             <RowTemplate>
                 <MudTd DataLabel="Nombre"><strong>@context.Nombre</strong></MudTd>
-                <MudTd DataLabel="Precio">
-                    @(context.EsGratuito ? "Gratis" : $"${context.Precio}")
-                </MudTd>
+                <MudTd DataLabel="Precio">@(context.EsGratuito ? "Gratis" : $"${context.Precio}")</MudTd>
                 <MudTd DataLabel="Tipo">
                     <MudChip T="string" Color="Color.Info" Size="Size.Small">@context.Tipo</MudChip>
                 </MudTd>
-                <MudTd DataLabel="Acción Rápida" Style="text-align: right;">
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" StartIcon="@Icons.Material.Filled.Link" OnClick="() => PrepararGeneracionLink(context)">
-                        Generar Link
-                    </MudButton>
+                <MudTd DataLabel="Acciones" Style="text-align: right;">
+                    <MudIconButton Icon="@Icons.Material.Filled.Link" Color="Color.Primary" title="Generar Link" OnClick="() => PrepararGeneracionLink(context)" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" title="Editar" OnClick="() => AbrirModalEdicion(context)" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" title="Eliminar" OnClick="() => EliminarProducto(context)" />
                 </MudTd>
             </RowTemplate>
             
@@ -52,109 +52,148 @@
     }
 </MudContainer>
 
-<!-- MODAL PARA GENERAR EL LINK (Se abre al darle al botón de la tabla) -->
-<MudDialog @bind-Visible="mostrarModal" Options="dialogOptions">
+<!-- MODAL PARA GENERAR LINK (Se mantiene intacto) -->
+<MudDialog @bind-Visible="mostrarModalLink" Options="dialogOptions">
     <TitleContent>
         <MudText Typo="Typo.h6">Generar acceso para: <strong>@productoSeleccionado?.Nombre</strong></MudText>
     </TitleContent>
     <DialogContent>
-        <MudText Typo="Typo.body2" Class="mb-4" Style="color: gray;">
-            Ingresa el número de WhatsApp o nombre del cliente para identificar este link.
-        </MudText>
-        
-        <MudTextField @bind-Value="request.CorreoCliente" Label="Referencia (Ej: +57 300...)" Variant="Variant.Outlined" AutoFocus="true" />
-
-        @if (cargandoLink)
-        {
-            <MudProgressLinear Color="Color.Secondary" Indeterminate="true" Class="mt-4" />
-        }
-
+        <MudTextField @bind-Value="requestLink.CorreoCliente" Label="Referencia (Ej: +57 300...)" Variant="Variant.Outlined" AutoFocus="true" />
         @if (!string.IsNullOrEmpty(linkGenerado))
         {
-            <MudDivider Class="my-4" />
-            <MudAlert Severity="Severity.Success" Class="mb-4">Link mágico creado (Expira en 24h)</MudAlert>
-            
+            <MudAlert Severity="Severity.Success" Class="mt-4 mb-4">Link mágico creado (Expira en 24h)</MudAlert>
             <MudStack Row="true" AlignItems="AlignItems.Center">
                 <MudTextField Value="@linkGenerado" Variant="Variant.Outlined" ReadOnly="true" Margin="Margin.Dense" />
-                <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" Color="Color.Primary" Variant="Variant.Filled" OnClick="CopiarAlPortapapeles" title="Copiar" />
+                <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" Color="Color.Primary" Variant="Variant.Filled" OnClick="CopiarAlPortapapeles" />
             </MudStack>
         }
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="CerrarModal" Color="Color.Default">Cerrar</MudButton>
-        <MudButton OnClick="GenerarLinkSeguro" Color="Color.Primary" Variant="Variant.Filled" Disabled="@(string.IsNullOrWhiteSpace(request.CorreoCliente) || cargandoLink)">
-            Crear Link
-        </MudButton>
+        <MudButton OnClick="() => mostrarModalLink = false">Cerrar</MudButton>
+        <MudButton OnClick="GenerarLinkSeguro" Color="Color.Primary" Variant="Variant.Filled">Crear Link</MudButton>
+    </DialogActions>
+</MudDialog>
+
+<!-- MODAL DE EDICIÓN RÁPIDA -->
+<MudDialog @bind-Visible="mostrarModalEdicion" Options="dialogOptions">
+    <TitleContent><MudText Typo="Typo.h6">Editar Producto</MudText></TitleContent>
+    <DialogContent>
+        @if (productoEditando != null)
+        {
+            <MudTextField @bind-Value="productoEditando.Nombre" Label="Nombre del Producto" Required="true" Class="mb-3" />
+            <MudTextField @bind-Value="productoEditando.Descripcion" Label="Descripción" Lines="3" Class="mb-3" />
+            <MudNumericField @bind-Value="productoEditando.Precio" Label="Precio (COP)" Min="0" Class="mb-3" />
+            <MudTextField @bind-Value="productoEditando.ImagenUrl" Label="URL de Imagen" Class="mb-3" />
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="() => mostrarModalEdicion = false">Cancelar</MudButton>
+        <MudButton OnClick="GuardarEdicion" Color="Color.Warning" Variant="Variant.Filled">Guardar Cambios</MudButton>
     </DialogActions>
 </MudDialog>
 
 @code {
     private List<ProductoDto>? productos;
     private string textoBusqueda = "";
-
-    // Variables para el Modal
-    private bool mostrarModal = false;
-    private ProductoDto? productoSeleccionado;
-    private GenerarLinkRequestDto request = new();
-    private bool cargandoLink = false;
-    private string linkGenerado = "";
-    
     private DialogOptions dialogOptions = new() { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+
+    // Link
+    private bool mostrarModalLink = false;
+    private ProductoDto? productoSeleccionado;
+    private GenerarLinkRequestDto requestLink = new();
+    private string linkGenerado = "";
+
+    // Edición
+    private bool mostrarModalEdicion = false;
+    private ProductoDto? productoEditando;
 
     protected override async Task OnInitializedAsync()
     {
-        // Cargamos la grilla
-        productos = await Http.GetFromJsonAsync<List<ProductoDto>>("api/Productos");
+        await CargarProductos();
     }
 
-    // Filtro para el buscador de la tabla
-    private bool Filtrar(ProductoDto prod) => 
-        string.IsNullOrWhiteSpace(textoBusqueda) || 
-        prod.Nombre.Contains(textoBusqueda, StringComparison.OrdinalIgnoreCase);
+    private async Task CargarProductos()
+    {
+        productos = await Http.GetFromJsonAsync<List<ProductoDto>>("api/Productos/admin");
+    }
 
-    // 1. Abre la ventanita cuando le das al botón en la tabla
+    private bool Filtrar(ProductoDto prod) => string.IsNullOrWhiteSpace(textoBusqueda) || prod.Nombre.Contains(textoBusqueda, StringComparison.OrdinalIgnoreCase);
+
+    // --- ACCIONES DE LINK ---
     private void PrepararGeneracionLink(ProductoDto producto)
     {
         productoSeleccionado = producto;
-        request = new GenerarLinkRequestDto { ProductoId = producto.Id, CorreoCliente = "" };
+        requestLink = new GenerarLinkRequestDto { ProductoId = producto.Id, CorreoCliente = "" };
         linkGenerado = "";
-        mostrarModal = true;
+        mostrarModalLink = true;
     }
 
-    // 2. Llama al backend para fabricar el link de 24h
     private async Task GenerarLinkSeguro()
     {
-        cargandoLink = true;
-        try
+        var response = await Http.PostAsJsonAsync("api/descargas/generar", requestLink);
+        if (response.IsSuccessStatusCode)
         {
-            var response = await Http.PostAsJsonAsync("api/descargas/generar", request);
-            if (response.IsSuccessStatusCode)
+            var resultado = await response.Content.ReadFromJsonAsync<GenerarLinkResponseDto>();
+            if (resultado != null)
             {
-                var resultado = await response.Content.ReadFromJsonAsync<GenerarLinkResponseDto>();
-                if (resultado != null)
-                {
-                    var uri = new Uri(resultado.UrlSegura);
-                    var tokenId = uri.Segments.Last(); 
-                    
-                    // 🔥 CORRECCIÓN: Agregamos el "!" para prometerle al compilador que no será nulo
-                    linkGenerado = $"{Nav.BaseUri}descargar/{tokenId}?nombre={Uri.EscapeDataString(productoSeleccionado!.Nombre)}";
-                }
+                var tokenId = new Uri(resultado.UrlSegura).Segments.Last(); 
+                linkGenerado = $"{Nav.BaseUri}descargar/{tokenId}?nombre={Uri.EscapeDataString(productoSeleccionado!.Nombre)}";
             }
         }
-        finally
+    }
+
+    private async Task CopiarAlPortapapeles() => await _js.InvokeVoidAsync("navigator.clipboard.writeText", linkGenerado);
+
+    // --- ACCIONES DE EDICIÓN Y ELIMINACIÓN ---
+    private void AbrirModalEdicion(ProductoDto producto)
+    {
+        // Clonamos el objeto para no afectar la tabla si cancela
+        productoEditando = new ProductoDto
         {
-            cargandoLink = false;
+            Id = producto.Id,
+            Nombre = producto.Nombre,
+            Descripcion = producto.Descripcion,
+            Precio = producto.Precio,
+            ImagenUrl = producto.ImagenUrl,
+            Tipo = producto.Tipo
+        };
+        mostrarModalEdicion = true;
+    }
+
+    private async Task GuardarEdicion()
+    {
+        var response = await Http.PutAsJsonAsync($"api/Productos/{productoEditando!.Id}", productoEditando);
+        if (response.IsSuccessStatusCode)
+        {
+            Snackbar.Add("Producto modificado correctamente", Severity.Success);
+            mostrarModalEdicion = false;
+            await CargarProductos(); // Recargamos la tabla
+        }
+        else
+        {
+            Snackbar.Add("Error al modificar el producto", Severity.Error);
         }
     }
 
-    // 3. Botón para copiar al portapapeles sin tener que sombrear el texto
-    private async Task CopiarAlPortapapeles()
+    private async Task EliminarProducto(ProductoDto producto)
     {
-        await _js.InvokeVoidAsync("navigator.clipboard.writeText", linkGenerado);
-    }
+        bool? result = await DialogService.ShowMessageBoxAsync(
+            "Confirmar Eliminación", 
+            $"¿Estás seguro que deseas eliminar '{producto.Nombre}'?", 
+            yesText: "Eliminar", cancelText: "Cancelar");
 
-    private void CerrarModal()
-    {
-        mostrarModal = false;
+        if (result == true)
+        {
+            var response = await Http.DeleteAsync($"api/Productos/{producto.Id}");
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Producto eliminado", Severity.Success);
+                await CargarProductos();
+            }
+            else
+            {
+                Snackbar.Add("No se pudo eliminar", Severity.Error);
+            }
+        }
     }
 }
