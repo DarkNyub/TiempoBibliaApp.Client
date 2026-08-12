@@ -132,14 +132,11 @@
         align-items: flex-start !important;
     }
 
-    /* Regla nueva para el título en PC */
     .titulo-luzy-wrapper {
         justify-content: flex-start !important;
-        /* Mueve el título a la izquierda */
     }
+}
 
-    .boton-luzy {
-        justify-content: flex-start !important;
-        /* Mueve el botón a la izquierda */
-    }
+.hover-zoom:hover {
+    transform: scale(1.05);
 }
