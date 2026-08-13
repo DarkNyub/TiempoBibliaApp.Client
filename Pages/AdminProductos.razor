@@ -7,9 +7,15 @@
 @inject IDialogService DialogService
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="mt-8">
-    <MudText Typo="Typo.h4" Style="font-weight: bold; color: #333;" Class="mb-6">
-        Gestión de Productos y Links 📦
-    </MudText>
+    <div class="d-flex justify-space-between align-center mb-6">
+        <MudText Typo="Typo.h4" Style="font-weight: bold; color: #333;">
+            Gestión de Productos 📦
+        </MudText>
+        <!-- 🔥 BOTÓN PARA CREAR NUEVO PRODUCTO -->
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="AbrirModalCreacion">
+            Nuevo Producto
+        </MudButton>
+    </div>
 
     @if (productos == null)
     {
@@ -39,7 +45,7 @@
                     <MudChip T="string" Color="Color.Info" Size="Size.Small">@context.Tipo</MudChip>
                 </MudTd>
                 <MudTd DataLabel="Acciones" Style="text-align: right;">
-                    <MudIconButton Icon="@Icons.Material.Filled.Link" Color="Color.Primary" title="Generar Link" OnClick="() => PrepararGeneracionLink(context)" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Link" Color="Color.Info" title="Generar Link" OnClick="() => PrepararGeneracionLink(context)" />
                     <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" title="Editar" OnClick="() => AbrirModalEdicion(context)" />
                     <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" title="Eliminar" OnClick="() => EliminarProducto(context)" />
                 </MudTd>
@@ -74,28 +80,92 @@
     </DialogActions>
 </MudDialog>
 
-<!-- MODAL DE EDICIÓN RÁPIDA -->
-<MudDialog @bind-Visible="mostrarModalEdicion" Options="dialogOptions">
-    <TitleContent><MudText Typo="Typo.h6">Editar Producto</MudText></TitleContent>
+<!-- 🔥 SÚPER MODAL DE CREACIÓN / EDICIÓN -->
+<MudDialog @bind-Visible="mostrarModalEdicion" Options="dialogOptionsEdicion">
+    <TitleContent>
+        <MudText Typo="Typo.h6">@(productoEditando?.Id == 0 ? "Crear Nuevo Producto" : "Editar Producto")</MudText>
+    </TitleContent>
     <DialogContent>
         @if (productoEditando != null)
         {
-            <MudTextField @bind-Value="productoEditando.Nombre" Label="Nombre del Producto" Required="true" Class="mb-3" />
-            <MudTextField @bind-Value="productoEditando.Descripcion" Label="Descripción" Lines="3" Class="mb-3" />
-            <MudNumericField @bind-Value="productoEditando.Precio" Label="Precio (COP)" Min="0" Class="mb-3" />
-            <MudTextField @bind-Value="productoEditando.ImagenUrl" Label="URL de Imagen" Class="mb-3" />
+            <MudGrid>
+                <!-- COLUMNA IZQUIERDA: Datos Básicos -->
+                <MudItem xs="12" md="6">
+                    <MudText Typo="Typo.subtitle2" Color="Color.Primary" Class="mb-2">Información Básica</MudText>
+                    <MudTextField @bind-Value="productoEditando.Nombre" Label="Nombre del Producto" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
+                    <MudTextField @bind-Value="productoEditando.Descripcion" Label="Descripción" Lines="3" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
+                    
+                    <div class="d-flex gap-4 mb-3">
+                        <MudNumericField @bind-Value="productoEditando.Precio" Label="Precio (COP)" Min="0" Variant="Variant.Outlined" Margin="Margin.Dense" Disabled="productoEditando.EsGratuito" />
+                        <MudCheckBox @bind-Value="productoEditando.EsGratuito" Label="Es Gratis (Free)" Color="Color.Success" />
+                    </div>
+
+                    <MudSelect @bind-Value="productoEditando.Tipo" Label="Tipo (Formato)" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3">
+                        <MudSelectItem Value="@("Producto")">Producto Suelto</MudSelectItem>
+                        <MudSelectItem Value="@("Serie")">Serie (Paga)</MudSelectItem>
+                        <MudSelectItem Value="@("Miniserie")">Miniserie (Free)</MudSelectItem>
+                    </MudSelect>
+
+                    <MudTextField @bind-Value="productoEditando.ImagenUrl" Label="URL de la Imagen" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
+                </MudItem>
+
+                <!-- COLUMNA DERECHA: Relaciones Mágicas -->
+                <MudItem xs="12" md="6">
+                    <MudText Typo="Typo.subtitle2" Color="Color.Secondary" Class="mb-2">Organización y Enlaces</MudText>
+                    
+                    <!-- Categoría Principal -->
+                    <MudSelect T="int" @bind-Value="productoEditando.CategoriaId" Label="Categoría Principal" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3">
+                        @if (categoriasDisponibles != null)
+                        {
+                            @foreach (var cat in categoriasDisponibles)
+                            {
+                                <MudSelectItem T="int" Value="@cat.Id">@cat.Nombre</MudSelectItem>
+                            }
+                        }
+                    </MudSelect>
+
+                    <!-- Categorías Secundarias (Multi-select) -->
+                    <MudSelect T="int" MultiSelection="true" @bind-SelectedValues="productoEditando.CategoriasSecundariasIds" Label="Categorías Secundarias" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3">
+                        @if (categoriasDisponibles != null)
+                        {
+                            @foreach (var cat in categoriasDisponibles)
+                            {
+                                <MudSelectItem T="int" Value="@cat.Id">@cat.Nombre</MudSelectItem>
+                            }
+                        }
+                    </MudSelect>
+
+                    <!-- Productos Relacionados (Cross-selling) -->
+                    <MudSelect T="int" MultiSelection="true" @bind-SelectedValues="productoEditando.ProductosRelacionadosIds" Label="Productos Similares / Relacionados" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3">
+                        @if (productos != null)
+                        {
+                            @foreach (var p in productos.Where(x => x.Id != productoEditando.Id)) // Evitamos que se relacione consigo mismo
+                            {
+                                <MudSelectItem T="int" Value="@p.Id">@p.Nombre</MudSelectItem>
+                            }
+                        }
+                    </MudSelect>
+                    
+                    <!-- URL de Archivos Privados -->
+                    <MudTextField @bind-Value="productoEditando.PdfUrl" Label="URL de Drive (El imprimible)" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
+                    <MudTextField @bind-Value="productoEditando.VideoUrl" Label="URL de YouTube (El tutorial)" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
+                </MudItem>
+            </MudGrid>
         }
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="() => mostrarModalEdicion = false">Cancelar</MudButton>
-        <MudButton OnClick="GuardarEdicion" Color="Color.Warning" Variant="Variant.Filled">Guardar Cambios</MudButton>
+        <MudButton OnClick="GuardarProducto" Color="Color.Primary" Variant="Variant.Filled">
+            @(productoEditando?.Id == 0 ? "Crear Producto" : "Guardar Cambios")
+        </MudButton>
     </DialogActions>
 </MudDialog>
 
 @code {
     private List<ProductoDto>? productos;
+    private List<CategoriaDto>? categoriasDisponibles;
+    
     private string textoBusqueda = "";
-    private DialogOptions dialogOptions = new() { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
 
     // Link
     private bool mostrarModalLink = false;
@@ -103,23 +173,27 @@
     private GenerarLinkRequestDto requestLink = new();
     private string linkGenerado = "";
 
-    // Edición
+    // Edición y Creación
     private bool mostrarModalEdicion = false;
     private ProductoDto? productoEditando;
 
+    private DialogOptions dialogOptions = new() { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+    private DialogOptions dialogOptionsEdicion = new() { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+
     protected override async Task OnInitializedAsync()
     {
-        await CargarProductos();
+        await CargarDatos();
     }
 
-    private async Task CargarProductos()
+    private async Task CargarDatos()
     {
         productos = await Http.GetFromJsonAsync<List<ProductoDto>>("api/Productos/admin");
+        categoriasDisponibles = await Http.GetFromJsonAsync<List<CategoriaDto>>("api/Categorias/admin");
     }
 
     private bool Filtrar(ProductoDto prod) => string.IsNullOrWhiteSpace(textoBusqueda) || prod.Nombre.Contains(textoBusqueda, StringComparison.OrdinalIgnoreCase);
 
-    // --- ACCIONES DE LINK ---
+    // --- ACCIONES DE LINK --- (Sin cambios)
     private void PrepararGeneracionLink(ProductoDto producto)
     {
         productoSeleccionado = producto;
@@ -144,34 +218,71 @@
 
     private async Task CopiarAlPortapapeles() => await _js.InvokeVoidAsync("navigator.clipboard.writeText", linkGenerado);
 
-    // --- ACCIONES DE EDICIÓN Y ELIMINACIÓN ---
+    // --- ACCIONES DE CREACIÓN Y EDICIÓN ---
+    
+    private void AbrirModalCreacion()
+    {
+        productoEditando = new ProductoDto
+        {
+            Id = 0,
+            Tipo = "Producto",
+            EsGratuito = false
+        };
+        mostrarModalEdicion = true;
+    }
+
     private void AbrirModalEdicion(ProductoDto producto)
     {
-        // Clonamos el objeto para no afectar la tabla si cancela
+        // Mapeamos el DTO de lectura al DTO de mutación
         productoEditando = new ProductoDto
         {
             Id = producto.Id,
             Nombre = producto.Nombre,
             Descripcion = producto.Descripcion,
             Precio = producto.Precio,
+            Descuento = producto.Descuento,
+            EsGratuito = producto.EsGratuito,
             ImagenUrl = producto.ImagenUrl,
-            Tipo = producto.Tipo
+            Tipo = producto.Tipo,
+            PdfUrl = producto.PdfUrl,
+            VideoUrl = producto.VideoUrl,
+            Activo = producto.Activo,
+            CategoriaId = producto.CategoriaId,
+            
+            // 🔥 CORRECCIÓN: Usamos ToList() para que empate perfecto con MudBlazor
+            CategoriasSecundariasIds = producto.CategoriasSecundarias.Select(c => c.CategoriaId).ToList(),
+            ProductosRelacionadosIds = producto.ProductosRelacionadosOrigen.Select(r => r.ProductoRelacionadoDestino.Id).ToList()
         };
         mostrarModalEdicion = true;
     }
-
-    private async Task GuardarEdicion()
+    
+    private async Task GuardarProducto()
     {
-        var response = await Http.PutAsJsonAsync($"api/Productos/{productoEditando!.Id}", productoEditando);
-        if (response.IsSuccessStatusCode)
+        if (productoEditando == null) return;
+
+        HttpResponseMessage response;
+
+        if (productoEditando.Id == 0)
         {
-            Snackbar.Add("Producto modificado correctamente", Severity.Success);
-            mostrarModalEdicion = false;
-            await CargarProductos(); // Recargamos la tabla
+            // Es una creación (POST)
+            response = await Http.PostAsJsonAsync("api/Productos", productoEditando);
         }
         else
         {
-            Snackbar.Add("Error al modificar el producto", Severity.Error);
+            // Es una edición (PUT)
+            response = await Http.PutAsJsonAsync($"api/Productos/{productoEditando.Id}", productoEditando);
+        }
+
+        if (response.IsSuccessStatusCode)
+        {
+            Snackbar.Add(productoEditando.Id == 0 ? "Producto creado exitosamente" : "Cambios guardados", Severity.Success);
+            mostrarModalEdicion = false;
+            await CargarDatos(); // Refrescamos la tabla
+        }
+        else
+        {
+            var error = await response.Content.ReadAsStringAsync();
+            Snackbar.Add($"Error: {error}", Severity.Error);
         }
     }
 
@@ -188,7 +299,7 @@
             if (response.IsSuccessStatusCode)
             {
                 Snackbar.Add("Producto eliminado", Severity.Success);
-                await CargarProductos();
+                await CargarDatos();
             }
             else
             {

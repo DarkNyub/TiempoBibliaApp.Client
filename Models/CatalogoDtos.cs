@@ -30,18 +30,51 @@ namespace TiempoBiblia.Client.Models
         public string Nombre { get; set; } = string.Empty;
         public string Descripcion { get; set; } = string.Empty;
         public decimal Precio { get; set; }
+        
+        // 🔥 CAMPOS NUEVOS AGREGADOS PARA LA EDICIÓN
+        public decimal Descuento { get; set; }
+        public string? PdfUrl { get; set; }
+        public string? VideoUrl { get; set; }
+        public bool Activo { get; set; } = true;
+        
         public bool EsGratuito { get; set; }
         public string ImagenUrl { get; set; } = string.Empty;
-        
-        // 🔥 NUEVA LÍNEA: Agregamos el Tipo que nos faltaba
         public string Tipo { get; set; } = string.Empty;
         
         public int CategoriaId { get; set; }
         public CategoriaDto Categoria { get; set; } = new();
         
+        // Relaciones completas (Para leer de la base de datos)
         public List<ProductoCategoriaSecundariaDto> CategoriasSecundarias { get; set; } = new();
         public List<ProductoTagDto> ProductoTags { get; set; } = new();
         public List<ProductoRelacionadoDto> ProductosRelacionadosOrigen { get; set; } = new();
+
+        // 🔥 CORRECCIÓN PARA MUDBLAZOR: Usar IReadOnlyCollection
+        public IReadOnlyCollection<int> CategoriasSecundariasIds { get; set; } = new List<int>();
+        public IReadOnlyCollection<int> TagsIds { get; set; } = new List<int>();
+        public IReadOnlyCollection<int> ProductosRelacionadosIds { get; set; } = new List<int>();
+    }
+    // 🔥 NUEVO: DTO para Crear/Editar desde el Frontend
+    public class ProductoMutacionDto
+    {
+        public int Id { get; set; } // Lo usamos internamente en Blazor para saber si es Editar o Crear
+        public string Nombre { get; set; } = string.Empty;
+        public string Descripcion { get; set; } = string.Empty;
+        public decimal Precio { get; set; }
+        public decimal Descuento { get; set; }
+        public bool EsGratuito { get; set; }
+        public string? ImagenUrl { get; set; }
+        public string Tipo { get; set; } = "Imprimible"; // Imprimible, Serie, Miniserie
+        public string? PdfUrl { get; set; }
+        public string? VideoUrl { get; set; }
+        public bool Activo { get; set; } = true;
+        
+        public int CategoriaId { get; set; }
+
+        // MudBlazor maneja las selecciones múltiples con IEnumerable
+        public IEnumerable<int> CategoriasSecundariasIds { get; set; } = new HashSet<int>();
+        public IEnumerable<int> TagsIds { get; set; } = new HashSet<int>();
+        public IEnumerable<int> ProductosRelacionadosIds { get; set; } = new HashSet<int>();
     }
     // 1. NUEVO: DTO para el Paquete
     public class PaqueteDto
