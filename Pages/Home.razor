@@ -67,15 +67,17 @@
                 // Filtramos si el usuario seleccionó una categoría específica
                 if (_filtroActual != "Todos" && _filtroActual != catNovedad.Nombre) continue;
 
-                var productosNovedad = productos.Where(p => p.Categoria?.Nombre == catNovedad.Nombre).ToList();
+                // 🔥 LÓGICA: Buscar en principal o secundarias
+                var productosNovedad = productos.Where(p => p.CategoriaId == catNovedad.Id || (p.CategoriasSecundarias != null && p.CategoriasSecundarias.Any(cs => cs.CategoriaId == catNovedad.Id))
+                ).ToList();
 
+                <div class="d-flex justify-center mb-6 mt-8">
+                    <MudChip T="string" Color="Color.Primary" Size="Size.Large" Style="font-weight: bold; font-size: 1.2rem;">
+                        ¡@catNovedad.Nombre.ToUpper()!
+                    </MudChip>
+                </div>
                 if (productosNovedad.Any())
                 {
-                    <div class="d-flex justify-center mb-6 mt-8">
-                        <MudChip T="string" Color="Color.Primary" Size="Size.Large" Style="font-weight: bold; font-size: 1.2rem;">
-                            ¡@catNovedad.Nombre.ToUpper()!
-                        </MudChip>
-                    </div>
 
                     <MudGrid Class="mb-12" Spacing="6">
                         @foreach (var prod in productosNovedad)
@@ -89,16 +91,19 @@
                                     </div>
                                 </MudPaper>
                                 
-                                <MudText Typo="Typo.subtitle1" Align="Align.Center" Style="font-weight: bold; color: #5D4037;" Class="mb-2">
+                                <MudText Typo="Typo.subtitle1" Align="Align.Center" Style="font-weight: bold; color: #5D4037; cursor: pointer;" Class="mb-2" @onclick="() => AbrirModalProducto(prod)">
                                     @prod.Nombre
                                 </MudText>
-                                
-                                <MudButton Variant="Variant.Outlined" Color="Color.Primary" Style="border-radius: 20px; border-width: 2px;" @onclick="() => AbrirModalProducto(prod)">
-                                    @(prod.EsGratuito ? "Obtener Free" : $"Añadir por ${prod.Precio}")
-                                </MudButton>
                             </MudItem>
                         }
                     </MudGrid>
+                }
+                else
+                {
+                    <!-- 🔥 MENSAJE SI NO HAY NOVEDADES -->
+                    <MudText Typo="Typo.h6" Align="Align.Center" Style="color: #999; font-style: italic;" Class="mb-12">
+                        No hay Novedades por ahora...
+                    </MudText>
                 }
             }
         }
@@ -116,7 +121,7 @@
 
                     <MudItem xs="12" md="6" Class="d-flex flex-column justify-center seccion-luzy">
                         <div class="titulo-luzy-wrapper mb-4">
-                            <MudText Typo="Typo.h4" Style="font-weight: bold; color: #F48FB1;">
+                            <MudText Typo="Typo.h3" Class="fuente-dancing" Style="font-weight: bold; color: #F48FB1;">
                                 ¡Hola soy Luzy!
                             </MudText>
                         </div>                  
@@ -140,14 +145,17 @@
             // Filtramos si el usuario seleccionó una categoría específica
             if (_filtroActual != "Todos" && _filtroActual != categoria.Nombre) continue;
 
-            var productosCat = productos.Where(p => p.Categoria?.Nombre == categoria.Nombre).ToList();
+            var productosCat = productos.Where(p => 
+                p.CategoriaId == categoria.Id || 
+                (p.CategoriasSecundarias != null && p.CategoriasSecundarias.Any(cs => cs.CategoriaId == categoria.Id))
+            ).ToList();
 
             if (productosCat.Any())
             {
-                <div class="d-flex justify-center mb-6 mt-8">
-                    <MudChip T="string" Color="Color.Primary" Size="Size.Large" Style="font-weight: bold; font-size: 1.2rem;">
-                        ¡@categoria.Nombre.ToUpper()!
-                    </MudChip>
+                <div class="cinta-categoria mt-8">
+                    <MudText Typo="Typo.h4" Align="Align.Center" Class="fuente-pacifico" Style="color: white; letter-spacing: 2px;">
+                        @categoria.Nombre
+                    </MudText>
                 </div>
                 <MudGrid Class="mb-12" Spacing="6">
                     @foreach (var prod in productosCat)
@@ -185,19 +193,8 @@
     {
         try
         {
-            // 1. Cargamos TODOS los productos
             productos = await Http.GetFromJsonAsync<List<ProductoDto>>("api/Productos");
-            
-            // 2. Cargamos las categorías. Por ahora, extraemos las categorías únicas de los productos.
-            if (productos != null)
-            {
-                categorias = productos
-                    .Where(p => p.Categoria != null)
-                    .Select(p => p.Categoria)
-                    .GroupBy(c => c.Id)
-                    .Select(g => g.First())
-                    .ToList();
-            }
+            categorias = await Http.GetFromJsonAsync<List<CategoriaDto>>("api/Categorias");
         }
         catch (Exception ex)
         {

@@ -140,3 +140,13 @@
 .hover-zoom:hover {
     transform: scale(1.05);
 }
+
+/* 🔥 NUEVO ESTILO: Cinta ancha para los títulos */
+.cinta-categoria {
+    background: linear-gradient(90deg, #F48FB1, #F8BBD0);
+    padding: 12px 20px;
+    width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(244, 143, 177, 0.4);
+    margin-bottom: 2rem;
+}
