@@ -3,6 +3,8 @@
 @inject IJSRuntime _js
 @inject TiempoBiblia.Client.Services.CarritoService Carrito
 @inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@inject HttpClient Http
 
 <MudDialog Class="netflix-modal-dialog">
     <DialogContent>
@@ -21,14 +23,6 @@
                 <MudText Typo="Typo.h3" Class="fuente-pacifico" Style="color: white; text-shadow: 2px 2px 6px rgba(0,0,0,0.8); line-height: 1.2;">
                     @Producto.Nombre
                 </MudText>
-                
-                <!-- 🔥 ETIQUETA VISUAL: Serie o Miniserie -->
-                @if (!string.IsNullOrEmpty(Producto.Tipo) && (Producto.Tipo.Equals("Serie", StringComparison.OrdinalIgnoreCase) || Producto.Tipo.Equals("Miniserie", StringComparison.OrdinalIgnoreCase)))
-                {
-                    <MudText Typo="Typo.h6" Style="color: #F8BBD0; text-shadow: 1px 1px 4px rgba(0,0,0,0.8); font-weight: bold;" Class="mt-1">
-                        (@Producto.Tipo.ToLower())
-                    </MudText>
-                }
 
                 <MudStack Row="true" Spacing="4" Class="mt-4">
                     <!-- 🔥 NUEVO: BOTÓN ÚNICO DE AÑADIR AL CARRITO (Adiós WhatsApp) -->
@@ -90,7 +84,9 @@
                         var posterRelacionado = string.IsNullOrEmpty(prodDestino.ImagenUrl) ? $"https://dummyimage.com/400x225/FCE4EC/e91e63.png&text={prodDestino.Nombre}" : prodDestino.ImagenUrl;
 
                         <MudItem xs="6" sm="4">
-                            <MudPaper Elevation="2" Style="background-color: white; border-radius: 12px; overflow: hidden; cursor: pointer; transition: transform 0.2s ease;" Class="hover-zoom">
+                            <!-- 🔥 MAGIA AQUÍ: Le pusimos un @onclick a la tarjeta -->
+                            <MudPaper Elevation="2" Style="background-color: white; border-radius: 12px; overflow: hidden; cursor: pointer; transition: transform 0.2s ease;" Class="hover-zoom"
+                                      @onclick="@(() => AbrirProductoRelacionado(prodDestino.Id))">
                                 <img src="@posterRelacionado" style="width: 100%; height: 120px; object-fit: cover;" alt="@prodDestino.Nombre" />
                                 <div style="padding: 1rem;">
                                     <MudText Typo="Typo.subtitle2" Style="font-weight: bold; line-height: 1.2; color: #5D4037;" Class="mb-1">@prodDestino.Nombre</MudText>
@@ -116,13 +112,6 @@
     </DialogContent>
 </MudDialog>
 
-<style>
-    .hover-zoom:hover {
-        transform: scale(1.03);
-        box-shadow: 0 8px 16px rgba(244,143,177,0.4);
-    }
-</style>
-
 @code {
     [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = null!;
     
@@ -139,6 +128,33 @@
         Snackbar.Add($"¡{Producto.Nombre} se agregó al carrito!", Severity.Success);
         
         // Opcional: Cerramos el modal para que siga viendo el catálogo y la burbuja del carrito se actualice
-        MudDialog.Close(); 
+        //MudDialog.Close(); 
+    }
+
+    // 🔥 NUEVA FUNCIÓN: Busca el producto completo a la API y abre su modal propio
+    private async Task AbrirProductoRelacionado(int idProducto)
+    {
+        try
+        {
+            // Consultamos la información fresca desde el backend
+            var productoCompleto = await Http.GetFromJsonAsync<ProductoDto>($"api/Productos/{idProducto}");
+            
+            if (productoCompleto != null)
+            {
+                // 1. Cerramos el modal actual
+                MudDialog.Close();
+
+                // 2. Preparamos el nuevo
+                var parameters = new DialogParameters<ProductoDetalleModal> { { x => x.Producto, productoCompleto } };
+                var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true, NoHeader = true, BackgroundClass = "netflix-modal-backdrop" };
+                
+                // 3. ¡Lo disparamos a la pantalla!
+                await DialogService.ShowAsync<ProductoDetalleModal>("", parameters, options);
+            }
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("Hubo un error al cargar el producto relacionado.", Severity.Error);
+        }
     }
 }

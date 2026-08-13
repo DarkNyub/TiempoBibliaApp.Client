@@ -36,6 +36,11 @@
     background-color: #FFF0F5;
     color: #333;
 }
+
+.hover-zoom:hover[b-vdavzh5gps] {
+    transform: scale(1.03);
+    box-shadow: 0 8px 16px rgba(244, 143, 177, 0.4);
+}
 /* /Layout/MainLayout.razor.rz.scp.css */
 .page[b-pqk1ij2xm6] {
     position: relative;
