@@ -98,7 +98,6 @@
                         <MudCheckBox @bind-Value="productoEditando.EsGratuito" Label="Es Gratis (Free)" Color="Color.Success" />
                     </div>
 
-                    <!-- 🔥 CAMBIO: Ahora es escritura libre -->
                     <MudTextField @bind-Value="productoEditando.Tipo" Label="Tipo (Formato)" Placeholder="Ej. Serie, Miniserie, Imprimible..." Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
 
                     <MudTextField @bind-Value="productoEditando.ImagenUrl" Label="URL de la Imagen" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
@@ -108,7 +107,6 @@
                 <MudItem xs="12" md="6">
                     <MudText Typo="Typo.subtitle2" Color="Color.Secondary" Class="mb-2">Organización y Enlaces</MudText>
                     
-                    <!-- 🔥 CAMBIO: Traduce el ID al Nombre de la categoría o muestra el mensaje por defecto -->
                     <MudSelect T="int" @bind-Value="productoEditando.CategoriaId" Label="Categoría Principal" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3"
                                ToStringFunc="@(id => id == 0 ? "Seleccione una categoría..." : categoriasDisponibles?.FirstOrDefault(c => c.Id == id)?.Nombre ?? "Desconocido")">
                         <MudSelectItem T="int" Value="0">Seleccione una categoría...</MudSelectItem>
@@ -121,7 +119,6 @@
                         }
                     </MudSelect>
 
-                    <!-- 🔥 CAMBIO: Traduce la lista de IDs a una lista de Nombres legibles -->
                     <MudSelect T="int" MultiSelection="true" @bind-SelectedValues="productoEditando.CategoriasSecundariasIds" Label="Categorías Secundarias" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3"
                                MultiSelectionTextFunc="@( _ => ObtenerNombresCategorias(productoEditando.CategoriasSecundariasIds) )">
                         @if (categoriasDisponibles != null)
@@ -133,7 +130,18 @@
                         }
                     </MudSelect>
 
-                    <!-- 🔥 CAMBIO: Traduce la lista de IDs a una lista de Nombres de productos -->
+                    <!-- 🔥 AQUÍ ESTÁN LOS TAGS -->
+                    <MudSelect T="int" MultiSelection="true" @bind-SelectedValues="productoEditando.TagsIds" Label="Etiquetas (Tags)" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3"
+                               MultiSelectionTextFunc="@( _ => ObtenerNombresTags(productoEditando.TagsIds) )">
+                        @if (tagsDisponibles != null)
+                        {
+                            @foreach (var tag in tagsDisponibles)
+                            {
+                                <MudSelectItem T="int" Value="@tag.Id">@tag.Nombre</MudSelectItem>
+                            }
+                        }
+                    </MudSelect>
+
                     <MudSelect T="int" MultiSelection="true" @bind-SelectedValues="productoEditando.ProductosRelacionadosIds" Label="Productos Similares / Relacionados" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3"
                                MultiSelectionTextFunc="@( _ => ObtenerNombresProductos(productoEditando.ProductosRelacionadosIds) )">
                         @if (productos != null)
@@ -162,6 +170,8 @@
 @code {
     private List<ProductoDto>? productos;
     private List<CategoriaDto>? categoriasDisponibles;
+    private List<TagDto>? tagsDisponibles; // 🔥 Lista de Tags para el selector
+    
     private string textoBusqueda = "";
 
     private DialogOptions dialogOptions = new() { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
@@ -184,6 +194,13 @@
     {
         productos = await Http.GetFromJsonAsync<List<ProductoDto>>("api/Productos/admin");
         categoriasDisponibles = await Http.GetFromJsonAsync<List<CategoriaDto>>("api/Categorias/admin");
+        
+        // 🔥 Cargamos los Tags. Asegúrate de tener este endpoint en tu backend o cámbialo al correcto
+        try {
+            tagsDisponibles = await Http.GetFromJsonAsync<List<TagDto>>("api/Tags");
+        } catch { 
+            tagsDisponibles = new List<TagDto>(); 
+        }
     }
 
     private bool Filtrar(ProductoDto prod) => string.IsNullOrWhiteSpace(textoBusqueda) || prod.Nombre.Contains(textoBusqueda, StringComparison.OrdinalIgnoreCase);
@@ -193,6 +210,14 @@
     {
         if (categoriasDisponibles == null || !ids.Any()) return "Ninguna";
         var nombres = categoriasDisponibles.Where(c => ids.Contains(c.Id)).Select(c => c.Nombre);
+        return string.Join(", ", nombres);
+    }
+    
+    // 🔥 Traductor visual para los Tags
+    private string ObtenerNombresTags(IEnumerable<int> ids)
+    {
+        if (tagsDisponibles == null || !ids.Any()) return "Ninguno";
+        var nombres = tagsDisponibles.Where(t => ids.Contains(t.Id)).Select(t => t.Nombre);
         return string.Join(", ", nombres);
     }
 
@@ -231,13 +256,12 @@
     // --- ACCIONES DE CREACIÓN Y EDICIÓN ---
     private void AbrirModalCreacion()
     {
-        // Unificamos usando el ProductoDto que arreglamos en el paso anterior
         productoEditando = new ProductoDto
         {
             Id = 0,
-            Tipo = "", // Campo en blanco para que escribas lo que quieras
+            Tipo = "", 
             EsGratuito = false,
-            CategoriaId = 0, // Para que muestre "Seleccione una categoría..."
+            CategoriaId = 0, 
             CategoriasSecundariasIds = new List<int>(),
             ProductosRelacionadosIds = new List<int>(),
             TagsIds = new List<int>()
@@ -262,7 +286,8 @@
             Activo = producto.Activo,
             CategoriaId = producto.CategoriaId,
             CategoriasSecundariasIds = producto.CategoriasSecundarias.Select(c => c.CategoriaId).ToList(),
-            ProductosRelacionadosIds = producto.ProductosRelacionadosOrigen.Select(r => r.ProductoRelacionadoDestino.Id).ToList()
+            ProductosRelacionadosIds = producto.ProductosRelacionadosOrigen.Select(r => r.ProductoRelacionadoDestino.Id).ToList(),
+            TagsIds = producto.ProductoTags.Select(t => t.Tag.Id).ToList() // 🔥 Extraemos los IDs de los Tags
         };
         mostrarModalEdicion = true;
     }
@@ -271,7 +296,6 @@
     {
         if (productoEditando == null) return;
 
-        // Validación simple antes de enviar
         if (productoEditando.CategoriaId == 0)
         {
             Snackbar.Add("Debes seleccionar una Categoría Principal", Severity.Warning);
