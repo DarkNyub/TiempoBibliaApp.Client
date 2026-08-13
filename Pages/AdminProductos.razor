@@ -292,12 +292,11 @@
                 Activo = prod.Activo,
                 CategoriaId = prod.CategoriaId,
                 
-                // Mapeo seguro de los IDs para los Selects Múltiples de MudBlazor
                 CategoriasSecundariasIds = prod.CategoriasSecundarias?.Select(c => c.CategoriaId).ToList() ?? new List<int>(),
                 ProductosRelacionadosIds = prod.ProductosRelacionadosOrigen?.Select(r => r.ProductoRelacionadoId != 0 ? r.ProductoRelacionadoId : r.ProductoRelacionadoDestino.Id).ToList() ?? new List<int>(),
                 
-                // 🔥 CORRECCIÓN: Solo leemos t.Tag.Id (Y filtramos por si viene alguno nulo)
-                TagsIds = prod.ProductoTags?.Where(t => t.Tag != null).Select(t => t.Tag.Id).ToList() ?? new List<int>()
+                // 🔥 CORRECCIÓN DEFINITIVA: Leemos directamente la propiedad TagId de la tabla intermedia
+                TagsIds = prod.ProductoTags?.Select(t => t.TagId).ToList() ?? new List<int>()
             };
         }
         catch
@@ -321,7 +320,7 @@
                 ProductosRelacionadosIds = producto.ProductosRelacionadosOrigen?.Select(r => r.ProductoRelacionadoId != 0 ? r.ProductoRelacionadoId : r.ProductoRelacionadoDestino.Id).ToList() ?? new List<int>(),
                 
                 // 🔥 CORRECCIÓN AQUÍ TAMBIÉN
-                TagsIds = producto.ProductoTags?.Where(t => t.Tag != null).Select(t => t.Tag.Id).ToList() ?? new List<int>()
+                TagsIds = producto.ProductoTags?.Select(t => t.TagId).ToList() ?? new List<int>()
             };
         }
 

@@ -12,9 +12,9 @@ namespace TiempoBiblia.Client.Models
         public int Id { get; set; }
         public string Nombre { get; set; } = string.Empty;
     }
-
-    public class ProductoTagDto
+public class ProductoTagDto
     {
+        public int TagId { get; set; } // 🔥 LÍNEA NUEVA: Leemos el ID directo de la tabla intermedia
         public TagDto Tag { get; set; } = new();
     }
 
