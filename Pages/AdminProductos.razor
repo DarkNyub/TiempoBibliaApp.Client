@@ -11,7 +11,6 @@
         <MudText Typo="Typo.h4" Style="font-weight: bold; color: #333;">
             Gestión de Productos 📦
         </MudText>
-        <!-- 🔥 BOTÓN PARA CREAR NUEVO PRODUCTO -->
         <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="AbrirModalCreacion">
             Nuevo Producto
         </MudButton>
@@ -23,7 +22,6 @@
     }
     else
     {
-        <!-- TABLA DE PRODUCTOS -->
         <MudTable Items="@productos" Filter="new Func<ProductoDto,bool>(Filtrar)" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="4" Style="border-radius: 12px; overflow: hidden;">
             <ToolBarContent>
                 <MudText Typo="Typo.h6">Catálogo</MudText>
@@ -58,7 +56,7 @@
     }
 </MudContainer>
 
-<!-- MODAL PARA GENERAR LINK (Se mantiene intacto) -->
+<!-- MODAL PARA GENERAR LINK -->
 <MudDialog @bind-Visible="mostrarModalLink" Options="dialogOptions">
     <TitleContent>
         <MudText Typo="Typo.h6">Generar acceso para: <strong>@productoSeleccionado?.Nombre</strong></MudText>
@@ -92,7 +90,7 @@
                 <!-- COLUMNA IZQUIERDA: Datos Básicos -->
                 <MudItem xs="12" md="6">
                     <MudText Typo="Typo.subtitle2" Color="Color.Primary" Class="mb-2">Información Básica</MudText>
-                    <MudTextField @bind-Value="productoEditando.Nombre" Label="Nombre del Producto" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
+                    <MudTextField @bind-Value="productoEditando.Nombre" Label="Nombre del Producto*" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
                     <MudTextField @bind-Value="productoEditando.Descripcion" Label="Descripción" Lines="3" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
                     
                     <div class="d-flex gap-4 mb-3">
@@ -100,11 +98,8 @@
                         <MudCheckBox @bind-Value="productoEditando.EsGratuito" Label="Es Gratis (Free)" Color="Color.Success" />
                     </div>
 
-                    <MudSelect @bind-Value="productoEditando.Tipo" Label="Tipo (Formato)" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3">
-                        <MudSelectItem Value="@("Producto")">Producto Suelto</MudSelectItem>
-                        <MudSelectItem Value="@("Serie")">Serie (Paga)</MudSelectItem>
-                        <MudSelectItem Value="@("Miniserie")">Miniserie (Free)</MudSelectItem>
-                    </MudSelect>
+                    <!-- 🔥 CAMBIO: Ahora es escritura libre -->
+                    <MudTextField @bind-Value="productoEditando.Tipo" Label="Tipo (Formato)" Placeholder="Ej. Serie, Miniserie, Imprimible..." Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
 
                     <MudTextField @bind-Value="productoEditando.ImagenUrl" Label="URL de la Imagen" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
                 </MudItem>
@@ -113,8 +108,10 @@
                 <MudItem xs="12" md="6">
                     <MudText Typo="Typo.subtitle2" Color="Color.Secondary" Class="mb-2">Organización y Enlaces</MudText>
                     
-                    <!-- Categoría Principal -->
-                    <MudSelect T="int" @bind-Value="productoEditando.CategoriaId" Label="Categoría Principal" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3">
+                    <!-- 🔥 CAMBIO: Traduce el ID al Nombre de la categoría o muestra el mensaje por defecto -->
+                    <MudSelect T="int" @bind-Value="productoEditando.CategoriaId" Label="Categoría Principal" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3"
+                               ToStringFunc="@(id => id == 0 ? "Seleccione una categoría..." : categoriasDisponibles?.FirstOrDefault(c => c.Id == id)?.Nombre ?? "Desconocido")">
+                        <MudSelectItem T="int" Value="0">Seleccione una categoría...</MudSelectItem>
                         @if (categoriasDisponibles != null)
                         {
                             @foreach (var cat in categoriasDisponibles)
@@ -124,8 +121,9 @@
                         }
                     </MudSelect>
 
-                    <!-- Categorías Secundarias (Multi-select) -->
-                    <MudSelect T="int" MultiSelection="true" @bind-SelectedValues="productoEditando.CategoriasSecundariasIds" Label="Categorías Secundarias" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3">
+                    <!-- 🔥 CAMBIO: Traduce la lista de IDs a una lista de Nombres legibles -->
+                    <MudSelect T="int" MultiSelection="true" @bind-SelectedValues="productoEditando.CategoriasSecundariasIds" Label="Categorías Secundarias" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3"
+                               MultiSelectionTextFunc="@( _ => ObtenerNombresCategorias(productoEditando.CategoriasSecundariasIds) )">
                         @if (categoriasDisponibles != null)
                         {
                             @foreach (var cat in categoriasDisponibles)
@@ -135,18 +133,18 @@
                         }
                     </MudSelect>
 
-                    <!-- Productos Relacionados (Cross-selling) -->
-                    <MudSelect T="int" MultiSelection="true" @bind-SelectedValues="productoEditando.ProductosRelacionadosIds" Label="Productos Similares / Relacionados" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3">
+                    <!-- 🔥 CAMBIO: Traduce la lista de IDs a una lista de Nombres de productos -->
+                    <MudSelect T="int" MultiSelection="true" @bind-SelectedValues="productoEditando.ProductosRelacionadosIds" Label="Productos Similares / Relacionados" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3"
+                               MultiSelectionTextFunc="@( _ => ObtenerNombresProductos(productoEditando.ProductosRelacionadosIds) )">
                         @if (productos != null)
                         {
-                            @foreach (var p in productos.Where(x => x.Id != productoEditando.Id)) // Evitamos que se relacione consigo mismo
+                            @foreach (var p in productos.Where(x => x.Id != productoEditando.Id))
                             {
                                 <MudSelectItem T="int" Value="@p.Id">@p.Nombre</MudSelectItem>
                             }
                         }
                     </MudSelect>
                     
-                    <!-- URL de Archivos Privados -->
                     <MudTextField @bind-Value="productoEditando.PdfUrl" Label="URL de Drive (El imprimible)" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
                     <MudTextField @bind-Value="productoEditando.VideoUrl" Label="URL de YouTube (El tutorial)" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
                 </MudItem>
@@ -164,21 +162,18 @@
 @code {
     private List<ProductoDto>? productos;
     private List<CategoriaDto>? categoriasDisponibles;
-    
     private string textoBusqueda = "";
 
-    // Link
+    private DialogOptions dialogOptions = new() { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+    private DialogOptions dialogOptionsEdicion = new() { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+
     private bool mostrarModalLink = false;
     private ProductoDto? productoSeleccionado;
     private GenerarLinkRequestDto requestLink = new();
     private string linkGenerado = "";
 
-    // Edición y Creación
     private bool mostrarModalEdicion = false;
     private ProductoDto? productoEditando;
-
-    private DialogOptions dialogOptions = new() { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-    private DialogOptions dialogOptionsEdicion = new() { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
 
     protected override async Task OnInitializedAsync()
     {
@@ -193,7 +188,22 @@
 
     private bool Filtrar(ProductoDto prod) => string.IsNullOrWhiteSpace(textoBusqueda) || prod.Nombre.Contains(textoBusqueda, StringComparison.OrdinalIgnoreCase);
 
-    // --- ACCIONES DE LINK --- (Sin cambios)
+    // --- MÉTODOS DE TRADUCCIÓN VISUAL PARA MUDBLAZOR ---
+    private string ObtenerNombresCategorias(IEnumerable<int> ids)
+    {
+        if (categoriasDisponibles == null || !ids.Any()) return "Ninguna";
+        var nombres = categoriasDisponibles.Where(c => ids.Contains(c.Id)).Select(c => c.Nombre);
+        return string.Join(", ", nombres);
+    }
+
+    private string ObtenerNombresProductos(IEnumerable<int> ids)
+    {
+        if (productos == null || !ids.Any()) return "Ninguno";
+        var nombres = productos.Where(p => ids.Contains(p.Id)).Select(p => p.Nombre);
+        return string.Join(", ", nombres);
+    }
+
+    // --- ACCIONES DE LINK ---
     private void PrepararGeneracionLink(ProductoDto producto)
     {
         productoSeleccionado = producto;
@@ -219,21 +229,24 @@
     private async Task CopiarAlPortapapeles() => await _js.InvokeVoidAsync("navigator.clipboard.writeText", linkGenerado);
 
     // --- ACCIONES DE CREACIÓN Y EDICIÓN ---
-    
     private void AbrirModalCreacion()
     {
+        // Unificamos usando el ProductoDto que arreglamos en el paso anterior
         productoEditando = new ProductoDto
         {
             Id = 0,
-            Tipo = "Producto",
-            EsGratuito = false
+            Tipo = "", // Campo en blanco para que escribas lo que quieras
+            EsGratuito = false,
+            CategoriaId = 0, // Para que muestre "Seleccione una categoría..."
+            CategoriasSecundariasIds = new List<int>(),
+            ProductosRelacionadosIds = new List<int>(),
+            TagsIds = new List<int>()
         };
         mostrarModalEdicion = true;
     }
 
     private void AbrirModalEdicion(ProductoDto producto)
     {
-        // Mapeamos el DTO de lectura al DTO de mutación
         productoEditando = new ProductoDto
         {
             Id = producto.Id,
@@ -248,28 +261,31 @@
             VideoUrl = producto.VideoUrl,
             Activo = producto.Activo,
             CategoriaId = producto.CategoriaId,
-            
-            // 🔥 CORRECCIÓN: Usamos ToList() para que empate perfecto con MudBlazor
             CategoriasSecundariasIds = producto.CategoriasSecundarias.Select(c => c.CategoriaId).ToList(),
             ProductosRelacionadosIds = producto.ProductosRelacionadosOrigen.Select(r => r.ProductoRelacionadoDestino.Id).ToList()
         };
         mostrarModalEdicion = true;
     }
-    
+
     private async Task GuardarProducto()
     {
         if (productoEditando == null) return;
+
+        // Validación simple antes de enviar
+        if (productoEditando.CategoriaId == 0)
+        {
+            Snackbar.Add("Debes seleccionar una Categoría Principal", Severity.Warning);
+            return;
+        }
 
         HttpResponseMessage response;
 
         if (productoEditando.Id == 0)
         {
-            // Es una creación (POST)
             response = await Http.PostAsJsonAsync("api/Productos", productoEditando);
         }
         else
         {
-            // Es una edición (PUT)
             response = await Http.PutAsJsonAsync($"api/Productos/{productoEditando.Id}", productoEditando);
         }
 
@@ -277,7 +293,7 @@
         {
             Snackbar.Add(productoEditando.Id == 0 ? "Producto creado exitosamente" : "Cambios guardados", Severity.Success);
             mostrarModalEdicion = false;
-            await CargarDatos(); // Refrescamos la tabla
+            await CargarDatos(); 
         }
         else
         {
