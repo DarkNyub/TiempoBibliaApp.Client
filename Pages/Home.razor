@@ -71,10 +71,10 @@
                 var productosNovedad = productos.Where(p => p.CategoriaId == catNovedad.Id || (p.CategoriasSecundarias != null && p.CategoriasSecundarias.Any(cs => cs.CategoriaId == catNovedad.Id))
                 ).ToList();
 
-                <div class="d-flex justify-center mb-6 mt-8">
-                    <MudChip T="string" Color="Color.Primary" Size="Size.Large" Style="font-weight: bold; font-size: 1.2rem;">
+                <div class="cinta-categoria mt-8">
+                    <MudText Typo="Typo.h4" Align="Align.Center" Class="fuente-pacifico" Style="color: white; letter-spacing: 2px;">
                         ¡@catNovedad.Nombre.ToUpper()!
-                    </MudChip>
+                    </MudText>
                 </div>
                 if (productosNovedad.Any())
                 {
@@ -126,7 +126,7 @@
                             </MudText>
                         </div>                  
                         <MudText Typo="Typo.body1" Align="Align.Justify" Class="mb-6" Style="color: #5D4037;">
-                            Hola, soy Luzy… una mujer apasionada por Dios, por Su Palabra y por enseñar de una manera creativa y cercana. Creo firmemente que la Biblia no solo se lee, sino que también puede vivirse, disfrutarse y llevarse a cada área de nuestra vida. 
+                            Mujer apasionada por Dios, por Su Palabra y por enseñar de una manera creativa y cercana. Creo firmemente que la Biblia no solo se lee, sino que también puede vivirse, disfrutarse y llevarse a cada área de nuestra vida. 
                             A través de *TiempoBiblia.Luzy*, comparto reflexiones, estudios bíblicos, devocionales, manualidades y recursos creativos que me ayudan a acercar la Palabra de Dios al corazón de cada persona.
                             Me encanta transformar una enseñanza bíblica en una experiencia que podamos recordar, crear y aplicar. Mi deseo es que este espacio sea un lugar donde puedas detenerte, aprender, crear y, sobre todo, encontrarte con Dios.
                             <strong>Bienvenida a TiempoBiblia.Luzy, un espacio creado con amor, fe y propósito.</strong> 💕📖✨
