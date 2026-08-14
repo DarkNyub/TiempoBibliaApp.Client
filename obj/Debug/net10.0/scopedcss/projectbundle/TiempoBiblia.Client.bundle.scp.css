@@ -2,9 +2,7 @@
 /* Fondo general del modal en rosado pastel */
 .netflix-modal-dialog[b-vdavzh5gps] {
     background-color: #FFF0F5 !important;
-    /* Lavender Blush */
     color: #333 !important;
-    /* Texto oscuro para que se lea */
     border-radius: 12px;
     overflow: hidden;
 }
@@ -23,6 +21,7 @@
     background: linear-gradient(to top, #FFF0F5 0%, transparent 70%);
 }
 
+/* Posición por defecto en Computadora (Abajo a la izquierda) */
 .modal-hero-content[b-vdavzh5gps] {
     position: absolute;
     bottom: 2rem;
@@ -42,9 +41,13 @@
     box-shadow: 0 8px 16px rgba(244, 143, 177, 0.4);
 }
 
-/* 🔥 REGLAS CSS PARA QUE EN CELULAR SE VEA PERFECTO */
+/* Estilos de Tipografía (PC) */
 .titulo-modal[b-vdavzh5gps] {
     font-size: 2.8rem !important;
+}
+
+.text-justify-pc[b-vdavzh5gps] {
+    text-align: justify;
 }
 
 .btn-comprar-modal[b-vdavzh5gps] {
@@ -54,21 +57,56 @@
     white-space: nowrap;
 }
 
+/* 🔥 LA MAGIA RESPONSIVA: SOLO APLICA EN CELULARES */
 @media (max-width: 600px) {
+    .modal-hero-content.responsive-hero-content[b-vdavzh5gps] {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        bottom: 1rem;
+        left: 0;
+        right: 0;
+        padding: 0 1rem;
+    }
+
+    .responsive-btn-container[b-vdavzh5gps] {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .responsive-text-center[b-vdavzh5gps] {
+        text-align: center !important;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .responsive-flex-center[b-vdavzh5gps] {
+        justify-content: center;
+    }
+
+    .responsive-grid-center[b-vdavzh5gps] {
+        justify-content: center !important;
+    }
+
+    .text-justify-pc[b-vdavzh5gps] {
+        text-align: center !important;
+        /* En celular centramos en vez de justificar */
+    }
+
     .titulo-modal[b-vdavzh5gps] {
         font-size: 2rem !important;
-        /* Achicamos el título en celular */
     }
 
     .btn-comprar-modal[b-vdavzh5gps] {
         padding: 8px 20px !important;
-        /* Achicamos el botón */
         font-size: 0.95rem !important;
     }
 
     .modal-body-container[b-vdavzh5gps] {
         padding: 1.5rem 1rem !important;
-        /* Menos margen a los lados en celular */
     }
 }
 /* /Layout/MainLayout.razor.rz.scp.css */
