@@ -93,9 +93,11 @@
                 customization: {
                     visual: { style: { theme: 'default' } },
                     paymentMethods: {
-                        creditCard: "all", // 🔥 ¡Agrega esto! Permite crédito
-                        debitCard: "all",  // 🔥 ¡Agrega esto! Permite débito
-                        maxInstallments: 1 // Sin cuotas complicadas
+                        ticket: "all",        // Habilita Efecty y otros pagos en efectivo
+                        bankTransfer: "all",  // Habilita PSE (y a veces Nequi se procesa por aquí)
+                        creditCard: "all",
+                        debitCard: "all",
+                        mercadoPago: "all"    // Habilita pago con dinero en cuenta de MP
                     }
                 },
                 callbacks: {

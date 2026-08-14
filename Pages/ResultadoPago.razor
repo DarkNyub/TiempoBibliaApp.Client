@@ -3,6 +3,7 @@
 @inject NavigationManager Nav
 @inject HttpClient Http
 @inject ISnackbar Snackbar
+@inject IDialogService DialogService
 
 <MudContainer MaxWidth="MaxWidth.Small" Class="pt-16 pb-16">
     <MudPaper Elevation="4" Class="pa-8 d-flex flex-column align-center text-center" Style="border-radius: 20px;">
@@ -18,8 +19,6 @@
 
             <div style="width: 100%; max-width: 400px;">
                 <MudTextField @bind-Value="_correoCliente" Label="Tu correo electrónico" Variant="Variant.Outlined" InputType="InputType.Email" Required="true" Class="mb-3" />
-                
-                <!-- 🔥 NUEVO: Confirmación de correo -->
                 <MudTextField @bind-Value="_confirmacionCorreo" Label="Confirma tu correo" Variant="Variant.Outlined" InputType="InputType.Email" Required="true" Class="mb-4" />
 
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Size="Size.Large" OnClick="ReclamarRecursos" Disabled="_procesando">
@@ -56,15 +55,14 @@
     private string _confirmacionCorreo = string.Empty;
     private bool _procesando = false;
 
-    // Leemos los parámetros que C# o JS nos manden en la URL
     [SupplyParameterFromQuery(Name = "payment_id")] public string? PaymentId { get; set; }
-    [SupplyParameterFromQuery(Name = "status")] public string? Status { get; set; } = "approved"; // Asumimos aprobado si no viene para pagos gratuitos
+    [SupplyParameterFromQuery(Name = "status")] public string? Status { get; set; } = "approved";
 
     protected override void OnInitialized()
     {
         if (Status == "approved" && !CarritoService.Items.Any())
         {
-            Nav.NavigateTo("/"); // Redirige si entran directo sin carrito
+            Nav.NavigateTo("/"); 
         }
     }
 
@@ -82,13 +80,24 @@
             return;
         }
 
+        // 🔥 MODAL DE CONFIRMACIÓN DEFINITIVA
+        bool? result = await DialogService.ShowMessageBoxAsync(
+            "Última revisión 📧", 
+            $"Tus recursos se enviarán a:\n\n{_correoCliente.Trim().ToLower()}\n\n¿Estás completamente segur@ de que está bien escrito? Si hay un error, los recursos se perderán.", 
+            yesText: "Sí, es correcto", cancelText: "Corregir");
+
+        if (result != true)
+        {
+            return; // Si el usuario dice "Corregir" o cierra el modal, no hacemos nada.
+        }
+
         try
         {
             _procesando = true;
 
             var solicitud = new
             {
-                Correo = _correoCliente.Trim().ToLower(), // Se guarda limpio
+                Correo = _correoCliente.Trim().ToLower(),
                 PagoId = PaymentId ?? "pago_cero",
                 ProductosIds = CarritoService.Items.Select(i => i.Producto.Id).ToList()
             };
@@ -97,7 +106,7 @@
 
             if (response.IsSuccessStatusCode)
             {
-                CarritoService.VaciarCarrito(); //[cite: 20] Limpiamos el carrito local
+                CarritoService.VaciarCarrito(); 
                 Snackbar.Add("¡Enlaces enviados! Revisa tu bandeja de entrada y Spam.", Severity.Success);
                 await Task.Delay(2500);
                 Nav.NavigateTo("/");
