@@ -8,48 +8,72 @@
 
 <MudDialog Class="netflix-modal-dialog">
     <DialogContent>
-        <!-- CABECERA: Imagen a full ancho con gradiente oscuro -->
-        <div class="modal-hero-container" style="background-image: url('@(string.IsNullOrEmpty(Producto.ImagenUrl) ? "images/default.jpg" : Producto.ImagenUrl)');">
+        <!-- CABECERA: Contenedor Relativo para agrupar todo -->
+        <div style="position: relative; height: 400px; width: 100%; overflow: hidden;">
             
-            <!-- 🔥 NUEVO: BOTÓN DE CERRAR EN LA ESQUINA SUPERIOR IZQUIERDA -->
+            <!-- 🔥 BOTÓN DE CERRAR FIJO EN LA ESQUINA -->
             <MudIconButton Icon="@Icons.Material.Filled.Close" 
                            OnClick="Cancelar" 
                            Style="position: absolute; top: 12px; left: 12px; z-index: 10; background-color: rgba(255, 255, 255, 0.8); color: #333; box-shadow: 0 4px 6px rgba(0,0,0,0.2);" 
                            Size="Size.Medium" />
 
-            <div class="modal-hero-overlay"></div>
+            <!-- CARRUSEL DE FONDO -->
+            <MudCarousel Class="mud-width-full" 
+                         Style="height: 400px; position: absolute; inset: 0; z-index: 1;" 
+                         ShowArrows="@(todasLasImagenes.Count > 1)" 
+                         ShowBullets="@(todasLasImagenes.Count > 1)" 
+                         AutoCycle="true" 
+                         TData="object">
+                @foreach (var img in todasLasImagenes)
+                {
+                    <MudCarouselItem Transition="Transition.Fade">
+                        <div style="background-image: url('@img'); height: 100%; width: 100%; background-size: cover; background-position: center;"></div>
+                    </MudCarouselItem>
+                }
+            </MudCarousel>
+
+            <!-- Gradiente oscuro -->
+            <div class="modal-hero-overlay" style="z-index: 2;"></div>
             
-            <div class="modal-hero-content">
-                <MudText Typo="Typo.h3" Class="fuente-pacifico" Style="color: white; text-shadow: 2px 2px 6px rgba(0,0,0,0.8); line-height: 1.2;">
+            <!-- 🔥 CONTENIDO CENTRADO Y RESPONSIVO -->
+            <div class="modal-hero-content d-flex flex-column align-center justify-end pb-4" style="z-index: 3; bottom: 0; left: 0; right: 0; width: 100%;">
+                <MudText Typo="Typo.h3" Class="fuente-pacifico titulo-modal px-4 text-center" Style="color: white; text-shadow: 2px 2px 6px rgba(0,0,0,0.8); line-height: 1.2;">
                     @Producto.Nombre
                 </MudText>
 
-                <MudStack Row="true" Spacing="4" Class="mt-4">
-                    <!-- 🔥 NUEVO: BOTÓN ÚNICO DE AÑADIR AL CARRITO (Adiós WhatsApp) -->
-                    <MudButton Variant="Variant.Filled" Size="Size.Large" 
+                @if (!string.IsNullOrEmpty(Producto.Tipo) && (Producto.Tipo.Equals("Serie", StringComparison.OrdinalIgnoreCase) || Producto.Tipo.Equals("Miniserie", StringComparison.OrdinalIgnoreCase)))
+                {
+                    <MudText Typo="Typo.h6" Style="color: #F8BBD0; text-shadow: 1px 1px 4px rgba(0,0,0,0.8); font-weight: bold;" Class="mt-1 text-center">
+                        (@Producto.Tipo.ToLower())
+                    </MudText>
+                }
+
+                <div class="mt-3 px-4 d-flex justify-center w-100">
+                    <MudButton Variant="Variant.Filled" 
                                StartIcon="@(Producto.EsGratuito ? Icons.Material.Filled.CloudDownload : Icons.Material.Filled.ShoppingCart)" 
-                               Style="background-color: #E91E63; color: white; font-weight: bold; border-radius: 30px; padding: 10px 30px; box-shadow: 0 4px 10px rgba(233, 30, 99, 0.4);"
+                               Class="btn-comprar-modal"
+                               Style="background-color: #E91E63; color: white; font-weight: bold; box-shadow: 0 4px 10px rgba(233, 30, 99, 0.4);"
                                OnClick="AgregarYNotificar">
-                        @(Producto.EsGratuito ? "Añadir Gratis al Carrito" : $"Comprar ahora por ${Producto.Precio}")
+                        @(Producto.EsGratuito ? "Añadir Gratis" : $"Comprar por ${Producto.Precio}")
                     </MudButton>
-                </MudStack>
+                </div>
             </div>
         </div>
 
         <!-- CUERPO: Detalles y Tags -->
-        <div class="modal-body-container">
-            <MudGrid>
-                <MudItem xs="12" md="8">
-                    <MudText Typo="Typo.body1" Style="font-size: 1.1rem; text-align: justify; color: #5D4037;">
+        <div class="modal-body-container text-center">
+            <MudGrid Justify="Justify.Center">
+                <!-- Información textual centrada -->
+                <MudItem xs="12" md="12" Class="d-flex flex-column align-center">
+                    <MudText Typo="Typo.body1" Align="Align.Center" Style="font-size: 1.05rem; color: #5D4037; max-width: 800px;" Class="mb-6 mt-2">
                         @Producto.Descripcion
                     </MudText>
-                </MudItem>
-                <MudItem xs="12" md="4">
-                    <MudText Typo="Typo.caption" Style="color: #999; font-weight: bold;">Categoría Principal:</MudText>
-                    <MudText Typo="Typo.body2" Class="mb-3" Style="color: #5D4037;">@Producto.Categoria?.Nombre</MudText>
+                    
+                    <MudText Typo="Typo.caption" Align="Align.Center" Style="color: #999; font-weight: bold;">Categoría Principal:</MudText>
+                    <MudText Typo="Typo.body2" Align="Align.Center" Class="mb-4" Style="color: #5D4037;">@Producto.Categoria?.Nombre</MudText>
 
-                    <MudText Typo="Typo.caption" Style="color: #999; font-weight: bold;">Etiquetas (Tags):</MudText>
-                    <div class="d-flex flex-wrap gap-1 mt-1">
+                    <MudText Typo="Typo.caption" Align="Align.Center" Style="color: #999; font-weight: bold;">Etiquetas (Tags):</MudText>
+                    <div class="d-flex flex-wrap justify-center gap-1 mt-2 mb-2">
                         @if(Producto.ProductoTags != null && Producto.ProductoTags.Any())
                         {
                             @foreach (var pt in Producto.ProductoTags.Take(5))
@@ -71,9 +95,12 @@
             <MudDivider Class="my-6" Style="background-color: #F48FB1; opacity: 0.3;" />
 
             <!-- SECCIÓN: Relacionados (More Like This) -->
-            <MudText Typo="Typo.h6" Style="font-weight: bold; margin-bottom: 1rem; color: #E91E63;">Similares a este título</MudText>
+            <MudText Typo="Typo.h6" Align="Align.Center" Style="font-weight: bold; margin-bottom: 1.5rem; color: #E91E63; width: 100%;">
+                Similares a este título
+            </MudText>
             
-            <MudGrid>
+            <!-- 🔥 GRID CENTRADO PARA PRODUCTOS RELACIONADOS -->
+            <MudGrid Justify="Justify.Center" Spacing="3">
                 @if(Producto.ProductosRelacionadosOrigen != null && Producto.ProductosRelacionadosOrigen.Any())
                 {
                     @foreach(var relacionado in Producto.ProductosRelacionadosOrigen)
@@ -83,12 +110,11 @@
 
                         var posterRelacionado = string.IsNullOrEmpty(prodDestino.ImagenUrl) ? $"https://dummyimage.com/400x225/FCE4EC/e91e63.png&text={prodDestino.Nombre}" : prodDestino.ImagenUrl;
 
-                        <MudItem xs="6" sm="4">
-                            <!-- 🔥 MAGIA AQUÍ: Le pusimos un @onclick a la tarjeta -->
-                            <MudPaper Elevation="2" Style="background-color: white; border-radius: 12px; overflow: hidden; cursor: pointer; transition: transform 0.2s ease;" Class="hover-zoom"
+                        <MudItem xs="6" sm="4" md="3" Class="d-flex justify-center">
+                            <MudPaper Elevation="2" Style="background-color: white; border-radius: 12px; overflow: hidden; cursor: pointer; transition: transform 0.2s ease; width: 100%; max-width: 180px;" Class="hover-zoom"
                                       @onclick="@(() => AbrirProductoRelacionado(prodDestino.Id))">
                                 <img src="@posterRelacionado" style="width: 100%; height: 120px; object-fit: cover;" alt="@prodDestino.Nombre" />
-                                <div style="padding: 1rem;">
+                                <div style="padding: 0.8rem;" class="text-center">
                                     <MudText Typo="Typo.subtitle2" Style="font-weight: bold; line-height: 1.2; color: #5D4037;" Class="mb-1">@prodDestino.Nombre</MudText>
                                     @if(prodDestino.EsGratuito)
                                     {
@@ -105,50 +131,51 @@
                 }
                 else
                 {
-                    <MudText Typo="Typo.body2" Style="color: gray; font-style: italic;" Class="ml-4">No hay títulos similares en este momento.</MudText>
+                    <MudText Typo="Typo.body2" Align="Align.Center" Style="color: gray; font-style: italic; width: 100%;">No hay títulos similares en este momento.</MudText>
                 }
             </MudGrid>
         </div>
     </DialogContent>
 </MudDialog>
 
+
 @code {
     [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = null!;
-    
     [Parameter] public ProductoDto Producto { get; set; } = new();
+
+    private List<string> todasLasImagenes = new();
+
+    protected override void OnParametersSet()
+    {
+        todasLasImagenes.Clear();
+        var mainImg = string.IsNullOrEmpty(Producto.ImagenUrl) ? "images/default.jpg" : Producto.ImagenUrl;
+        todasLasImagenes.Add(mainImg);
+        
+        if (Producto.ImagenesSecundarias != null && Producto.ImagenesSecundarias.Any())
+        {
+            todasLasImagenes.AddRange(Producto.ImagenesSecundarias.Select(i => i.Url));
+        }
+    }
 
     private void Cancelar() => MudDialog.Cancel();
 
     private void AgregarYNotificar()
     {
-        // Agregamos el producto al cerebro del carrito
         Carrito.AgregarAlCarrito(Producto);
-        
-        // Mostramos un mensaje de éxito en la esquina de la pantalla
         Snackbar.Add($"¡{Producto.Nombre} se agregó al carrito!", Severity.Success);
-        
-        // Opcional: Cerramos el modal para que siga viendo el catálogo y la burbuja del carrito se actualice
-        //MudDialog.Close(); 
+        MudDialog.Close(); 
     }
 
-    // 🔥 NUEVA FUNCIÓN: Busca el producto completo a la API y abre su modal propio
     private async Task AbrirProductoRelacionado(int idProducto)
     {
         try
         {
-            // Consultamos la información fresca desde el backend
             var productoCompleto = await Http.GetFromJsonAsync<ProductoDto>($"api/Productos/{idProducto}");
-            
             if (productoCompleto != null)
             {
-                // 1. Cerramos el modal actual
                 MudDialog.Close();
-
-                // 2. Preparamos el nuevo
                 var parameters = new DialogParameters<ProductoDetalleModal> { { x => x.Producto, productoCompleto } };
                 var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true, NoHeader = true, BackgroundClass = "netflix-modal-backdrop" };
-                
-                // 3. ¡Lo disparamos a la pantalla!
                 await DialogService.ShowAsync<ProductoDetalleModal>("", parameters, options);
             }
         }

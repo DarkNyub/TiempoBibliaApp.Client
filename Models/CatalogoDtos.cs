@@ -48,6 +48,8 @@ public class ProductoTagDto
         public List<ProductoCategoriaSecundariaDto> CategoriasSecundarias { get; set; } = new();
         public List<ProductoTagDto> ProductoTags { get; set; } = new();
         public List<ProductoRelacionadoDto> ProductosRelacionadosOrigen { get; set; } = new();
+        // 🔥 NUEVA LISTA: El contenedor para el carrusel
+        public List<ImagenProductoDto> ImagenesSecundarias { get; set; } = new();
 
         // 🔥 CORRECCIÓN PARA MUDBLAZOR: Usar IReadOnlyCollection
         public IReadOnlyCollection<int> CategoriasSecundariasIds { get; set; } = new List<int>();
@@ -70,6 +72,8 @@ public class ProductoTagDto
         public bool Activo { get; set; } = true;
         
         public int CategoriaId { get; set; }
+        // 🔥 NUEVA LISTA: El contenedor para el carrusel
+        public List<ImagenProductoDto> ImagenesSecundarias { get; set; } = new();
 
         // MudBlazor maneja las selecciones múltiples con IEnumerable
         public IEnumerable<int> CategoriasSecundariasIds { get; set; } = new HashSet<int>();
@@ -152,5 +156,12 @@ public class ProductoTagDto
         public string Estado { get; set; } = string.Empty;
         public string IdPago { get; set; } = string.Empty;
         public string Mensaje { get; set; } = string.Empty;
+    }
+    // 🔥 NUEVA CLASE: Para recibir las fotos adicionales
+    public class ImagenProductoDto
+    {
+        public int Id { get; set; }
+        public string Url { get; set; } = string.Empty;
+        public int ProductoId { get; set; }
     }
 } // Fin del namespace
