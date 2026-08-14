@@ -77,7 +77,7 @@
                 }
             </MudItem>
 
-            <!-- ZONA DE PAGO DIRECTO (BRICKS) -->
+            <!-- ZONA DE PAGO DIRECTO -->
             <MudItem xs="12" md="5">
                 <MudPaper Elevation="2" Class="pa-6" Style="border-radius: 20px; background-color: #FCE4EC;">
                     <div class="d-flex justify-space-between mb-4">
@@ -87,7 +87,7 @@
 
                     <MudDivider Class="my-4" />
 
-                    <!-- 🔥 LOGICA DEL CHECKBOX: Solo se muestra si NO ha aceptado -->
+                    <!-- 🔥 LOGICA DEL CHECKBOX -->
                     @if (!_aceptaTerminos)
                     {
                         <MudCheckBox T="bool" ValueChanged="AceptarTerminos" Color="Color.Primary" Class="mb-4">
@@ -105,7 +105,6 @@
                     }
                     else
                     {
-                        <!-- Botón por si quiere arrepentirse y modificar el carrito -->
                         <MudButton Variant="Variant.Text" StartIcon="@Icons.Material.Filled.Edit" Color="Color.Default" OnClick="DeshacerTerminos" Class="mb-4" FullWidth="true">
                             Modificar carrito
                         </MudButton>
@@ -118,9 +117,37 @@
                             <MudText Class="mt-2" Style="font-weight: bold;">Procesando tu pago...</MudText>
                         </div>
                     }
-                    <!-- 🚀 CONTENEDOR DE MERCADO PAGO -->
-                    <div style="@(_procesandoPago || !_aceptaTerminos ? "display: none;" : "")">
-                        <div id="paymentBrick_container"></div>
+
+                    <!-- 🚀 CONTENEDOR DE MÚLTIPLES PASARELAS -->
+                    <div style="@(_procesandoPago || !_aceptaTerminos ? "display: none;" : "")" class="mt-4">
+                        
+                        <!-- OPCIÓN 1: COLOMBIA (MERCADO PAGO BRICKS) -->
+                        <div style="background-color: white; border-radius: 12px; padding: 16px; margin-bottom: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                            <MudText Typo="Typo.subtitle2" Style="color: #009EE3; font-weight: bold;" Class="mb-3 d-flex align-center">
+                                <MudIcon Icon="@Icons.Material.Filled.Public" Class="mr-2" Size="Size.Small" /> 
+                                🇨🇴 Pagos en Colombia (Nequi, PSE, Tarjetas)
+                            </MudText>
+                            <div id="paymentBrick_container"></div>
+                        </div>
+
+                        <!-- OPCIÓN 2: INTERNACIONAL (PAYPAL) -->
+                        <div style="background-color: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                            <MudText Typo="Typo.subtitle2" Style="color: #003087; font-weight: bold;" Class="mb-3 d-flex align-center">
+                                <MudIcon Icon="@Icons.Material.Filled.Public" Class="mr-2" Size="Size.Small" /> 
+                                🌎 Pagos Internacionales (Dólares)
+                            </MudText>
+                            <MudButton Variant="Variant.Filled" 
+                                       FullWidth="true" 
+                                       Style="background-color: #FFC439; color: #003087; font-weight: bold; border-radius: 8px; padding: 12px; text-transform: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" 
+                                       OnClick="PagarConPayPal" 
+                                       Disabled="_procesandoPago">
+                                Pagar con PayPal
+                            </MudButton>
+                            <MudText Typo="Typo.caption" Style="color: #999; display: block; text-align: center;" Class="mt-2">
+                                (Serás redirigido de forma segura a PayPal)
+                            </MudText>
+                        </div>
+
                     </div>
                 </MudPaper>
             </MudItem>
@@ -166,13 +193,11 @@
 
     private void DeshacerTerminos()
     {
-        // Si el cliente quiere modificar cantidades, apagamos el flag.
         _aceptaTerminos = false;
-        _brickRendered = false; // Forzamos a que vuelva a dibujar el Brick si vuelve a aceptar
+        _brickRendered = false; 
     }
 
     [JSInvokable] 
-    // 🔥 CAMBIO: Ahora devuelve Task<bool>
     public async Task<bool> ProcesarPago(object formDataBricks) 
     {
         try
@@ -184,11 +209,9 @@
             
             if (response.IsSuccessStatusCode)
             {
-                // 🔥 Extraemos la respuesta para leer el ID de la transacción y pasarlo a la URL
                 var resultado = await response.Content.ReadFromJsonAsync<RespuestaPagoBrickDto>();
                 string idPago = resultado?.IdPago ?? "desconocido";
 
-                // 🔥 Redirigimos a la pantalla genérica de resultados, OJO: NO VACIAR EL CARRITO AQUÍ.
                 Nav.NavigateTo($"/resultado-pago?status=approved&payment_id={idPago}"); 
                 return true; 
             }
@@ -211,6 +234,47 @@
                 config.VisibleStateDuration = 10000; 
             });
             return false; 
+        }
+        finally
+        {
+            _procesandoPago = false;
+            StateHasChanged();
+        }
+    }
+
+    // ==============================================
+    // 🔥 NUEVA INTEGRACIÓN CON PAYPAL (Backend)
+    // ==============================================
+    private async Task PagarConPayPal()
+    {
+        _procesandoPago = true;
+        try
+        {
+            // Enviamos la solicitud de pago al backend
+            var solicitud = new SolicitudPagoDto 
+            { 
+                Titulo = "Recursos de Tiempo Biblia.Luzy", 
+                TotalAPagar = CarritoService.ObtenerTotal() // El backend hará la conversión a USD
+            };
+
+            var response = await Http.PostAsJsonAsync("api/pagos/paypal", solicitud);
+            if (response.IsSuccessStatusCode)
+            {
+                var resultado = await response.Content.ReadFromJsonAsync<RespuestaPagoDto>();
+                if (resultado != null && !string.IsNullOrEmpty(resultado.UrlPago))
+                {
+                    // Redirigimos al cliente a PayPal
+                    await JS.InvokeVoidAsync("window.location.assign", resultado.UrlPago);
+                }
+            }
+            else
+            {
+                Snackbar.Add("Hubo un error al conectar con PayPal.", Severity.Error);
+            }
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("Error de conexión al procesar PayPal.", Severity.Error);
         }
         finally
         {

@@ -22,7 +22,8 @@
                          Style="height: 400px; position: absolute; inset: 0; z-index: 1;" 
                          ShowArrows="@(todasLasImagenes.Count > 1)" 
                          ShowBullets="@(todasLasImagenes.Count > 1)" 
-                         AutoCycle="true" 
+                         AutoCycle="true"
+                         AutoCycleTime="TimeSpan.FromSeconds(2.5)"
                          TData="object">
                 @foreach (var img in todasLasImagenes)
                 {
