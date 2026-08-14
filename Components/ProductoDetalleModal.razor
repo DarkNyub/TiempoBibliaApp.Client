@@ -35,20 +35,20 @@
             <!-- Gradiente oscuro -->
             <div class="modal-hero-overlay" style="z-index: 2;"></div>
             
-            <!-- 🔥 CONTENIDO CENTRADO Y RESPONSIVO -->
-            <div class="modal-hero-content d-flex flex-column align-center justify-end pb-4" style="z-index: 3; bottom: 0; left: 0; right: 0; width: 100%;">
-                <MudText Typo="Typo.h3" Class="fuente-pacifico titulo-modal px-4 text-center" Style="color: white; text-shadow: 2px 2px 6px rgba(0,0,0,0.8); line-height: 1.2;">
+            <!-- 🔥 CONTENIDO: Izquierda en PC, Centrado en Móvil -->
+            <div class="modal-hero-content responsive-hero-content" style="z-index: 3;">
+                <MudText Typo="Typo.h3" Class="fuente-pacifico titulo-modal" Style="color: white; text-shadow: 2px 2px 6px rgba(0,0,0,0.8); line-height: 1.2;">
                     @Producto.Nombre
                 </MudText>
 
                 @if (!string.IsNullOrEmpty(Producto.Tipo) && (Producto.Tipo.Equals("Serie", StringComparison.OrdinalIgnoreCase) || Producto.Tipo.Equals("Miniserie", StringComparison.OrdinalIgnoreCase)))
                 {
-                    <MudText Typo="Typo.h6" Style="color: #F8BBD0; text-shadow: 1px 1px 4px rgba(0,0,0,0.8); font-weight: bold;" Class="mt-1 text-center">
+                    <MudText Typo="Typo.h6" Style="color: #F8BBD0; text-shadow: 1px 1px 4px rgba(0,0,0,0.8); font-weight: bold;" Class="mt-1">
                         (@Producto.Tipo.ToLower())
                     </MudText>
                 }
 
-                <div class="mt-3 px-4 d-flex justify-center w-100">
+                <div class="mt-4 responsive-btn-container">
                     <MudButton Variant="Variant.Filled" 
                                StartIcon="@(Producto.EsGratuito ? Icons.Material.Filled.CloudDownload : Icons.Material.Filled.ShoppingCart)" 
                                Class="btn-comprar-modal"
@@ -61,19 +61,22 @@
         </div>
 
         <!-- CUERPO: Detalles y Tags -->
-        <div class="modal-body-container text-center">
-            <MudGrid Justify="Justify.Center">
-                <!-- Información textual centrada -->
-                <MudItem xs="12" md="12" Class="d-flex flex-column align-center">
-                    <MudText Typo="Typo.body1" Align="Align.Center" Style="font-size: 1.05rem; color: #5D4037; max-width: 800px;" Class="mb-6 mt-2">
+        <div class="modal-body-container">
+            <MudGrid>
+                <!-- Información textual (8 columnas PC, 12 Móvil) -->
+                <MudItem xs="12" md="8" Class="responsive-text-center">
+                    <MudText Typo="Typo.body1" Style="font-size: 1.1rem; color: #5D4037;" Class="mb-6 mt-2 text-justify-pc">
                         @Producto.Descripcion
                     </MudText>
-                    
-                    <MudText Typo="Typo.caption" Align="Align.Center" Style="color: #999; font-weight: bold;">Categoría Principal:</MudText>
-                    <MudText Typo="Typo.body2" Align="Align.Center" Class="mb-4" Style="color: #5D4037;">@Producto.Categoria?.Nombre</MudText>
+                </MudItem>
+                
+                <!-- Categorías y Tags (4 columnas PC, 12 Móvil) -->
+                <MudItem xs="12" md="4" Class="responsive-text-center">
+                    <MudText Typo="Typo.caption" Style="color: #999; font-weight: bold;">Categoría Principal:</MudText>
+                    <MudText Typo="Typo.body2" Class="mb-4" Style="color: #5D4037;">@Producto.Categoria?.Nombre</MudText>
 
-                    <MudText Typo="Typo.caption" Align="Align.Center" Style="color: #999; font-weight: bold;">Etiquetas (Tags):</MudText>
-                    <div class="d-flex flex-wrap justify-center gap-1 mt-2 mb-2">
+                    <MudText Typo="Typo.caption" Style="color: #999; font-weight: bold;">Etiquetas (Tags):</MudText>
+                    <div class="d-flex flex-wrap gap-1 mt-2 mb-2 responsive-flex-center">
                         @if(Producto.ProductoTags != null && Producto.ProductoTags.Any())
                         {
                             @foreach (var pt in Producto.ProductoTags.Take(5))
@@ -95,12 +98,11 @@
             <MudDivider Class="my-6" Style="background-color: #F48FB1; opacity: 0.3;" />
 
             <!-- SECCIÓN: Relacionados (More Like This) -->
-            <MudText Typo="Typo.h6" Align="Align.Center" Style="font-weight: bold; margin-bottom: 1.5rem; color: #E91E63; width: 100%;">
+            <MudText Typo="Typo.h6" Class="responsive-text-center" Style="font-weight: bold; margin-bottom: 1.5rem; color: #E91E63;">
                 Similares a este título
             </MudText>
             
-            <!-- 🔥 GRID CENTRADO PARA PRODUCTOS RELACIONADOS -->
-            <MudGrid Justify="Justify.Center" Spacing="3">
+            <MudGrid Class="responsive-grid-center" Spacing="3">
                 @if(Producto.ProductosRelacionadosOrigen != null && Producto.ProductosRelacionadosOrigen.Any())
                 {
                     @foreach(var relacionado in Producto.ProductosRelacionadosOrigen)
@@ -131,13 +133,12 @@
                 }
                 else
                 {
-                    <MudText Typo="Typo.body2" Align="Align.Center" Style="color: gray; font-style: italic; width: 100%;">No hay títulos similares en este momento.</MudText>
+                    <MudText Typo="Typo.body2" Class="responsive-text-center" Style="color: gray; font-style: italic; width: 100%;">No hay títulos similares en este momento.</MudText>
                 }
             </MudGrid>
         </div>
     </DialogContent>
 </MudDialog>
-
 
 @code {
     [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = null!;
