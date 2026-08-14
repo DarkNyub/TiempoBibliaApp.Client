@@ -41,6 +41,36 @@
     transform: scale(1.03);
     box-shadow: 0 8px 16px rgba(244, 143, 177, 0.4);
 }
+
+/* 🔥 REGLAS CSS PARA QUE EN CELULAR SE VEA PERFECTO */
+.titulo-modal[b-vdavzh5gps] {
+    font-size: 2.8rem !important;
+}
+
+.btn-comprar-modal[b-vdavzh5gps] {
+    border-radius: 30px;
+    padding: 10px 30px !important;
+    font-size: 1.1rem !important;
+    white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+    .titulo-modal[b-vdavzh5gps] {
+        font-size: 2rem !important;
+        /* Achicamos el título en celular */
+    }
+
+    .btn-comprar-modal[b-vdavzh5gps] {
+        padding: 8px 20px !important;
+        /* Achicamos el botón */
+        font-size: 0.95rem !important;
+    }
+
+    .modal-body-container[b-vdavzh5gps] {
+        padding: 1.5rem 1rem !important;
+        /* Menos margen a los lados en celular */
+    }
+}
 /* /Layout/MainLayout.razor.rz.scp.css */
 .page[b-pqk1ij2xm6] {
     position: relative;
