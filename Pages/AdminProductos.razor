@@ -58,6 +58,7 @@
 
 <!-- MODAL PARA GENERAR LINK -->
 <MudDialog @bind-Visible="mostrarModalLink" Options="dialogOptions">
+    <!-- ... (mismo código de generar link) ... -->
     <TitleContent>
         <MudText Typo="Typo.h6">Generar acceso para: <strong>@productoSeleccionado?.Nombre</strong></MudText>
     </TitleContent>
@@ -100,7 +101,10 @@
 
                     <MudTextField @bind-Value="productoEditando.Tipo" Label="Tipo (Formato)" Placeholder="Ej. Serie, Miniserie, Imprimible..." Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
 
-                    <MudTextField @bind-Value="productoEditando.ImagenUrl" Label="URL de la Imagen" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
+                    <MudTextField @bind-Value="productoEditando.ImagenUrl" Label="URL de la Imagen Principal" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
+                    
+                    <!-- 🔥 NUEVO: CAMPO PARA MÚLTIPLES IMÁGENES -->
+                    <MudTextField @bind-Value="textoImagenesSecundarias" Label="Otras Imágenes (Para el Carrusel)" Placeholder="Pega los links separados por coma (,)" Lines="3" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" HelperText="Ej: url1.jpg, url2.png" />
                 </MudItem>
 
                 <!-- COLUMNA DERECHA: Relaciones Mágicas -->
@@ -130,7 +134,6 @@
                         }
                     </MudSelect>
 
-                    <!-- 🔥 AQUÍ ESTÁN LOS TAGS -->
                     <MudSelect T="int" MultiSelection="true" @bind-SelectedValues="productoEditando.TagsIds" Label="Etiquetas (Tags)" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3"
                                MultiSelectionTextFunc="@( _ => ObtenerNombresTags(productoEditando.TagsIds) )">
                         @if (tagsDisponibles != null)
@@ -170,9 +173,12 @@
 @code {
     private List<ProductoDto>? productos;
     private List<CategoriaDto>? categoriasDisponibles;
-    private List<TagDto>? tagsDisponibles; // 🔥 Lista de Tags para el selector
+    private List<TagDto>? tagsDisponibles;
     
     private string textoBusqueda = "";
+
+    // 🔥 Variable temporal para el input de imágenes
+    private string textoImagenesSecundarias = "";
 
     private DialogOptions dialogOptions = new() { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
     private DialogOptions dialogOptionsEdicion = new() { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
@@ -195,7 +201,6 @@
         productos = await Http.GetFromJsonAsync<List<ProductoDto>>("api/Productos/admin");
         categoriasDisponibles = await Http.GetFromJsonAsync<List<CategoriaDto>>("api/Categorias/admin");
         
-        // 🔥 Cargamos los Tags. Asegúrate de tener este endpoint en tu backend o cámbialo al correcto
         try {
             tagsDisponibles = await Http.GetFromJsonAsync<List<TagDto>>("api/Tags");
         } catch { 
@@ -205,7 +210,6 @@
 
     private bool Filtrar(ProductoDto prod) => string.IsNullOrWhiteSpace(textoBusqueda) || prod.Nombre.Contains(textoBusqueda, StringComparison.OrdinalIgnoreCase);
 
-    // --- MÉTODOS DE TRADUCCIÓN VISUAL PARA MUDBLAZOR ---
     private string ObtenerNombresCategorias(IEnumerable<int> ids)
     {
         if (categoriasDisponibles == null || !ids.Any()) return "Ninguna";
@@ -213,7 +217,6 @@
         return string.Join(", ", nombres);
     }
     
-    // 🔥 Traductor visual para los Tags
     private string ObtenerNombresTags(IEnumerable<int> ids)
     {
         if (tagsDisponibles == null || !ids.Any()) return "Ninguno";
@@ -228,7 +231,6 @@
         return string.Join(", ", nombres);
     }
 
-    // --- ACCIONES DE LINK ---
     private void PrepararGeneracionLink(ProductoDto producto)
     {
         productoSeleccionado = producto;
@@ -253,7 +255,6 @@
 
     private async Task CopiarAlPortapapeles() => await _js.InvokeVoidAsync("navigator.clipboard.writeText", linkGenerado);
 
-    // --- ACCIONES DE CREACIÓN Y EDICIÓN ---
     private void AbrirModalCreacion()
     {
         productoEditando = new ProductoDto
@@ -264,8 +265,10 @@
             CategoriaId = 0, 
             CategoriasSecundariasIds = new List<int>(),
             ProductosRelacionadosIds = new List<int>(),
-            TagsIds = new List<int>()
+            TagsIds = new List<int>(),
+            ImagenesSecundarias = new List<ImagenProductoDto>()
         };
+        textoImagenesSecundarias = ""; // Limpiamos la caja
         mostrarModalEdicion = true;
     }
 
@@ -273,7 +276,6 @@
     {
         try
         {
-            // Consultamos los detalles completos actualizados desde la API por ID
             var prodDetalle = await Http.GetFromJsonAsync<ProductoDto>($"api/Productos/{producto.Id}");
             var prod = prodDetalle ?? producto;
 
@@ -294,34 +296,18 @@
                 
                 CategoriasSecundariasIds = prod.CategoriasSecundarias?.Select(c => c.CategoriaId).ToList() ?? new List<int>(),
                 ProductosRelacionadosIds = prod.ProductosRelacionadosOrigen?.Select(r => r.ProductoRelacionadoId != 0 ? r.ProductoRelacionadoId : r.ProductoRelacionadoDestino.Id).ToList() ?? new List<int>(),
+                TagsIds = prod.ProductoTags?.Select(t => t.TagId).ToList() ?? new List<int>(),
                 
-                // 🔥 CORRECCIÓN DEFINITIVA: Leemos directamente la propiedad TagId de la tabla intermedia
-                TagsIds = prod.ProductoTags?.Select(t => t.TagId).ToList() ?? new List<int>()
+                // 🔥 Traemos las imágenes
+                ImagenesSecundarias = prod.ImagenesSecundarias ?? new List<ImagenProductoDto>()
             };
+
+            // 🔥 Convertimos la lista de imágenes a texto separado por comas para mostrarlo en el input
+            textoImagenesSecundarias = string.Join(", ", productoEditando.ImagenesSecundarias.Select(i => i.Url));
         }
         catch
         {
-            // Mapeo de respaldo si falla la red
-            productoEditando = new ProductoDto
-            {
-                Id = producto.Id,
-                Nombre = producto.Nombre,
-                Descripcion = producto.Descripcion,
-                Precio = producto.Precio,
-                Descuento = producto.Descuento,
-                EsGratuito = producto.EsGratuito,
-                ImagenUrl = producto.ImagenUrl,
-                Tipo = producto.Tipo,
-                PdfUrl = producto.PdfUrl,
-                VideoUrl = producto.VideoUrl,
-                Activo = producto.Activo,
-                CategoriaId = producto.CategoriaId,
-                CategoriasSecundariasIds = producto.CategoriasSecundarias?.Select(c => c.CategoriaId).ToList() ?? new List<int>(),
-                ProductosRelacionadosIds = producto.ProductosRelacionadosOrigen?.Select(r => r.ProductoRelacionadoId != 0 ? r.ProductoRelacionadoId : r.ProductoRelacionadoDestino.Id).ToList() ?? new List<int>(),
-                
-                // 🔥 CORRECCIÓN AQUÍ TAMBIÉN
-                TagsIds = producto.ProductoTags?.Select(t => t.TagId).ToList() ?? new List<int>()
-            };
+            Snackbar.Add("Error al cargar detalles para edición.", Severity.Warning);
         }
 
         mostrarModalEdicion = true;
@@ -335,6 +321,24 @@
         {
             Snackbar.Add("Debes seleccionar una Categoría Principal", Severity.Warning);
             return;
+        }
+
+        // 🔥 PROCESAR LAS IMÁGENES SECUNDARIAS
+        // 1. Limpiamos la lista actual
+        productoEditando.ImagenesSecundarias.Clear();
+        
+        // 2. Si el administrador escribió algo, lo separamos por comas
+        if (!string.IsNullOrWhiteSpace(textoImagenesSecundarias))
+        {
+            var urls = textoImagenesSecundarias.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            foreach (var url in urls)
+            {
+                var cleanUrl = url.Trim();
+                if (!string.IsNullOrEmpty(cleanUrl))
+                {
+                    productoEditando.ImagenesSecundarias.Add(new ImagenProductoDto { Url = cleanUrl });
+                }
+            }
         }
 
         HttpResponseMessage response;

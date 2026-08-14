@@ -39,10 +39,6 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9UZXJtaW5vc0NvbmRpY2lvbmVzTW9kYWwucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/mnt/01D78A42E1FC1E30/Documents/TiempoBibliaApp/TiempoBiblia.Client/Pages/AdminProductos.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXMvQWRtaW5Qcm9kdWN0b3MucmF6b3I=
-build_metadata.AdditionalFiles.CssScope = 
-
 [/mnt/01D78A42E1FC1E30/Documents/TiempoBibliaApp/TiempoBiblia.Client/Pages/Carrito.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvQ2Fycml0by5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
@@ -70,6 +66,10 @@ build_metadata.AdditionalFiles.CssScope = b-vdavzh5gps
 [/mnt/01D78A42E1FC1E30/Documents/TiempoBibliaApp/TiempoBiblia.Client/Layout/MainLayout.razor]
 build_metadata.AdditionalFiles.TargetPath = TGF5b3V0L01haW5MYXlvdXQucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = b-pqk1ij2xm6
+
+[/mnt/01D78A42E1FC1E30/Documents/TiempoBibliaApp/TiempoBiblia.Client/Pages/AdminProductos.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvQWRtaW5Qcm9kdWN0b3MucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = b-kwcw14br4h
 
 [/mnt/01D78A42E1FC1E30/Documents/TiempoBibliaApp/TiempoBiblia.Client/Pages/Home.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvSG9tZS5yYXpvcg==
