@@ -1,5 +1,6 @@
 @page "/admin/productos"
 @using TiempoBiblia.Client.Models
+@using System.Text.RegularExpressions
 @inject HttpClient Http
 @inject IJSRuntime _js
 @inject NavigationManager Nav
@@ -58,7 +59,6 @@
 
 <!-- MODAL PARA GENERAR LINK -->
 <MudDialog @bind-Visible="mostrarModalLink" Options="dialogOptions">
-    <!-- ... (mismo código de generar link) ... -->
     <TitleContent>
         <MudText Typo="Typo.h6">Generar acceso para: <strong>@productoSeleccionado?.Nombre</strong></MudText>
     </TitleContent>
@@ -103,7 +103,6 @@
 
                     <MudTextField @bind-Value="productoEditando.ImagenUrl" Label="URL de la Imagen Principal" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
                     
-                    <!-- 🔥 NUEVO: CAMPO PARA MÚLTIPLES IMÁGENES -->
                     <MudTextField @bind-Value="textoImagenesSecundarias" Label="Otras Imágenes (Para el Carrusel)" Placeholder="Pega los links separados por coma (,)" Lines="3" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" HelperText="Ej: url1.jpg, url2.png" />
                 </MudItem>
 
@@ -156,7 +155,7 @@
                         }
                     </MudSelect>
                     
-                    <MudTextField @bind-Value="productoEditando.PdfUrl" Label="URL de Drive (El imprimible)" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
+                    <MudTextField @bind-Value="productoEditando.PdfUrl" Label="URL de Drive (El imprimible)" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" HelperText="Pega el link de compartir, se formateará solo." />
                     <MudTextField @bind-Value="productoEditando.VideoUrl" Label="URL de YouTube (El tutorial)" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
                 </MudItem>
             </MudGrid>
@@ -176,8 +175,6 @@
     private List<TagDto>? tagsDisponibles;
     
     private string textoBusqueda = "";
-
-    // 🔥 Variable temporal para el input de imágenes
     private string textoImagenesSecundarias = "";
 
     private DialogOptions dialogOptions = new() { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
@@ -268,7 +265,7 @@
             TagsIds = new List<int>(),
             ImagenesSecundarias = new List<ImagenProductoDto>()
         };
-        textoImagenesSecundarias = ""; // Limpiamos la caja
+        textoImagenesSecundarias = ""; 
         mostrarModalEdicion = true;
     }
 
@@ -298,11 +295,9 @@
                 ProductosRelacionadosIds = prod.ProductosRelacionadosOrigen?.Select(r => r.ProductoRelacionadoId != 0 ? r.ProductoRelacionadoId : r.ProductoRelacionadoDestino.Id).ToList() ?? new List<int>(),
                 TagsIds = prod.ProductoTags?.Select(t => t.TagId).ToList() ?? new List<int>(),
                 
-                // 🔥 Traemos las imágenes
                 ImagenesSecundarias = prod.ImagenesSecundarias ?? new List<ImagenProductoDto>()
             };
 
-            // 🔥 Convertimos la lista de imágenes a texto separado por comas para mostrarlo en el input
             textoImagenesSecundarias = string.Join(", ", productoEditando.ImagenesSecundarias.Select(i => i.Url));
         }
         catch
@@ -311,6 +306,23 @@
         }
 
         mostrarModalEdicion = true;
+    }
+
+    // 🔥 NUEVO: Función que extrae el ID de Drive y arma el link de descarga directa
+    private string FormatearLinkDrive(string? urlOriginal)
+    {
+        if (string.IsNullOrWhiteSpace(urlOriginal)) return string.Empty;
+        
+        // Buscamos si el link tiene el patrón clásico de Drive
+        var match = Regex.Match(urlOriginal, @"drive\.google\.com/file/d/([^/]+)");
+        if (match.Success)
+        {
+            var idDrive = match.Groups[1].Value;
+            return $"https://drive.google.com/uc?export=download&id={idDrive}";
+        }
+        
+        // Si no cumple el patrón (quizás ya está formateado o es de otra plataforma), lo devolvemos intacto
+        return urlOriginal;
     }
 
     private async Task GuardarProducto()
@@ -323,11 +335,11 @@
             return;
         }
 
-        // 🔥 PROCESAR LAS IMÁGENES SECUNDARIAS
-        // 1. Limpiamos la lista actual
+        // 🔥 FORMATEAMOS EL LINK DE DRIVE AUTOMÁTICAMENTE
+        productoEditando.PdfUrl = FormatearLinkDrive(productoEditando.PdfUrl);
+
+        // Procesar imágenes secundarias
         productoEditando.ImagenesSecundarias.Clear();
-        
-        // 2. Si el administrador escribió algo, lo separamos por comas
         if (!string.IsNullOrWhiteSpace(textoImagenesSecundarias))
         {
             var urls = textoImagenesSecundarias.Split(',', StringSplitOptions.RemoveEmptyEntries);
