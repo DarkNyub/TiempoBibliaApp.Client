@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>TiempoBiblia.Client</title>
     <base href="/" />
-    <link href="_framework/dotnet.5mokh2mutq.js" rel="preload" as="script" fetchpriority="high" crossorigin="anonymous" integrity="sha256-nZIjTUQ0a7lg38RVnSv5HXn4YKYAxjzh04bLnUG5PGE=" />
+    <link href="_framework/dotnet.0ejnvx6afi.js" rel="preload" as="script" fetchpriority="high" crossorigin="anonymous" integrity="sha256-GLvldMNaFKPquNkCdGeJeVKTIRZIw8XQjy14/w8YQEM=" />
     <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="css/app.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
@@ -14,7 +14,7 @@
     <script type="importmap">{
   "imports": {
     "./_framework/blazor.webassembly.js": "./_framework/blazor.webassembly.958z1vx7fr.js",
-    "./_framework/dotnet.js": "./_framework/dotnet.5mokh2mutq.js",
+    "./_framework/dotnet.js": "./_framework/dotnet.0ejnvx6afi.js",
     "./_framework/dotnet.native.js": "./_framework/dotnet.native.puryxhmhq9.js",
     "./_framework/dotnet.runtime.js": "./_framework/dotnet.runtime.web2r9gqbh.js"
   },
@@ -22,8 +22,8 @@
   "integrity": {
     "./_framework/blazor.webassembly.958z1vx7fr.js": "sha256-A59Tr9HqEhHMu8kU7kruLI9ayw5MRS6Lvc6z7jCbghk=",
     "./_framework/blazor.webassembly.js": "sha256-A59Tr9HqEhHMu8kU7kruLI9ayw5MRS6Lvc6z7jCbghk=",
-    "./_framework/dotnet.5mokh2mutq.js": "sha256-nZIjTUQ0a7lg38RVnSv5HXn4YKYAxjzh04bLnUG5PGE=",
-    "./_framework/dotnet.js": "sha256-nZIjTUQ0a7lg38RVnSv5HXn4YKYAxjzh04bLnUG5PGE=",
+    "./_framework/dotnet.0ejnvx6afi.js": "sha256-GLvldMNaFKPquNkCdGeJeVKTIRZIw8XQjy14/w8YQEM=",
+    "./_framework/dotnet.js": "sha256-GLvldMNaFKPquNkCdGeJeVKTIRZIw8XQjy14/w8YQEM=",
     "./_framework/dotnet.native.js": "sha256-gQbHHzCnWx8iDOC65EKbql7bEltJkfao7lmkAbIRajw=",
     "./_framework/dotnet.native.puryxhmhq9.js": "sha256-gQbHHzCnWx8iDOC65EKbql7bEltJkfao7lmkAbIRajw=",
     "./_framework/dotnet.runtime.js": "sha256-SOUHEQ3FhDAibBSR2u90NWZpoBjPuWRmH0BAATUlhJU=",
@@ -111,9 +111,11 @@
                 customization: {
                     visual: { style: { theme: 'default' } },
                     paymentMethods: {
-                        creditCard: "all", // 🔥 ¡Agrega esto! Permite crédito
-                        debitCard: "all",  // 🔥 ¡Agrega esto! Permite débito
-                        maxInstallments: 1 // Sin cuotas complicadas
+                        ticket: "all",        // Habilita Efecty y otros pagos en efectivo
+                        bankTransfer: "all",  // Habilita PSE (y a veces Nequi se procesa por aquí)
+                        creditCard: "all",
+                        debitCard: "all",
+                        mercadoPago: "all"    // Habilita pago con dinero en cuenta de MP
                     }
                 },
                 callbacks: {
