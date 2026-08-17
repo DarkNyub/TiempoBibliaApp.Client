@@ -7,8 +7,12 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-// Conectamos el cliente directamente a tu API en producción
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://tiempobibliaappapi-hbb2bzgvc4fudkcw.canadacentral-01.azurewebsites.net/") });
+// 🔥 1. LEEMOS LA URL DESDE appsettings.json
+var apiUrl = builder.Configuration["ApiSettings:BaseUrl"] 
+             ?? "https://localhost:7147/"; // URL de respaldo por si falla la lectura
+
+// 🔥 2. INYECTAMOS EL HTTP CLIENT LIMPIO
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(apiUrl) });
 builder.Services.AddScoped<TiempoBiblia.Client.Services.CarritoService>();
 
 // INYECTA MUDBLAZOR AQUÍ
