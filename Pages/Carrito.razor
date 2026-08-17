@@ -6,17 +6,13 @@
 @inject IJSRuntime JS
 @inject ISnackbar Snackbar 
 
-<!-- 🔥 Ajuste 1: MaxWidth.Large y redujimos los márgenes laterales en móvil con px-2 px-sm-4 -->
 <MudContainer MaxWidth="MaxWidth.Large" Class="pt-8 pb-16 px-2 px-sm-4">
-    <!-- 🔥 LOGO PEQUEÑITO EN EL CARRITO -->
+    <!-- LOGO PEQUEÑITO EN EL CARRITO -->
     <div class="d-flex justify-center mb-2">
         <img src="images/tiempobiblia.luzy.png" alt="Tiempo Biblia Lucy" style="height: 60px; object-fit: contain;" />
     </div>
     <div class="d-flex align-center mb-6">
-        <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" 
-                       Color="Color.Default" 
-                       OnClick="@(() => Nav.NavigateTo("/"))" 
-                       Class="mr-2" />
+        <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Default" OnClick="@(() => Nav.NavigateTo("/"))" Class="mr-2" />
         <MudText Typo="Typo.h4" Style="font-weight: bold; color: #5D4037;" Class="mb-0">
             Tu Carrito de Compras 🛒
         </MudText>
@@ -35,7 +31,7 @@
     else
     {
         <MudGrid Spacing="4">
-            <!-- LISTA DE PRODUCTOS -->
+            <!-- COLUMNA IZQUIERDA: LISTA DE PRODUCTOS -->
             <MudItem xs="12" md="7">
                 @foreach (var item in CarritoService.Items)
                 {
@@ -45,113 +41,110 @@
                         </div>
                         <div class="flex-grow-1">
                             <MudText Typo="Typo.subtitle1" Style="font-weight: bold;">@item.Producto.Nombre</MudText>
-                            <MudText Typo="Typo.body2" Style="color: #8D6E63;">$@item.Producto.Precio</MudText>
+                            <MudText Typo="Typo.body2" Style="color: #8D6E63;">$@item.Producto.Precio.ToString("N0")</MudText>
                         </div>
                         
-                        <!-- 🔥 CONTROLES OCULTABLES -->
                         <div class="d-flex align-center mx-2">
-                            @if (!_aceptaTerminos)
+                            @if (!_mostrarMediosPago)
                             {
                                 <MudIconButton Icon="@Icons.Material.Filled.Remove" Size="Size.Small" OnClick="@(() => CarritoService.ModificarCantidad(item.Producto.Id, item.Cantidad - 1))" />
                             }
                             <MudText Class="mx-2">@item.Cantidad</MudText>
-                            @if (!_aceptaTerminos)
+                            @if (!_mostrarMediosPago)
                             {
                                 <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small" OnClick="@(() => CarritoService.ModificarCantidad(item.Producto.Id, item.Cantidad + 1))" />
                             }
                         </div>
 
-                        @if (!_aceptaTerminos)
+                        @if (!_mostrarMediosPago)
                         {
                             <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => CarritoService.EliminarDelCarrito(item.Producto.Id))" />
                         }
                     </MudPaper>
                 }
                 
-                @if (!_aceptaTerminos)
+                @if (!_mostrarMediosPago)
                 {
-                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" FullWidth="true" Size="Size.Large" 
-                               Style="border-radius: 20px; font-weight: bold; border-width: 2px;" 
-                               OnClick="@(() => Nav.NavigateTo("/"))">
+                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" FullWidth="true" Size="Size.Large" Style="border-radius: 20px; font-weight: bold; border-width: 2px;" OnClick="@(() => Nav.NavigateTo("/"))">
                         Seguir Comprando
                     </MudButton>
                 }
             </MudItem>
 
-            <!-- ZONA DE PAGO DIRECTO -->
+            <!-- COLUMNA DERECHA: FLUJO DE PAGO -->
             <MudItem xs="12" md="5">
-                <!-- 🔥 Ajuste 2: Padding responsivo (pa-3 en móvil, pa-md-6 en PC) para ganar espacio -->
                 <MudPaper Elevation="2" Class="pa-3 pa-md-6" Style="border-radius: 20px; background-color: #FCE4EC;">
                     <div class="d-flex justify-space-between mb-4">
                         <MudText Typo="Typo.h5" Style="font-weight: bold;">Total a Pagar:</MudText>
-                        <MudText Typo="Typo.h5" Style="font-weight: bold; color: #E91E63;">$@CarritoService.ObtenerTotal()</MudText>
+                        <MudText Typo="Typo.h5" Style="font-weight: bold; color: #E91E63;">$@CarritoService.ObtenerTotal().ToString("N0")</MudText>
                     </div>
 
                     <MudDivider Class="my-4" />
 
-                    <!-- 🔥 LOGICA DEL CHECKBOX -->
-                    @if (!_aceptaTerminos)
+                    <!-- 🔥 PASO 1: PEDIR CORREO Y TÉRMINOS -->
+                    @if (!_mostrarMediosPago)
                     {
-                        <MudCheckBox T="bool" ValueChanged="AceptarTerminos" Color="Color.Primary" Class="mb-4">
+                        <MudText Typo="Typo.subtitle1" Style="font-weight: bold; color: #5D4037;" Class="mb-3">
+                            1. ¿A dónde enviamos tus recursos?
+                        </MudText>
+                        
+                        <MudTextField @bind-Value="_correoCliente" Label="Tu correo electrónico" Variant="Variant.Outlined" InputType="InputType.Email" Required="true" Class="mb-3" />
+                        <MudTextField @bind-Value="_confirmacionCorreo" Label="Confirma tu correo" Variant="Variant.Outlined" InputType="InputType.Email" Required="true" Class="mb-4" />
+
+                        <MudCheckBox T="bool" @bind-Value="_aceptaTerminos" Color="Color.Primary" Class="mb-4">
                             <MudText Typo="Typo.body2">
                                 Acepto el tratamiento de mis datos personales según la 
                                 <a href="javascript:void(0)" @onclick="AbrirTerminos" @onclick:preventDefault style="color: #E91E63; font-weight: bold; text-decoration: underline;">
-                                    Política de Privacidad y Habeas Data
+                                    Política de Privacidad
                                 </a>.
                             </MudText>
                         </MudCheckBox>
 
-                        <MudAlert Severity="Severity.Info" Class="mb-4">
-                            Debes aceptar las políticas para habilitar el pago seguro.
-                        </MudAlert>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Size="Size.Large" OnClick="HabilitarPagos">
+                            Continuar al Pago
+                        </MudButton>
                     }
                     else
                     {
-                        <MudButton Variant="Variant.Text" StartIcon="@Icons.Material.Filled.Edit" Color="Color.Default" OnClick="DeshacerTerminos" Class="mb-4" FullWidth="true">
-                            Modificar carrito
-                        </MudButton>
-                    }
+                        <!-- 🔥 PASO 2: MOSTRAR PASARELAS -->
+                        <div class="mb-4 d-flex justify-space-between align-center" style="background-color: white; padding: 10px; border-radius: 8px;">
+                            <div>
+                                <MudText Typo="Typo.caption" Style="color: #999;">Enviar a:</MudText>
+                                <MudText Typo="Typo.body2" Style="font-weight: bold; color: #5D4037;">@_correoCliente</MudText>
+                            </div>
+                            <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small" OnClick="ModificarDatos">Modificar</MudButton>
+                        </div>
 
-                    @if (_procesandoPago)
-                    {
-                        <div class="d-flex flex-column align-center my-4">
-                            <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
-                            <MudText Class="mt-2" Style="font-weight: bold;">Procesando tu pago...</MudText>
+                        @if (_procesandoPago)
+                        {
+                            <div class="d-flex flex-column align-center my-4">
+                                <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
+                                <MudText Class="mt-2" Style="font-weight: bold;">Procesando tu pago de forma segura...</MudText>
+                            </div>
+                        }
+
+                        <div style="@(_procesandoPago ? "display: none;" : "")" class="mt-4">
+                            <!-- OPCIÓN 1: MERCADO PAGO -->
+                            <div style="background-color: white; border-radius: 12px; padding: 8px; margin-bottom: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); overflow: hidden;">
+                                <MudText Typo="Typo.subtitle2" Style="color: #009EE3; font-weight: bold; padding: 4px;" Class="mb-2 d-flex align-center">
+                                    <MudIcon Icon="@Icons.Material.Filled.Public" Class="mr-2" Size="Size.Small" /> 
+                                    🇨🇴 Pagos en Colombia
+                                </MudText>
+                                <div id="paymentBrick_container" style="width: 100%;"></div>
+                            </div>
+
+                            <!-- OPCIÓN 2: PAYPAL -->
+                            <div style="background-color: white; border-radius: 12px; padding: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                                <MudText Typo="Typo.subtitle2" Style="color: #003087; font-weight: bold;" Class="mb-3 d-flex align-center">
+                                    <MudIcon Icon="@Icons.Material.Filled.Public" Class="mr-2" Size="Size.Small" /> 
+                                    🌎 Pagos Internacionales (USD)
+                                </MudText>
+                                <MudButton Variant="Variant.Filled" FullWidth="true" Style="background-color: #FFC439; color: #003087; font-weight: bold; border-radius: 8px; padding: 12px; text-transform: none;" OnClick="PagarConPayPal">
+                                    Pagar con PayPal
+                                </MudButton>
+                            </div>
                         </div>
                     }
-
-                    <!-- 🚀 CONTENEDOR DE MÚLTIPLES PASARELAS -->
-                    <div style="@(_procesandoPago || !_aceptaTerminos ? "display: none;" : "")" class="mt-4">
-                        
-                        <!-- OPCIÓN 1: COLOMBIA (MERCADO PAGO BRICKS) -->
-                        <!-- 🔥 Ajuste 3: Padding súper reducido a 8px para darle todo el ancho al Brick -->
-                        <div style="background-color: white; border-radius: 12px; padding: 8px; margin-bottom: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); overflow: hidden;">
-                            <MudText Typo="Typo.subtitle2" Style="color: #009EE3; font-weight: bold; padding: 4px;" Class="mb-2 d-flex align-center">
-                                <MudIcon Icon="@Icons.Material.Filled.Public" Class="mr-2" Size="Size.Small" /> 
-                                🇨🇴 Pagos en Colombia
-                            </MudText>
-                            <div id="paymentBrick_container" style="width: 100%;"></div>
-                        </div>
-
-                        <!-- OPCIÓN 2: INTERNACIONAL (PAYPAL) -->
-                        <div style="background-color: white; border-radius: 12px; padding: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                            <MudText Typo="Typo.subtitle2" Style="color: #003087; font-weight: bold;" Class="mb-3 d-flex align-center">
-                                <MudIcon Icon="@Icons.Material.Filled.Public" Class="mr-2" Size="Size.Small" /> 
-                                🌎 Pagos Internacionales (USD)
-                            </MudText>
-                            <MudButton Variant="Variant.Filled" 
-                                       FullWidth="true" 
-                                       Style="background-color: #FFC439; color: #003087; font-weight: bold; border-radius: 8px; padding: 12px; text-transform: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" 
-                                       OnClick="PagarConPayPal" 
-                                       Disabled="_procesandoPago">
-                                Pagar con PayPal
-                            </MudButton>
-                            <MudText Typo="Typo.caption" Style="color: #999; display: block; text-align: center;" Class="mt-2">
-                                (Serás redirigido a PayPal)
-                            </MudText>
-                        </div>
-
-                    </div>
                 </MudPaper>
             </MudItem>
         </MudGrid>
@@ -162,8 +155,11 @@
     [Inject] private IConfiguration Config { get; set; } = default!;
     [Inject] private IDialogService DialogService { get; set; } = default!;
 
-    private bool _procesandoPago = false;
+    private string _correoCliente = string.Empty;
+    private string _confirmacionCorreo = string.Empty;
     private bool _aceptaTerminos = false;
+    private bool _mostrarMediosPago = false;
+    private bool _procesandoPago = false;
     private bool _brickRendered = false;
     private DotNetObjectReference<Carrito>? _objRef;
 
@@ -173,11 +169,31 @@
         await DialogService.ShowAsync<TerminosCondicionesModal>("Términos y Condiciones", options);
     }
 
-    private async Task AceptarTerminos(bool aceptado)
+    private async Task HabilitarPagos()
     {
-        _aceptaTerminos = aceptado;
+        // Validaciones estrictas antes de abrir la billetera
+        if (string.IsNullOrWhiteSpace(_correoCliente) || !_correoCliente.Contains("@"))
+        {
+            Snackbar.Add("Por favor ingresa un correo válido.", Severity.Warning);
+            return;
+        }
 
-        if (_aceptaTerminos && !_brickRendered)
+        if (_correoCliente.Trim().ToLower() != _confirmacionCorreo.Trim().ToLower())
+        {
+            Snackbar.Add("Los correos no coinciden. Por favor, verifícalos.", Severity.Error);
+            return;
+        }
+
+        if (!_aceptaTerminos)
+        {
+            Snackbar.Add("Debes aceptar la política de privacidad para continuar.", Severity.Warning);
+            return;
+        }
+
+        _mostrarMediosPago = true;
+
+        // Renderizamos el Brick de Mercado Pago
+        if (!_brickRendered)
         {
             var total = CarritoService.ObtenerTotal();
             if (total > 0)
@@ -187,6 +203,8 @@
                 
                 if (!string.IsNullOrEmpty(publicKey))
                 {
+                    // Pequeño delay para permitir que el DOM dibuje el div contenedor antes de inyectar JS
+                    await Task.Delay(100); 
                     await JS.InvokeVoidAsync("renderMercadoPagoBrick", publicKey, total, _objRef);
                     _brickRendered = true;
                 }
@@ -194,12 +212,15 @@
         }
     }
 
-    private void DeshacerTerminos()
+    private void ModificarDatos()
     {
-        _aceptaTerminos = false;
-        _brickRendered = false; 
+        _mostrarMediosPago = false;
+        _brickRendered = false; // Forzamos a que el Brick se vuelva a dibujar limpio
     }
 
+    // ==============================================
+    // 🔥 MERCADO PAGO: ENVÍO DEL SÚPER PAQUETE
+    // ==============================================
     [JSInvokable] 
     public async Task<bool> ProcesarPago(object formDataBricks) 
     {
@@ -208,7 +229,14 @@
             _procesandoPago = true;
             StateHasChanged(); 
 
-            var response = await Http.PostAsJsonAsync("api/checkout/procesar-pago-brick", formDataBricks);
+            var payload = new CheckoutRequestDto
+            {
+                FormData = formDataBricks,
+                CorreoCliente = _correoCliente.Trim().ToLower(),
+                ProductosIds = CarritoService.Items.Select(i => i.Producto.Id).ToList()
+            };
+
+            var response = await Http.PostAsJsonAsync("api/checkout/procesar-pago-brick", payload);
             
             if (response.IsSuccessStatusCode)
             {
@@ -221,21 +249,13 @@
             else
             {
                 var errorBackend = await response.Content.ReadAsStringAsync();
-                
-                Snackbar.Add($"Error al pagar: {errorBackend}", Severity.Error, config => 
-                { 
-                    config.VisibleStateDuration = 10000; 
-                    config.ShowCloseIcon = true;
-                });
+                Snackbar.Add($"Error al pagar: {errorBackend}", Severity.Error, config => { config.VisibleStateDuration = 10000; });
                 return false; 
             }
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Fallo de conexión: {ex.Message}", Severity.Error, config => 
-            { 
-                config.VisibleStateDuration = 10000; 
-            });
+            Snackbar.Add($"Fallo de conexión: {ex.Message}", Severity.Error);
             return false; 
         }
         finally
@@ -245,6 +265,9 @@
         }
     }
 
+    // ==============================================
+    // 🔥 PAYPAL: ENVÍO DEL SÚPER PAQUETE
+    // ==============================================
     private async Task PagarConPayPal()
     {
         _procesandoPago = true;
@@ -253,7 +276,9 @@
             var solicitud = new SolicitudPagoDto 
             { 
                 Titulo = "Recursos de Tiempo Biblia.Luzy", 
-                TotalAPagar = CarritoService.ObtenerTotal() 
+                TotalAPagar = CarritoService.ObtenerTotal(),
+                CorreoCliente = _correoCliente.Trim().ToLower(),
+                ProductosIds = CarritoService.Items.Select(i => i.Producto.Id).ToList()
             };
 
             var response = await Http.PostAsJsonAsync("api/pagos/paypal", solicitud);

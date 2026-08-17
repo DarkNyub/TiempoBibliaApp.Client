@@ -15,7 +15,7 @@
         @Body
         
         <!-- 🔥 BOTÓN FLOTANTE DEL CARRITO (Siempre visible, excepto en /carrito) -->
-        @if (!EsPaginaCarrito)
+        @if (!OcultarCarritoFlotante)
         {
             <div class="carrito-flotante-container">
                 <MudBadge Content="Carrito.ObtenerCantidadItems()" Color="Color.Secondary" Overlap="true" Visible="@(Carrito.ObtenerCantidadItems() > 0)">
@@ -33,7 +33,9 @@
 
 @code {
     // Detectamos si estamos en la página del carrito
-    private bool EsPaginaCarrito => Nav.Uri.Contains("/carrito", StringComparison.OrdinalIgnoreCase);
+    private bool OcultarCarritoFlotante => 
+        Nav.Uri.Contains("/carrito", StringComparison.OrdinalIgnoreCase) || 
+        Nav.Uri.Contains("/resultado-pago", StringComparison.OrdinalIgnoreCase);
 
     protected override void OnInitialized()
     {

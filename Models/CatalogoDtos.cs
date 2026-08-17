@@ -115,12 +115,6 @@ public class ProductoTagDto
         public ProductoDto Producto { get; set; } = new();
         public int Cantidad { get; set; } = 1;
     }
-    // DTO para enviar el total a cobrar
-    public class SolicitudPagoDto
-    {
-        public string Titulo { get; set; } = "Recursos de Tiempo Biblia";
-        public decimal TotalAPagar { get; set; }
-    }
 
     // DTO para recibir el link de Mercado Pago
     public class RespuestaPagoDto
@@ -164,4 +158,48 @@ public class ProductoTagDto
         public string Url { get; set; } = string.Empty;
         public int ProductoId { get; set; }
     }
+
+    // ==========================================
+    // DTOs PARA PAGOS Y CHECKOUT
+    // ==========================================
+
+    // DTO para PayPal (Añadimos ProductosIds)
+    public class SolicitudPagoDto
+    {
+        public string Titulo { get; set; } = "Recursos de TiempoBiblia.Luzy";
+        public decimal TotalAPagar { get; set; }
+        public string CorreoCliente { get; set; } = string.Empty;
+        // 🔥 NUEVO: Enviamos los productos desde el momento cero
+        public List<int> ProductosIds { get; set; } = new(); 
+    }
+
+    // 🔥 NUEVO: Envoltorio para enviar la tarjeta (Bricks) + Los Productos
+    
+    public class CheckoutRequestDto
+    {
+        public object FormData { get; set; } = new();
+        public string CorreoCliente { get; set; } = string.Empty;
+        public List<int> ProductosIds { get; set; } = new();
+    }
+    
+    public class PedidoAdminDto
+    {
+        public DateTime FechaCreacion { get; set; }
+
+        public string TransaccionGatewayId { get; set; } = string.Empty;
+
+        public string CorreoCliente { get; set; } = string.Empty;
+
+        public int CantidadProductos { get; set; }
+
+        public string Pasarela { get; set; } = string.Empty;
+
+        public decimal TotalCobrado { get; set; }
+
+        public string Moneda { get; set; } = string.Empty;
+
+        public string Estado { get; set; } = string.Empty;
+    }
+
+
 } // Fin del namespace
