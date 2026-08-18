@@ -68,8 +68,7 @@
                 if (_filtroActual != "Todos" && _filtroActual != catNovedad.Nombre) continue;
 
                 // 🔥 LÓGICA: Buscar en principal o secundarias
-                var productosNovedad = productos.Where(p => p.CategoriaId == catNovedad.Id || (p.CategoriasSecundarias != null && p.CategoriasSecundarias.Any(cs => cs.CategoriaId == catNovedad.Id))
-                ).ToList();
+                var productosNovedad = productos.Where(p => p.CategoriaId == catNovedad.Id || (p.CategoriasSecundariasIds != null && p.CategoriasSecundariasIds.Contains(catNovedad.Id))).ToList();
 
                 <div class="cinta-categoria mt-8">
                     <MudText Typo="Typo.h4" Align="Align.Center" Class="fuente-pacifico" Style="color: white; letter-spacing: 2px;">
@@ -158,10 +157,7 @@
             // Filtramos si el usuario seleccionó una categoría específica
             if (_filtroActual != "Todos" && _filtroActual != categoria.Nombre) continue;
 
-            var productosCat = productos.Where(p => 
-                p.CategoriaId == categoria.Id || 
-                (p.CategoriasSecundarias != null && p.CategoriasSecundarias.Any(cs => cs.CategoriaId == categoria.Id))
-            ).ToList();
+            var productosCat = productos.Where(p => p.CategoriaId == categoria.Id || (p.CategoriasSecundariasIds != null && p.CategoriasSecundariasIds.Contains(categoria.Id))).ToList();
 
             if (productosCat.Any())
             {
