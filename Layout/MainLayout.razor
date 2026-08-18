@@ -15,7 +15,7 @@
         @Body
         
         <!-- 🔥 BOTÓN FLOTANTE DEL CARRITO (Siempre visible, excepto en /carrito) -->
-        @if (!OcultarCarritoFlotante)
+        @if (MostrarCarrito())
         {
             <div class="carrito-flotante-container">
                 <MudBadge Content="Carrito.ObtenerCantidadItems()" Color="Color.Secondary" Overlap="true" Visible="@(Carrito.ObtenerCantidadItems() > 0)">
@@ -32,10 +32,6 @@
 </style>
 
 @code {
-    // Detectamos si estamos en la página del carrito
-    private bool OcultarCarritoFlotante => 
-        Nav.Uri.Contains("/carrito", StringComparison.OrdinalIgnoreCase) || 
-        Nav.Uri.Contains("/resultado-pago", StringComparison.OrdinalIgnoreCase);
 
     protected override void OnInitialized()
     {
@@ -47,6 +43,12 @@
         
         // 3. Le decimos al layout que se actualice si cambiamos de página (para ocultar/mostrar el carrito)
         Nav.LocationChanged += ActualizarVista;
+    }
+    // 🔥 LA LISTA BLANCA: Solo mostramos el carrito en estas rutas
+    private bool MostrarCarrito()
+    {
+        var rutaBase = Nav.ToBaseRelativePath(Nav.Uri).ToLower();
+        return string.IsNullOrEmpty(rutaBase);
     }
 
     private void ActualizarVista(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)

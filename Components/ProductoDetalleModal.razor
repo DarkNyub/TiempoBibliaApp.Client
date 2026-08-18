@@ -175,6 +175,8 @@
                                 <ValidationMessage For="@(() => _nuevaResena.Calificacion)" />
                             </div>
 
+                            <MudTextField @bind-Value="_nuevaResena.NombreCliente" Label="Tu Nombre (Opcional)" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
+
                             <MudTextField @bind-Value="_nuevaResena.Comentario" Label="Tu Comentario" Variant="Variant.Outlined" Lines="3" Margin="Margin.Dense" Class="mb-4" />
                             <ValidationMessage For="@(() => _nuevaResena.Comentario)" />
 
@@ -248,7 +250,7 @@
     // 🔥 VARIABLES PARA EL SISTEMA DE RESEÑAS
     // ==========================================
     private List<ResenaDto> _listaResenas = new();
-    private CrearResenaDto _nuevaResena = new(){ NombreCliente = "Anónimo" };
+    private CrearResenaDto _nuevaResena = new();
     private bool _cargandoResenas = true;
     private bool _enviandoResena = false;
 
@@ -349,9 +351,13 @@
                 // Reiniciamos el formulario conservando las 5 estrellas por defecto
                 _nuevaResena = new CrearResenaDto { 
                     ProductoId = Producto.Id, 
-                    Calificacion = 5, 
-                    NombreCliente = "Anónimo" // <-- Aseguramos que siga siendo anónimo
+                    Calificacion = 5
                 };
+                // 🔥 REGLA DE NEGOCIO: Si está vacío, es Anónimo
+                if (string.IsNullOrWhiteSpace(_nuevaResena.NombreCliente))
+                {
+                    _nuevaResena.NombreCliente = "Anónimo";
+                }
                 
                 // Recargamos la lista visual de reseñas
                 await CargarResenasAsync(); 

@@ -25,6 +25,8 @@
 
             <MudRating @bind-SelectedValue="_calificacion" MaxValue="5" Color="Color.Warning" Size="Size.Large" Class="mb-6" />
 
+            <MudTextField @bind-Value="_nombreCliente" Label="Tu Nombre (Opcional)" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-4" Style="background-color: white;" />
+
             <MudTextField @bind-Value="_comentario" Label="Tu comentario (Opcional)" Variant="Variant.Outlined" Lines="4" Class="mb-6" Style="background-color: white;" />
 
             <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Style="border-radius: 20px; font-weight: bold;" OnClick="EnviarCalificacionGlobal" Disabled="_procesando">
@@ -50,6 +52,7 @@
     public int EstrellasQuery { get; set; }
 
     private int _calificacion = 5;
+    private string _nombreCliente = string.Empty;
     private string _comentario = string.Empty;
     private bool _procesando = false;
     private bool _enviadoExitosamente = false;
@@ -71,6 +74,7 @@
             var payload = new 
             {
                 PedidoId = this.PedidoId,
+                NombreCliente = this._nombreCliente,
                 Calificacion = this._calificacion,
                 Comentario = this._comentario
             };
