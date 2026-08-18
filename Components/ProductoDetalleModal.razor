@@ -45,9 +45,9 @@
                 <!-- 🔥 NUEVO: ESTRELLAS GRANDES EN EL DETALLE -->
                 <div class="d-flex align-center mt-1">
                     <MudRating SelectedValue="@Producto.PromedioCalificacion" MaxValue="5" ReadOnly="true" Size="Size.Medium" Color="Color.Warning" />
-                    <MudText Typo="Typo.body2" Class="ml-2" Style="color: white; text-shadow: 1px 1px 4px rgba(0,0,0,0.8); font-weight: bold;">
+                    <!-- <MudText Typo="Typo.body2" Class="ml-2" Style="color: white; text-shadow: 1px 1px 4px rgba(0,0,0,0.8); font-weight: bold;">
                         (@Producto.TotalResenas reseñas)
-                    </MudText>
+                    </MudText> -->
                 </div>
 
                 @if (!string.IsNullOrEmpty(Producto.Tipo) && (Producto.Tipo.Equals("Serie", StringComparison.OrdinalIgnoreCase) || Producto.Tipo.Equals("Miniserie", StringComparison.OrdinalIgnoreCase)))
