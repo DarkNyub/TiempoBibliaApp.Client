@@ -307,7 +307,7 @@
 
         var payload = new CheckoutRequestDto
         {
-            FormData = orderId, 
+            OrderId = orderId, 
             CorreoCliente = _correoCliente.Trim().ToLower(),
             ProductosIds = CarritoService.Items.Select(i => i.Producto.Id).ToList()
         };
