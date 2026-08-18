@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>TiempoBiblia.Client</title>
     <base href="/" />
-    <link href="_framework/dotnet.kvzk5dhu55.js" rel="preload" as="script" fetchpriority="high" crossorigin="anonymous" integrity="sha256-YATyg7fCVTDV7Tw3cXJbgaBZPdq70fHVtaWpwveGkso=" />
+    <link href="_framework/dotnet.7cs8uy3nio.js" rel="preload" as="script" fetchpriority="high" crossorigin="anonymous" integrity="sha256-iSj4+OPw1tOsVx3UE31sZOe5TwpM2dByb9bUnLUFMjM=" />
     <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="css/app.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
@@ -16,7 +16,7 @@
     "./_content/Microsoft.DotNet.HotReload.WebAssembly.Browser/Microsoft.DotNet.HotReload.WebAssembly.Browser.lib.module.js": "./_content/Microsoft.DotNet.HotReload.WebAssembly.Browser/Microsoft.DotNet.HotReload.WebAssembly.Browser.99zm1jdh75.lib.module.js",
     "./_content/MudBlazor/MudBlazor.min.js": "./_content/MudBlazor/MudBlazor.min.obq49z3y15.js",
     "./_framework/blazor.webassembly.js": "./_framework/blazor.webassembly.958z1vx7fr.js",
-    "./_framework/dotnet.js": "./_framework/dotnet.kvzk5dhu55.js",
+    "./_framework/dotnet.js": "./_framework/dotnet.7cs8uy3nio.js",
     "./_framework/dotnet.native.js": "./_framework/dotnet.native.puryxhmhq9.js",
     "./_framework/dotnet.runtime.js": "./_framework/dotnet.runtime.web2r9gqbh.js",
     "./lib/bootstrap/dist/js/bootstrap.bundle.js": "./lib/bootstrap/dist/js/bootstrap.bundle.2d0rqesrp0.js",
@@ -34,8 +34,8 @@
     "./_content/MudBlazor/MudBlazor.min.obq49z3y15.js": "sha256-RCP1u+n2DiNin+A6Edw6xsfWpI03aYyzU8pijagzeGQ=",
     "./_framework/blazor.webassembly.958z1vx7fr.js": "sha256-A59Tr9HqEhHMu8kU7kruLI9ayw5MRS6Lvc6z7jCbghk=",
     "./_framework/blazor.webassembly.js": "sha256-A59Tr9HqEhHMu8kU7kruLI9ayw5MRS6Lvc6z7jCbghk=",
-    "./_framework/dotnet.js": "sha256-YATyg7fCVTDV7Tw3cXJbgaBZPdq70fHVtaWpwveGkso=",
-    "./_framework/dotnet.kvzk5dhu55.js": "sha256-YATyg7fCVTDV7Tw3cXJbgaBZPdq70fHVtaWpwveGkso=",
+    "./_framework/dotnet.7cs8uy3nio.js": "sha256-iSj4+OPw1tOsVx3UE31sZOe5TwpM2dByb9bUnLUFMjM=",
+    "./_framework/dotnet.js": "sha256-iSj4+OPw1tOsVx3UE31sZOe5TwpM2dByb9bUnLUFMjM=",
     "./_framework/dotnet.native.js": "sha256-gQbHHzCnWx8iDOC65EKbql7bEltJkfao7lmkAbIRajw=",
     "./_framework/dotnet.native.puryxhmhq9.js": "sha256-gQbHHzCnWx8iDOC65EKbql7bEltJkfao7lmkAbIRajw=",
     "./_framework/dotnet.runtime.js": "sha256-SOUHEQ3FhDAibBSR2u90NWZpoBjPuWRmH0BAATUlhJU=",
@@ -168,6 +168,44 @@
                 'paymentBrick_container',
                 settings
             );
+        };
+    </script>
+    <script>
+        window.renderPayPalButton = function (clientId, dotNetHelper) {
+
+            // Función interna que dibuja los botones una vez que el SDK cargó
+            const renderizarBotones = () => {
+                const container = document.getElementById('paypal-button-container');
+                if (container) container.innerHTML = ''; // Limpiamos por si acaso
+
+                paypal.Buttons({
+                    style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal' },
+                    createOrder: function (data, actions) {
+                        return dotNetHelper.invokeMethodAsync('CrearOrdenPayPalAPI');
+                    },
+                    onApprove: function (data, actions) {
+                        return dotNetHelper.invokeMethodAsync('CapturarOrdenPayPalAPI', data.orderID);
+                    },
+                    onCancel: function (data) {
+                        dotNetHelper.invokeMethodAsync('CancelarPayPalAPI');
+                    },
+                    onError: function (err) {
+                        dotNetHelper.invokeMethodAsync('ErrorPayPalAPI', err.toString());
+                    }
+                }).render('#paypal-button-container');
+            };
+
+            // 1. Verificamos si PayPal ya se cargó antes para no cargarlo dos veces
+            if (window.paypal) {
+                renderizarBotones();
+                return;
+            }
+
+            // 2. Si no existe, creamos la etiqueta <script> dinámicamente usando tu Client ID
+            const script = document.createElement('script');
+            script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD`;
+            script.onload = renderizarBotones; // Cuando termine de cargar, dibuja los botones
+            document.head.appendChild(script); // Lo inyectamos en la página
         };
     </script>
 </body>

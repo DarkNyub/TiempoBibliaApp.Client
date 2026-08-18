@@ -128,6 +128,44 @@
             );
         };
     </script>
+    <script>
+        window.renderPayPalButton = function (clientId, dotNetHelper) {
+
+            // Función interna que dibuja los botones una vez que el SDK cargó
+            const renderizarBotones = () => {
+                const container = document.getElementById('paypal-button-container');
+                if (container) container.innerHTML = ''; // Limpiamos por si acaso
+
+                paypal.Buttons({
+                    style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal' },
+                    createOrder: function (data, actions) {
+                        return dotNetHelper.invokeMethodAsync('CrearOrdenPayPalAPI');
+                    },
+                    onApprove: function (data, actions) {
+                        return dotNetHelper.invokeMethodAsync('CapturarOrdenPayPalAPI', data.orderID);
+                    },
+                    onCancel: function (data) {
+                        dotNetHelper.invokeMethodAsync('CancelarPayPalAPI');
+                    },
+                    onError: function (err) {
+                        dotNetHelper.invokeMethodAsync('ErrorPayPalAPI', err.toString());
+                    }
+                }).render('#paypal-button-container');
+            };
+
+            // 1. Verificamos si PayPal ya se cargó antes para no cargarlo dos veces
+            if (window.paypal) {
+                renderizarBotones();
+                return;
+            }
+
+            // 2. Si no existe, creamos la etiqueta <script> dinámicamente usando tu Client ID
+            const script = document.createElement('script');
+            script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD`;
+            script.onload = renderizarBotones; // Cuando termine de cargar, dibuja los botones
+            document.head.appendChild(script); // Lo inyectamos en la página
+        };
+    </script>
 </body>
 
 </html>

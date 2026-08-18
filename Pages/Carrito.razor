@@ -139,9 +139,8 @@
                                     <MudIcon Icon="@Icons.Material.Filled.Public" Class="mr-2" Size="Size.Small" /> 
                                     🌎 Pagos Internacionales (USD)
                                 </MudText>
-                                <MudButton Variant="Variant.Filled" FullWidth="true" Style="background-color: #FFC439; color: #003087; font-weight: bold; border-radius: 8px; padding: 12px; text-transform: none;" OnClick="PagarConPayPal">
-                                    Pagar con PayPal
-                                </MudButton>
+                                
+                                <div id="paypal-button-container" style="width: 100%; min-height: 150px; position: relative; z-index: 1;"></div>
                             </div>
                         </div>
                     }
@@ -193,21 +192,32 @@
         _mostrarMediosPago = true;
 
         // Renderizamos el Brick de Mercado Pago
+        _mostrarMediosPago = true;
+
         if (!_brickRendered)
         {
             var total = CarritoService.ObtenerTotal();
             if (total > 0)
             {
                 _objRef = DotNetObjectReference.Create(this);
-                string? publicKey = Config["MercadoPago:PublicKey"]; 
                 
-                if (!string.IsNullOrEmpty(publicKey))
+                // 1. Renderizamos Mercado Pago
+                string? mpKey = Config["MercadoPago:PublicKey"]; 
+                if (!string.IsNullOrEmpty(mpKey))
                 {
-                    // Pequeño delay para permitir que el DOM dibuje el div contenedor antes de inyectar JS
                     await Task.Delay(100); 
-                    await JS.InvokeVoidAsync("renderMercadoPagoBrick", publicKey, total, _objRef);
-                    _brickRendered = true;
+                    await JS.InvokeVoidAsync("renderMercadoPagoBrick", mpKey, total, _objRef);
                 }
+
+                // 🔥 2. Renderizamos PayPal de forma dinámica y segura
+                string? paypalKey = Config["PayPal:ClientId"];
+                if (!string.IsNullOrEmpty(paypalKey))
+                {
+                    // Le enviamos la llave como parámetro al Javascript
+                    await JS.InvokeVoidAsync("renderPayPalButton", paypalKey, _objRef);
+                }
+                
+                _brickRendered = true;
             }
         }
     }
@@ -266,44 +276,70 @@
     }
 
     // ==============================================
-    // 🔥 PAYPAL: ENVÍO DEL SÚPER PAQUETE
+    // 🔥 PAYPAL: FLUJO DE LOS SMART BUTTONS
     // ==============================================
-    private async Task PagarConPayPal()
+    
+    [JSInvokable]
+    public async Task<string> CrearOrdenPayPalAPI()
     {
         _procesandoPago = true;
-        try
-        {
-            var solicitud = new SolicitudPagoDto 
-            { 
-                Titulo = "Recursos de Tiempo Biblia.Luzy", 
-                TotalAPagar = CarritoService.ObtenerTotal(),
-                CorreoCliente = _correoCliente.Trim().ToLower(),
-                ProductosIds = CarritoService.Items.Select(i => i.Producto.Id).ToList()
-            };
+        StateHasChanged();
 
-            var response = await Http.PostAsJsonAsync("api/pagos/paypal", solicitud);
-            if (response.IsSuccessStatusCode)
-            {
-                var resultado = await response.Content.ReadFromJsonAsync<RespuestaPagoDto>();
-                if (resultado != null && !string.IsNullOrEmpty(resultado.UrlPago))
-                {
-                    await JS.InvokeVoidAsync("window.location.assign", resultado.UrlPago);
-                }
-            }
-            else
-            {
-                Snackbar.Add("Hubo un error al conectar con PayPal.", Severity.Error);
-            }
-        }
-        catch (Exception)
+        var solicitud = new SolicitudPagoDto 
+        { 
+            Titulo = "Recursos de Tiempo Biblia.Luzy", 
+            TotalAPagar = CarritoService.ObtenerTotal(),
+            CorreoCliente = _correoCliente.Trim().ToLower(),
+            ProductosIds = CarritoService.Items.Select(i => i.Producto.Id).ToList()
+        };
+
+        // Le pedimos al backend que cree la orden
+        var response = await Http.PostAsJsonAsync("api/checkout/paypal/crear", solicitud);
+        var resultado = await response.Content.ReadFromJsonAsync<RespuestaPagoDto>();
+        
+        // Retornamos el ID de la orden a JS para que abra la ventanita emergente
+        return resultado?.UrlPago ?? string.Empty; 
+    }
+
+    [JSInvokable]
+    public async Task CapturarOrdenPayPalAPI(string orderId)
+    {
+        // El cliente aprobó en la ventanita, le decimos al backend que capture el dinero
+        var payload = new CheckoutRequestDto
         {
-            Snackbar.Add("Error de conexión al procesar PayPal.", Severity.Error);
-        }
-        finally
+            FormData = orderId, // Enviamos el ID de la orden de PayPal
+            CorreoCliente = _correoCliente.Trim().ToLower(),
+            ProductosIds = CarritoService.Items.Select(i => i.Producto.Id).ToList()
+        };
+
+        var response = await Http.PostAsJsonAsync("api/checkout/procesar-pago-paypal", payload);
+        
+        if (response.IsSuccessStatusCode)
         {
+            Nav.NavigateTo($"/resultado-pago?status=approved&payment_id={orderId}");
+        }
+        else
+        {
+            Snackbar.Add("Error al capturar el pago. No se te ha cobrado.", Severity.Error);
             _procesandoPago = false;
             StateHasChanged();
         }
+    }
+
+    [JSInvokable]
+    public void CancelarPayPalAPI()
+    {
+        Snackbar.Add("Cancelaste el pago seguro con PayPal.", Severity.Warning);
+        _procesandoPago = false;
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public void ErrorPayPalAPI(string error)
+    {
+        Snackbar.Add("Ocurrió un error con la ventanita de PayPal.", Severity.Error);
+        _procesandoPago = false;
+        StateHasChanged();
     }
 
     public void Dispose()
