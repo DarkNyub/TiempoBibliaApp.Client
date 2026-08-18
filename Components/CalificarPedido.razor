@@ -1,0 +1,98 @@
+@page "/calificar/{PedidoId:int}"
+@using MudBlazor
+@inject HttpClient Http
+@inject NavigationManager Nav
+@inject ISnackbar Snackbar
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="pt-16 pb-16">
+    <MudPaper Elevation="3" Class="pa-8 text-center" Style="border-radius: 20px; background-color: #FFF0F5;">
+        
+        @if (_enviadoExitosamente)
+        {
+            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Style="font-size: 5rem;" Class="mb-4" />
+            <MudText Typo="Typo.h4" Style="color: #E91E63; font-weight: bold;" Class="mb-2">¡Gracias por tu apoyo!</MudText>
+            <MudText Typo="Typo.body1" Style="color: #5D4037;">Tus estrellas y comentarios se han aplicado a todos los recursos de tu pedido.</MudText>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-8" Style="border-radius: 20px;" OnClick='() => Nav.NavigateTo("/")'>
+                Volver a la Tienda
+            </MudButton>
+        }
+        else
+        {
+            <MudText Typo="Typo.h4" Style="color: #E91E63; font-weight: bold;" Class="mb-2">¡Casi listo!</MudText>
+            <MudText Typo="Typo.body1" Style="color: #5D4037;" Class="mb-6">
+                Seleccionaste <strong>@_calificacion estrellas</strong>. ¿Te gustaría dejarnos un comentario general sobre cómo te fue con los recursos?
+            </MudText>
+
+            <MudRating @bind-SelectedValue="_calificacion" MaxValue="5" Color="Color.Warning" Size="Size.Large" Class="mb-6" />
+
+            <MudTextField @bind-Value="_comentario" Label="Tu comentario (Opcional)" Variant="Variant.Outlined" Lines="4" Class="mb-6" Style="background-color: white;" />
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Style="border-radius: 20px; font-weight: bold;" OnClick="EnviarCalificacionGlobal" Disabled="_procesando">
+                @if (_procesando)
+                {
+                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                    <MudText Class="ms-2">Enviando...</MudText>
+                }
+                else
+                {
+                    <MudText>Confirmar y Enviar</MudText>
+                }
+            </MudButton>
+        }
+
+    </MudPaper>
+</MudContainer>
+
+@code {
+    [Parameter] public int PedidoId { get; set; }
+    
+    [SupplyParameterFromQuery(Name = "estrellas")]
+    public int EstrellasQuery { get; set; }
+
+    private int _calificacion = 5;
+    private string _comentario = string.Empty;
+    private bool _procesando = false;
+    private bool _enviadoExitosamente = false;
+
+    protected override void OnInitialized()
+    {
+        // Atrapamos las estrellas que vienen de la URL del correo
+        if (EstrellasQuery >= 1 && EstrellasQuery <= 5)
+        {
+            _calificacion = EstrellasQuery;
+        }
+    }
+
+    private async Task EnviarCalificacionGlobal()
+    {
+        _procesando = true;
+        try
+        {
+            var payload = new 
+            {
+                PedidoId = this.PedidoId,
+                Calificacion = this._calificacion,
+                Comentario = this._comentario
+            };
+
+            var response = await Http.PostAsJsonAsync("api/resenas/global", payload);
+
+            if (response.IsSuccessStatusCode)
+            {
+                _enviadoExitosamente = true;
+            }
+            else
+            {
+                Snackbar.Add("Ocurrió un error al enviar tu reseña.", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("Error de conexión.", Severity.Error);
+        }
+        finally
+        {
+            _procesando = false;
+        }
+    }
+}
