@@ -1,6 +1,7 @@
 @using System.Net.Http.Headers
 @inject HttpClient Http
 @inject ISnackbar Snackbar
+@inject IJSRuntime _js 
 
 <MudPaper Elevation="0" Class="pa-4 text-center" Style="border: 2px dashed #F48FB1; border-radius: 12px; background-color: #FFF0F5;">
     
@@ -10,11 +11,24 @@
         <MudIcon Icon="@Icons.Material.Filled.CloudUpload" Size="Size.Large" Style="color: #E91E63;" Class="mb-2" />
         <MudText Typo="Typo.body1" Style="color: #5D4037; font-weight: bold;" Class="mb-4">Sube una imagen para recortar</MudText>
         
-        <!-- 🔥 FIX MUD-BLAZOR: Truco maestro. Un botón falso que activa un input oculto real -->
         <MudButton HtmlTag="label" for="fileInput" Variant="Variant.Filled" Color="Color.Primary" Style="border-radius: 20px; cursor: pointer;">
             Explorar Archivos
         </MudButton>
         <InputFile id="fileInput" OnChange="ProcesarArchivo" accept=".png, .jpg, .jpeg, .webp" style="display: none;" />
+
+        <!-- 🔥 FASE 3: MOSTRAR EL LINK GENERADO (Con botones de copiar y probar) -->
+        @if (!string.IsNullOrEmpty(_urlGenerada))
+        {
+            <div class="mt-6 pa-3" style="background-color: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <MudText Typo="Typo.body2" Style="color: #4CAF50; font-weight: bold;" Class="mb-2">¡Imagen lista! Copia tu URL:</MudText>
+                <MudStack Row="true" AlignItems="AlignItems.Center">
+                    <MudTextField Value="@_urlGenerada" Variant="Variant.Outlined" ReadOnly="true" Margin="Margin.Dense" />
+                    <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" Color="Color.Primary" Variant="Variant.Filled" OnClick="CopiarEnlace" title="Copiar URL" />
+                    <!-- 🔥 NUEVO: Botón para probar la imagen recién subida -->
+                    <MudIconButton Icon="@Icons.Material.Filled.OpenInNew" Color="Color.Info" Variant="Variant.Filled" OnClick="ProbarEnlace" title="Probar URL" />
+                </MudStack>
+            </div>
+        }
     }
     else
     {
@@ -49,10 +63,9 @@
 </MudPaper>
 
 @code {
-    [Parameter] public EventCallback<string> OnImagenSubida { get; set; }
-
     private CropperComponent? _cropper;
     private string _imagenSeleccionada = string.Empty;
+    private string _urlGenerada = string.Empty; 
     private bool _subiendo = false;
 
     private Options _opcionesCropper = new Options
@@ -72,6 +85,7 @@
             await archivo.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024).ReadAsync(buffer);
             var base64 = Convert.ToBase64String(buffer);
             _imagenSeleccionada = $"data:{archivo.ContentType};base64,{base64}";
+            _urlGenerada = string.Empty; 
         }
     }
 
@@ -87,17 +101,17 @@
 
         try
         {
-            // 🔥 FIX 1: La calidad ahora se pasa como un texto en minúsculas ("high", "medium" o "low")
             var opcionesDeRecorte = new GetCroppedCanvasOptions
             {
                 ImageSmoothingEnabled = true,
-                ImageSmoothingQuality = "high" 
+                ImageSmoothingQuality = "high"
             };
 
-            // 🔥 FIX 2: Silenciamos temporalmente la advertencia para mantener tu terminal impecable (en verde)
-#pragma warning disable CS0618
+            // 🔥 FIX: Volvemos al método que sí devuelve un string (texto)
+            // y usamos pragma para callar la advertencia amarilla del compilador.
+            #pragma warning disable CS0618
             var urlRecortada = await _cropper.GetCroppedCanvasDataURLAsync(opcionesDeRecorte);
-#pragma warning restore CS0618
+            #pragma warning restore CS0618
 
             var base64Data = urlRecortada.Split(',')[1];
             var bytes = Convert.FromBase64String(base64Data);
@@ -115,10 +129,9 @@
                 var resultado = await response.Content.ReadFromJsonAsync<RespuestaSubida>();
                 if (resultado != null && !string.IsNullOrEmpty(resultado.Url))
                 {
-                    Snackbar.Add("¡Imagen subida con éxito!", Severity.Success);
+                    Snackbar.Add("¡Imagen subida con éxito a GitHub!", Severity.Success);
                     _imagenSeleccionada = string.Empty; 
-                    
-                    await OnImagenSubida.InvokeAsync(resultado.Url);
+                    _urlGenerada = resultado.Url; 
                 }
             }
             else
@@ -134,6 +147,24 @@
         finally
         {
             _subiendo = false;
+        }
+    }
+
+    private async Task CopiarEnlace()
+    {
+        if (!string.IsNullOrEmpty(_urlGenerada))
+        {
+            await _js.InvokeVoidAsync("navigator.clipboard.writeText", _urlGenerada);
+            Snackbar.Add("¡Enlace copiado al portapapeles!", Severity.Info);
+        }
+    }
+
+    // 🔥 NUEVO: Función para probar la imagen recién subida
+    private async Task ProbarEnlace()
+    {
+        if (!string.IsNullOrEmpty(_urlGenerada))
+        {
+            await _js.InvokeVoidAsync("window.open", _urlGenerada, "_blank");
         }
     }
 

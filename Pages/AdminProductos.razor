@@ -101,11 +101,13 @@
 
                     <MudTextField @bind-Value="productoEditando.Tipo" Label="Tipo (Formato)" Placeholder="Ej. Serie, Miniserie, Imprimible..." Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
 
-                    <MudTextField @bind-Value="productoEditando.ImagenUrl" Label="URL de la Imagen Principal" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
+                    <MudTextField @bind-Value="productoEditando.ImagenUrl" Label="URL de la Imagen Principal" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" 
+                                  Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.OpenInNew" AdornmentColor="Color.Info" 
+                                  OnAdornmentClick="@(() => AbrirUrl(productoEditando.ImagenUrl))" title="Probar enlace" />
                     
                     <MudTextField @bind-Value="textoImagenesSecundarias" Label="Otras Imágenes (Para el Carrusel)" Placeholder="Pega los links separados por coma (,)" Lines="3" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" HelperText="Ej: url1.jpg, url2.png" />
 
-                    <SubidorImagen OnImagenSubida="ActualizarImagenProducto" />
+                    <SubidorImagen/>
                 </MudItem>
 
                 <!-- COLUMNA DERECHA: Relaciones Mágicas -->
@@ -157,8 +159,13 @@
                         }
                     </MudSelect>
                     
-                    <MudTextField @bind-Value="productoEditando.PdfUrl" Label="URL de Drive (El imprimible)" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" HelperText="Pega el link de compartir, se formateará solo." />
-                    <MudTextField @bind-Value="productoEditando.VideoUrl" Label="URL de YouTube (El tutorial)" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
+                    <MudTextField @bind-Value="productoEditando.PdfUrl" Label="URL de Drive (El imprimible)" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" HelperText="Pega el link de compartir, se formateará solo." 
+                                  Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.OpenInNew" AdornmentColor="Color.Info" 
+                                  OnAdornmentClick="@(() => AbrirUrl(productoEditando.PdfUrl))" title="Probar enlace" />
+
+                    <MudTextField @bind-Value="productoEditando.VideoUrl" Label="URL de YouTube (El tutorial)" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" 
+                                  Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.OpenInNew" AdornmentColor="Color.Info" 
+                                  OnAdornmentClick="@(() => AbrirUrl(productoEditando.VideoUrl))" title="Probar enlace" />
                 </MudItem>
             </MudGrid>
         }
@@ -400,13 +407,20 @@
             }
         }
     }
-    private void ActualizarImagenProducto(string urlPublica)
+    // 🔥 NUEVO: Función para probar los links abriéndolos en una nueva pestaña
+    private async Task AbrirUrl(string? url)
     {
-        // Guardamos la URL mágica de GitHub directamente en el formulario actual
-        if (productoEditando != null)
+        if (!string.IsNullOrWhiteSpace(url))
         {
-            productoEditando.ImagenUrl = urlPublica; 
-            StateHasChanged(); // Obliga a la pantalla a refrescarse para mostrar el link
+            // Si es un link de Drive, lo formateamos al vuelo para probar la descarga real
+            string urlFinal = FormatearLinkDrive(url);
+            
+            // Usamos JSInterop para abrir la pestaña nueva (_blank)
+            await _js.InvokeVoidAsync("window.open", urlFinal, "_blank");
+        }
+        else
+        {
+            Snackbar.Add("El campo está vacío. Pega un link primero para probarlo.", Severity.Warning);
         }
     }
 }
