@@ -163,7 +163,7 @@
                             ¿Ya lo descargaste?
                         </MudText>
                         <MudText Typo="Typo.body2" Class="mb-4" Style="color: #888;">
-                            Cuéntanos qué te pareció este recurso y ayuda a otros a decidirse.
+                            Cuéntanos qué te pareció este recurso.
                         </MudText>
 
                         <EditForm Model="_nuevaResena" OnValidSubmit="EnviarResena">
@@ -174,9 +174,6 @@
                                 <MudRating @bind-SelectedValue="_nuevaResena.Calificacion" MaxValue="5" Color="Color.Warning" Size="Size.Large" />
                                 <ValidationMessage For="@(() => _nuevaResena.Calificacion)" />
                             </div>
-
-                            <MudTextField @bind-Value="_nuevaResena.NombreCliente" Label="Tu Nombre" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
-                            <ValidationMessage For="@(() => _nuevaResena.NombreCliente)" />
 
                             <MudTextField @bind-Value="_nuevaResena.Comentario" Label="Tu Comentario" Variant="Variant.Outlined" Lines="3" Margin="Margin.Dense" Class="mb-4" />
                             <ValidationMessage For="@(() => _nuevaResena.Comentario)" />
@@ -251,7 +248,7 @@
     // 🔥 VARIABLES PARA EL SISTEMA DE RESEÑAS
     // ==========================================
     private List<ResenaDto> _listaResenas = new();
-    private CrearResenaDto _nuevaResena = new();
+    private CrearResenaDto _nuevaResena = new(){ NombreCliente = "Anónimo" };
     private bool _cargandoResenas = true;
     private bool _enviandoResena = false;
 
@@ -350,7 +347,11 @@
                 Snackbar.Add("¡Gracias por tu opinión!", Severity.Success);
                 
                 // Reiniciamos el formulario conservando las 5 estrellas por defecto
-                _nuevaResena = new CrearResenaDto { ProductoId = Producto.Id, Calificacion = 5 };
+                _nuevaResena = new CrearResenaDto { 
+                    ProductoId = Producto.Id, 
+                    Calificacion = 5, 
+                    NombreCliente = "Anónimo" // <-- Aseguramos que siga siendo anónimo
+                };
                 
                 // Recargamos la lista visual de reseñas
                 await CargarResenasAsync(); 
