@@ -5,7 +5,7 @@ var e=!1;const t=async()=>WebAssembly.validate(new Uint8Array([0,97,115,109,1,0,
   "mainAssemblyName": "TiempoBiblia.Client",
   "applicationEnvironment": "Development",
   "resources": {
-    "hash": "sha256-h2rAX9Suk/O0O51Yt6lu4ELWmUTTXBpon509GPouwkw=",
+    "hash": "sha256-E9W9cQWWNpiXjAU7qO3P04t6Ipd1ZUWyGDWfU5EJREg=",
     "jsModuleNative": [
       {
         "name": "dotnet.native.puryxhmhq9.js"
@@ -1260,16 +1260,16 @@ var e=!1;const t=async()=>WebAssembly.validate(new Uint8Array([0,97,115,109,1,0,
       },
       {
         "virtualPath": "TiempoBiblia.Client.wasm",
-        "name": "TiempoBiblia.Client.c6tizf41m4.wasm",
-        "hash": "sha256-NIPeAuyvSKRBdcK9YkQDDkvZSWWBafsYAXiLhiI5SAY=",
+        "name": "TiempoBiblia.Client.199s5xkmh9.wasm",
+        "hash": "sha256-K9mQisdk4cHWtCXWKneZP/sEJBWRO/JbPxtero5uFXs=",
         "cache": "force-cache"
       }
     ],
     "pdb": [
       {
         "virtualPath": "TiempoBiblia.Client.pdb",
-        "name": "TiempoBiblia.Client.qqeq8vuium.pdb",
-        "hash": "sha256-3u6LprEW/nmF99tFLXqCeBcfaJYrVkeCSghTrj3dE3s=",
+        "name": "TiempoBiblia.Client.q156ioxn90.pdb",
+        "hash": "sha256-8h79jtq1/qv+rRA417dJAtpGlP7zeMjvL6ZPUlmu8YU=",
         "cache": "force-cache"
       }
     ],
