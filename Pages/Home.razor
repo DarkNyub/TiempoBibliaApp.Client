@@ -194,6 +194,51 @@
             }
         }
     }
+    @* ==========================================
+       🔥 SECCIÓN 6: FOOTER / REDES SOCIALES
+       ========================================== *@
+    <div style="background-color: #FFF0F5; border-radius: 20px; padding: 40px 20px; margin-top: 20px; box-shadow: 0 4px 15px rgba(233, 30, 99, 0.1);" class="d-flex flex-column align-center text-center">
+        <MudText Typo="Typo.h4" Class="fuente-pacifico mb-2" Style="color: #E91E63;">
+            ¡Síguenos en nuestras redes!
+        </MudText>
+        <MudText Typo="Typo.body1" Style="color: #5D4037;" Class="mb-6">
+            Únete a nuestra comunidad y no te pierdas ningún recurso nuevo.
+        </MudText>
+
+        <div class="d-flex justify-center gap-6 flex-wrap">
+            <!-- Instagram -->
+            <MudIconButton Icon="@(Icons.Custom.Brands.Instagram)" 
+                           Color="Color.Secondary" 
+                           Size="Size.Large" 
+                           Href="https://www.instagram.com/tiempobiblia.luzy/" 
+                           Target="_blank" 
+                           Style="background-color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 50%; padding: 12px;" />
+            
+            <!-- TikTok -->
+            <MudIconButton Icon="@(Icons.Custom.Brands.TikTok)" 
+                           Color="Color.Dark" 
+                           Size="Size.Large" 
+                           Href='@("https://www.tiktok.com/@tiempobiblia.luzy")' 
+                           Target="_blank"
+                           Style="background-color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 50%; padding: 12px;" />
+            
+            <!-- YouTube -->
+            <MudIconButton Icon="@(Icons.Custom.Brands.YouTube)" 
+                           Color="Color.Error" 
+                           Size="Size.Large" 
+                           Href='@("https://www.youtube.com/@tiempobiblialuzy")' 
+                           Target="_blank"
+                           Style="background-color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 50%; padding: 12px;" />
+            
+            <!-- WhatsApp -->
+            <MudIconButton Icon="@(Icons.Custom.Brands.WhatsApp)" 
+                           Color="Color.Success" 
+                           Size="Size.Large" 
+                           Href="https://whatsapp.com/channel/0029Vb85iDBAojYvooQVSg2r" 
+                           Target="_blank"
+                           Style="background-color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 50%; padding: 12px;" />
+        </div>
+    </div>
 </MudContainer>
 
 @code {

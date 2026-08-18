@@ -92,7 +92,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add("Error de conexión.", Severity.Error);
+            Snackbar.Add($"Error al cargar catálogo: {ex.Message}");
         }
         finally
         {
