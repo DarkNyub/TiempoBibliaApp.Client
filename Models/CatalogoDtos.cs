@@ -57,6 +57,9 @@ namespace TiempoBiblia.Client.Models
         public IReadOnlyCollection<int> CategoriasSecundariasIds { get; set; } = new List<int>();
         public IReadOnlyCollection<int> TagsIds { get; set; } = new List<int>();
         public IReadOnlyCollection<int> ProductosRelacionadosIds { get; set; } = new List<int>();
+        // 🔥 NUEVOS CAMPOS: SISTEMA DE RESEÑAS
+        public int PromedioCalificacion { get; set; } = 5; // Por defecto 5 estrellas
+        public int TotalResenas { get; set; } = 0;
     }
     // 🔥 NUEVO: DTO para Crear/Editar desde el Frontend
     public class ProductoMutacionDto

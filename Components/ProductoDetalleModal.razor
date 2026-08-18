@@ -41,6 +41,14 @@
                 <MudText Typo="Typo.h3" Class="fuente-pacifico titulo-modal" Style="color: white; text-shadow: 2px 2px 6px rgba(0,0,0,0.8); line-height: 1.2;">
                     @Producto.Nombre
                 </MudText>
+                
+                <!-- 🔥 NUEVO: ESTRELLAS GRANDES EN EL DETALLE -->
+                <div class="d-flex align-center mt-1">
+                    <MudRating SelectedValue="@Producto.PromedioCalificacion" MaxValue="5" ReadOnly="true" Size="Size.Medium" Color="Color.Warning" />
+                    <MudText Typo="Typo.body2" Class="ml-2" Style="color: white; text-shadow: 1px 1px 4px rgba(0,0,0,0.8); font-weight: bold;">
+                        (@Producto.TotalResenas reseñas)
+                    </MudText>
+                </div>
 
                 @if (!string.IsNullOrEmpty(Producto.Tipo) && (Producto.Tipo.Equals("Serie", StringComparison.OrdinalIgnoreCase) || Producto.Tipo.Equals("Miniserie", StringComparison.OrdinalIgnoreCase)))
                 {
@@ -301,6 +309,23 @@
         {
             _cargandoResenas = true;
             _listaResenas = await Http.GetFromJsonAsync<List<ResenaDto>>($"api/resenas/producto/{Producto.Id}") ?? new List<ResenaDto>();
+
+            // 🔥 MAGIA MATEMÁTICA: Recalculamos promedios en tiempo real
+            if (_listaResenas.Any())
+            {
+                Producto.TotalResenas = _listaResenas.Count;
+                // Calculamos el promedio y usamos Math.Ceiling para redondear siempre hacia arriba
+                double promedioReal = _listaResenas.Average(r => r.Calificacion);
+                Producto.PromedioCalificacion = (int)Math.Ceiling(promedioReal);
+            }
+            else
+            {
+                // Tu regla de negocio: Si no hay, 5 estrellas
+                Producto.TotalResenas = 0;
+                Producto.PromedioCalificacion = 5;
+            }
+            
+            StateHasChanged(); // Forzamos a repintar el UI
         }
         catch (Exception ex)
         {
