@@ -282,9 +282,6 @@
     [JSInvokable]
     public async Task<string> CrearOrdenPayPalAPI()
     {
-        _procesandoPago = true;
-        StateHasChanged();
-
         var solicitud = new SolicitudPagoDto 
         { 
             Titulo = "Recursos de Tiempo Biblia.Luzy", 
@@ -304,10 +301,13 @@
     [JSInvokable]
     public async Task CapturarOrdenPayPalAPI(string orderId)
     {
-        // El cliente aprobó en la ventanita, le decimos al backend que capture el dinero
+        // 🔥 AQUÍ SÍ PONEMOS LA CARGA, porque el cliente ya aprobó y estamos cobrando
+        _procesandoPago = true;
+        StateHasChanged();
+
         var payload = new CheckoutRequestDto
         {
-            FormData = orderId, // Enviamos el ID de la orden de PayPal
+            FormData = orderId, 
             CorreoCliente = _correoCliente.Trim().ToLower(),
             ProductosIds = CarritoService.Items.Select(i => i.Producto.Id).ToList()
         };
