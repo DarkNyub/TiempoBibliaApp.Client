@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace TiempoBiblia.Client.Models
 {
     public class CategoriaDto
@@ -12,7 +14,7 @@ namespace TiempoBiblia.Client.Models
         public int Id { get; set; }
         public string Nombre { get; set; } = string.Empty;
     }
-public class ProductoTagDto
+    public class ProductoTagDto
     {
         public int TagId { get; set; } // 🔥 LÍNEA NUEVA: Leemos el ID directo de la tabla intermedia
         public TagDto Tag { get; set; } = new();
@@ -202,5 +204,30 @@ public class ProductoTagDto
         public string Estado { get; set; } = string.Empty;
     }
 
+    // DTO para leer las reseñas que vienen del servidor
+    public class ResenaDto
+    {
+        public int Id { get; set; }
+        public string NombreCliente { get; set; } = string.Empty;
+        public int Calificacion { get; set; }
+        public string Comentario { get; set; } = string.Empty;
+        public DateTime FechaCreacion { get; set; }
+    }
 
+    // DTO para enviar una nueva reseña al servidor
+    public class CrearResenaDto
+    {
+        public int ProductoId { get; set; }
+        
+        [Required(ErrorMessage = "Tu nombre es obligatorio.")]
+        [MaxLength(100)]
+        public string NombreCliente { get; set; } = string.Empty;
+
+        [Range(1, 5, ErrorMessage = "Debes seleccionar entre 1 y 5 estrellas.")]
+        public int Calificacion { get; set; } = 5; // Por defecto 5 estrellas
+
+        [Required(ErrorMessage = "Por favor, cuéntanos qué te pareció el recurso.")]
+        [MaxLength(1000)]
+        public string Comentario { get; set; } = string.Empty;
+    }
 } // Fin del namespace

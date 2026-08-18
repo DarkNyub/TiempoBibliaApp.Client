@@ -137,6 +137,98 @@
                     <MudText Typo="Typo.body2" Class="responsive-text-center" Style="color: gray; font-style: italic; width: 100%;">No hay títulos similares en este momento.</MudText>
                 }
             </MudGrid>
+
+            <!-- ========================================== -->
+            <!-- 🔥 NUEVA SECCIÓN: SISTEMA DE RESEÑAS      -->
+            <!-- ========================================== -->
+            <MudDivider Class="my-10" Style="background-color: #F48FB1; opacity: 0.3;" />
+            
+            <MudText Typo="Typo.h6" Class="responsive-text-center" Style="font-weight: bold; margin-bottom: 1.5rem; color: #E91E63;">
+                Opiniones de nuestra comunidad ⭐
+            </MudText>
+
+            <MudGrid>
+                <!-- COLUMNA IZQUIERDA: FORMULARIO -->
+                <MudItem xs="12" md="4">
+                    <MudPaper Elevation="2" Class="pa-6" Style="border-radius: 16px; background-color: white;">
+                        <MudText Typo="Typo.subtitle1" Style="color: #5D4037; font-weight: bold;" Class="mb-2">
+                            ¿Ya lo descargaste?
+                        </MudText>
+                        <MudText Typo="Typo.body2" Class="mb-4" Style="color: #888;">
+                            Cuéntanos qué te pareció este recurso y ayuda a otros a decidirse.
+                        </MudText>
+
+                        <EditForm Model="_nuevaResena" OnValidSubmit="EnviarResena">
+                            <DataAnnotationsValidator />
+
+                            <div class="mb-4 text-center">
+                                <MudText Typo="Typo.caption" Style="color: #888;">Tu calificación:</MudText><br/>
+                                <MudRating @bind-SelectedValue="_nuevaResena.Calificacion" MaxValue="5" Color="Color.Warning" Size="Size.Large" />
+                                <ValidationMessage For="@(() => _nuevaResena.Calificacion)" />
+                            </div>
+
+                            <MudTextField @bind-Value="_nuevaResena.NombreCliente" Label="Tu Nombre" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
+                            <ValidationMessage For="@(() => _nuevaResena.NombreCliente)" />
+
+                            <MudTextField @bind-Value="_nuevaResena.Comentario" Label="Tu Comentario" Variant="Variant.Outlined" Lines="3" Margin="Margin.Dense" Class="mb-4" />
+                            <ValidationMessage For="@(() => _nuevaResena.Comentario)" />
+
+                            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Style="border-radius: 20px;" Disabled="_enviandoResena">
+                                @if (_enviandoResena)
+                                {
+                                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                                    <MudText Class="ms-2">Enviando...</MudText>
+                                }
+                                else
+                                {
+                                    <MudText>Publicar Reseña</MudText>
+                                }
+                            </MudButton>
+                        </EditForm>
+                    </MudPaper>
+                </MudItem>
+
+                <!-- COLUMNA DERECHA: LISTA DE RESEÑAS -->
+                <MudItem xs="12" md="8">
+                    @if (_cargandoResenas)
+                    {
+                        <div class="d-flex justify-center my-8">
+                            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+                        </div>
+                    }
+                    else if (!_listaResenas.Any())
+                    {
+                        <MudPaper Elevation="0" Class="pa-8 text-center" Style="border: 2px dashed #FCE4EC; border-radius: 16px; background-color: transparent;">
+                            <MudIcon Icon="@Icons.Material.Filled.RateReview" Size="Size.Large" Style="color: #F8BBD0;" Class="mb-3"/>
+                            <MudText Typo="Typo.h6" Style="color: #8D6E63;">Aún no hay opiniones</MudText>
+                            <MudText Typo="Typo.body2" Style="color: #999;">¡Sé el primero en calificar este recurso!</MudText>
+                        </MudPaper>
+                    }
+                    else
+                    {
+                        <div style="max-height: 400px; overflow-y: auto; padding-right: 10px;">
+                            @foreach (var resena in _listaResenas)
+                            {
+                                <MudPaper Elevation="0" Class="pa-4 mb-4" Style="border-radius: 12px; border-left: 4px solid #F48FB1; background-color: white;">
+                                    <div class="d-flex justify-space-between align-center mb-2">
+                                        <MudText Typo="Typo.subtitle1" Style="font-weight: bold; color: #5D4037;">
+                                            <MudIcon Icon="@Icons.Material.Filled.PersonOutline" Size="Size.Small" Class="mr-1" />
+                                            @resena.NombreCliente
+                                        </MudText>
+                                        <MudText Typo="Typo.caption" Style="color: #999;">
+                                            @resena.FechaCreacion.ToString("dd MMM yyyy")
+                                        </MudText>
+                                    </div>
+                                    <MudRating SelectedValue="@resena.Calificacion" MaxValue="5" ReadOnly="true" Color="Color.Warning" Size="Size.Small" Class="mb-2" />
+                                    <MudText Typo="Typo.body2" Style="color: #424242; font-style: italic;">
+                                        "@resena.Comentario"
+                                    </MudText>
+                                </MudPaper>
+                            }
+                        </div>
+                    }
+                </MudItem>
+            </MudGrid>
         </div>
     </DialogContent>
 </MudDialog>
@@ -147,7 +239,16 @@
 
     private List<string> todasLasImagenes = new();
 
-    protected override void OnParametersSet()
+    // ==========================================
+    // 🔥 VARIABLES PARA EL SISTEMA DE RESEÑAS
+    // ==========================================
+    private List<ResenaDto> _listaResenas = new();
+    private CrearResenaDto _nuevaResena = new();
+    private bool _cargandoResenas = true;
+    private bool _enviandoResena = false;
+
+    // 🔥 MODIFICADO: Cambiamos a OnParametersSetAsync para manejar peticiones HTTP
+    protected override async Task OnParametersSetAsync()
     {
         todasLasImagenes.Clear();
         var mainImg = string.IsNullOrEmpty(Producto.ImagenUrl) ? "images/default.jpg" : Producto.ImagenUrl;
@@ -157,6 +258,12 @@
         {
             todasLasImagenes.AddRange(Producto.ImagenesSecundarias.Select(i => i.Url));
         }
+
+        // Preparamos el ID del producto para el formulario de reseñas
+        _nuevaResena.ProductoId = Producto.Id;
+        
+        // Disparamos la carga de reseñas de forma asíncrona
+        await CargarResenasAsync();
     }
 
     private void Cancelar() => MudDialog.Cancel();
@@ -165,7 +272,6 @@
     {
         Carrito.AgregarAlCarrito(Producto);
         Snackbar.Add($"¡{Producto.Nombre} se agregó al carrito!", Severity.Success);
-        //MudDialog.Close(); 
     }
 
     private async Task AbrirProductoRelacionado(int idProducto)
@@ -184,6 +290,59 @@
         catch (Exception)
         {
             Snackbar.Add("Hubo un error al cargar el producto relacionado.", Severity.Error);
+        }
+    }
+
+    // ==========================================
+    // 🔥 LÓGICA DE RESEÑAS
+    // ==========================================
+    private async Task CargarResenasAsync()
+    {
+        try
+        {
+            _cargandoResenas = true;
+            _listaResenas = await Http.GetFromJsonAsync<List<ResenaDto>>($"api/resenas/producto/{Producto.Id}") ?? new List<ResenaDto>();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar reseñas: {ex.Message}");
+        }
+        finally
+        {
+            _cargandoResenas = false;
+        }
+    }
+
+    private async Task EnviarResena()
+    {
+        try
+        {
+            _enviandoResena = true;
+            
+            var response = await Http.PostAsJsonAsync("api/resenas", _nuevaResena);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("¡Gracias por tu opinión!", Severity.Success);
+                
+                // Reiniciamos el formulario conservando las 5 estrellas por defecto
+                _nuevaResena = new CrearResenaDto { ProductoId = Producto.Id, Calificacion = 5 };
+                
+                // Recargamos la lista visual de reseñas
+                await CargarResenasAsync(); 
+            }
+            else
+            {
+                Snackbar.Add("Hubo un error al publicar tu reseña.", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Fallo de conexión al enviar la reseña: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _enviandoResena = false;
         }
     }
 }
