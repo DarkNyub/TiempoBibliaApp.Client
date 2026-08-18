@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TiempoBiblia.Client")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+655730d4ba5499a1f9ce5865f5601cd4990fd747")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1de9cb11c917b6c3d742080fd39050322fdb825c")]
 [assembly: System.Reflection.AssemblyProductAttribute("TiempoBiblia.Client")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TiempoBiblia.Client")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

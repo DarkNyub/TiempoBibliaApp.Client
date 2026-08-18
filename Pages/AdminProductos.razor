@@ -104,6 +104,8 @@
                     <MudTextField @bind-Value="productoEditando.ImagenUrl" Label="URL de la Imagen Principal" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
                     
                     <MudTextField @bind-Value="textoImagenesSecundarias" Label="Otras Imágenes (Para el Carrusel)" Placeholder="Pega los links separados por coma (,)" Lines="3" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" HelperText="Ej: url1.jpg, url2.png" />
+
+                    <SubidorImagen OnImagenSubida="ActualizarImagenProducto" />
                 </MudItem>
 
                 <!-- COLUMNA DERECHA: Relaciones Mágicas -->
@@ -396,6 +398,15 @@
             {
                 Snackbar.Add("No se pudo eliminar", Severity.Error);
             }
+        }
+    }
+    private void ActualizarImagenProducto(string urlPublica)
+    {
+        // Guardamos la URL mágica de GitHub directamente en el formulario actual
+        if (productoEditando != null)
+        {
+            productoEditando.ImagenUrl = urlPublica; 
+            StateHasChanged(); // Obliga a la pantalla a refrescarse para mostrar el link
         }
     }
 }

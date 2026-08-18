@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "0IjGXkijeaI=",
+  "dgSpecHash": "USWSYj7vrUM=",
   "success": true,
   "projectFilePath": "/mnt/01D78A42E1FC1E30/Documents/TiempoBibliaApp/TiempoBiblia.Client/TiempoBiblia.Client.csproj",
   "expectedPackageFiles": [
+    "/home/pc/.nuget/packages/cropper.blazor/1.5.1/cropper.blazor.1.5.1.nupkg.sha512",
     "/home/pc/.nuget/packages/microsoft.aspnetcore.app.internal.assets/10.0.10/microsoft.aspnetcore.app.internal.assets.10.0.10.nupkg.sha512",
     "/home/pc/.nuget/packages/microsoft.aspnetcore.authorization/10.0.9/microsoft.aspnetcore.authorization.10.0.9.nupkg.sha512",
     "/home/pc/.nuget/packages/microsoft.aspnetcore.components/10.0.9/microsoft.aspnetcore.components.10.0.9.nupkg.sha512",
