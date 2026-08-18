@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using TiempoBiblia.Client;
 using MudBlazor.Services;
+using Cropper.Blazor.Extensions;
+using TiempoBiblia.Client.Services;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -13,9 +15,10 @@ var apiUrl = builder.Configuration["ApiSettings:BaseUrl"]
 
 // 🔥 2. INYECTAMOS EL HTTP CLIENT LIMPIO
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(apiUrl) });
-builder.Services.AddScoped<TiempoBiblia.Client.Services.CarritoService>();
+builder.Services.AddScoped<CarritoService>();
 
 // INYECTA MUDBLAZOR AQUÍ
 builder.Services.AddMudServices(); 
+builder.Services.AddCropper();
 
 await builder.Build().RunAsync();
