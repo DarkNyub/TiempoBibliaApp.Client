@@ -20,6 +20,10 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Dancing+Script:wght@400..700&family=Pacifico&display=swap"
         rel="stylesheet">
+    <!-- 1. Estilos del Cropper Oficial -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet" />
+
+    <!-- 2. Estilos del Interop de Blazor -->
     <link href="_content/Cropper.Blazor/cropper.min.css" rel="stylesheet" />
 </head>
 
@@ -167,6 +171,11 @@
             document.head.appendChild(script); // Lo inyectamos en la página
         };
     </script>
+    <!-- 1. Motor JavaScript Oficial -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+    <!-- 2. Puente de comunicación con C# -->
+    <script src="_content/Cropper.Blazor/cropper.min.js"></script>
 </body>
 
 </html>
