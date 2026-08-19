@@ -3,12 +3,12 @@
 @inject ISnackbar Snackbar
 @inject IJSRuntime _js 
 
-<MudPaper Elevation="0" Class="pa-4 text-center" Style="border: 2px dashed #F48FB1; border-radius: 12px; background-color: #FFF0F5;">
+<MudPaper Elevation="0" Class="pa-2 text-center" Style="border: 2px dashed #F48FB1; border-radius: 12px; background-color: #FFF0F5;">
     
     @if (string.IsNullOrEmpty(_imagenSeleccionada))
     {
         <!-- FASE 1: SELECCIONAR IMAGEN -->
-        <MudIcon Icon="@Icons.Material.Filled.CloudUpload" Size="Size.Large" Style="color: #E91E63;" Class="mb-2" />
+        <MudIcon Icon="@Icons.Material.Filled.CloudUpload" Size="Size.Medium" Style="color: #E91E63;" Class="mb-2" />
         <MudText Typo="Typo.body1" Style="color: #5D4037; font-weight: bold;" Class="mb-4">Sube una imagen para recortar</MudText>
         
         <MudButton HtmlTag="label" for="fileInput" Variant="Variant.Filled" Color="Color.Primary" Style="border-radius: 20px; cursor: pointer;">
@@ -35,7 +35,7 @@
         <!-- FASE 2: EL ESTUDIO DE RECORTE -->
         <MudText Typo="Typo.subtitle2" Style="color: #E91E63; font-weight: bold;" Class="mb-2">Ajusta el recuadro a tu gusto</MudText>
         
-        <div style="height: 300px; width: 100%; border-radius: 8px; overflow: hidden; margin-bottom: 1rem;">
+        <div style="height: 200px; width: 100%; border-radius: 8px; overflow: hidden; margin-bottom: 1rem;">
             <CropperComponent @ref="_cropper" 
                               Src="@_imagenSeleccionada" 
                               Options="_opcionesCropper" />
