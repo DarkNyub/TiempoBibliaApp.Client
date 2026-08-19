@@ -16,28 +16,35 @@
                            OnClick="Cancelar" 
                            Style="position: absolute; top: 12px; left: 12px; z-index: 10; padding:4px !important; background-color: rgba(255, 255, 255, 0.8); color: #333; box-shadow: 0 4px 6px rgba(0,0,0,0.2);" 
                            Size="Size.Medium" />
+            <!-- 🔥 IMAGEN DE FONDO FIJA (La primera imagen) -->
+            <div style="position: absolute; inset: 0; background-image: url('@(todasLasImagenes.FirstOrDefault())'); background-size: cover; background-position: center; z-index: 0;"></div>
+            
+            <!-- 🔥 CAPA DE OPACIDAD (70% oscura) SUPERPUESTA AL FONDO -->
+            <div style="position: absolute; inset: 0; background-color: rgba(0, 0, 0, 0.4); z-index: 1;"></div>
 
             <!-- CARRUSEL DE FONDO -->
-            <MudCarousel Class="mud-width-full" 
-                         Style="height: 400px; position: absolute; inset: 0; z-index: 1;"
-                         ShowBullets="false"
-                         ShowArrows="false"
-                         AutoCycle="true"
-                         AutoCycleTime="TimeSpan.FromSeconds(3.5)"
-                         TData="object">
-                @foreach (var img in todasLasImagenes)
-                {
-                    <MudCarouselItem Transition="Transition.Fade">
-                        <div style="background-image: url('@img'); height: 100%; width: 100%; background-size: cover; background-position: center;"></div>
-                    </MudCarouselItem>
-                }
-            </MudCarousel>
+            <div style="position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; z-index: 2;">
+                <!-- 🔥 CARRUSEL SUPERPUESTO DE 400px -->
+                <MudCarousel Style="height: 400px; width: 100%; max-width: 400px; box-shadow: 0 0 25px rgba(0,0,0,0.6);"
+                             ShowBullets="false"
+                             ShowArrows="false"
+                             AutoCycle="true"
+                             AutoCycleTime="TimeSpan.FromSeconds(3.5)"
+                             TData="object">
+                    @foreach (var img in todasLasImagenes)
+                    {
+                        <MudCarouselItem Transition="Transition.Fade">
+                            <div style="background-image: url('@img'); height: 100%; width: 100%; background-size: cover; background-position: center;"></div>
+                        </MudCarouselItem>
+                    }
+                </MudCarousel>
+            </div>
 
-            <!-- Gradiente oscuro -->
-            <div class="modal-hero-overlay" style="z-index: 2;"></div>
+            <!-- Gradiente oscuro original (Para que el texto resalte) -->
+            <div class="modal-hero-overlay" style="z-index: 3;"></div>
             
             <!-- 🔥 CONTENIDO: Izquierda en PC, Centrado en Móvil -->
-            <div class="modal-hero-content responsive-hero-content" style="z-index: 3;">
+            <div class="modal-hero-content responsive-hero-content" style="z-index: 4;">
                 <MudText Typo="Typo.h3" Class="fuente-pacifico titulo-modal mb-4" Style="color: white; text-shadow: 2px 2px 6px rgba(0,0,0,0.8); line-height: 1.2;">
                     @Producto.Nombre
                 </MudText>
@@ -45,9 +52,6 @@
                 <!-- 🔥 NUEVO: ESTRELLAS GRANDES EN EL DETALLE -->
                 <div class="d-flex align-center mt-1">
                     <MudRating SelectedValue="@Producto.PromedioCalificacion" MaxValue="5" ReadOnly="true" Size="Size.Medium" Color="Color.Warning" />
-                    <!-- <MudText Typo="Typo.body2" Class="ml-2" Style="color: white; text-shadow: 1px 1px 4px rgba(0,0,0,0.8); font-weight: bold;">
-                        (@Producto.TotalResenas reseñas)
-                    </MudText> -->
                 </div>
 
                 @if (!string.IsNullOrEmpty(Producto.Tipo) && (Producto.Tipo.Equals("Serie", StringComparison.OrdinalIgnoreCase) || Producto.Tipo.Equals("Miniserie", StringComparison.OrdinalIgnoreCase)))
@@ -142,7 +146,7 @@
                 }
                 else
                 {
-                    <MudText Typo="Typo.body2" Class="w-100 responsive-text-center" Style="color: gray; font-style: italic; width: 100%;">No hay títulos similares en este momento.</MudText>
+                    <MudText Typo="Typo.body2" Class="w-100 ml-3 responsive-text-center" Style="color: gray; font-style: italic; width: 100%;">No hay títulos similares en este momento.</MudText>
                 }
             </MudGrid>
 
@@ -159,10 +163,10 @@
                 <!-- COLUMNA IZQUIERDA: FORMULARIO -->
                 <MudItem xs="12" md="4">
                     <MudPaper Elevation="2" Class="pa-6" Style="border-radius: 16px; background-color: white;">
-                        <MudText Typo="Typo.subtitle1" Style="color: #5D4037; font-weight: bold;" Class="mb-2">
+                        <MudText Typo="Typo.subtitle1" Style="color: #5D4037; font-weight: bold;" Class="mb-2 responsive-text-center">
                             ¿Ya lo descargaste?
                         </MudText>
-                        <MudText Typo="Typo.body2" Class="mb-4" Style="color: #888;">
+                        <MudText Typo="Typo.body2" Class="mb-4 responsive-text-center" Style="color: #888;">
                             Cuéntanos qué te pareció este recurso.
                         </MudText>
 
