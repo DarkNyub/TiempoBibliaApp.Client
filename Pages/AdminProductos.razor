@@ -34,6 +34,7 @@
                 <MudTh>Nombre</MudTh>
                 <MudTh>Precio</MudTh>
                 <MudTh>Tipo</MudTh>
+                <MudTh>Estado</MudTh>
                 <MudTh Style="text-align: right;">Acciones</MudTh>
             </HeaderContent>
             
@@ -42,6 +43,10 @@
                 <MudTd DataLabel="Precio">@(context.EsGratuito ? "Gratis" : $"${context.Precio}")</MudTd>
                 <MudTd DataLabel="Tipo">
                     <MudChip T="string" Color="Color.Info" Size="Size.Small">@context.Tipo</MudChip>
+                </MudTd>
+                <!-- 🔥 NUEVO SWITCH INTERACTIVO -->
+                <MudTd DataLabel="Estado">
+                    <MudSwitch T="bool" Value="@context.Activo" ValueChanged="@((bool val) => CambiarEstadoProducto(context, val))" Color="Color.Success" />
                 </MudTd>
                 <MudTd DataLabel="Acciones" Style="text-align: right;">
                     <MudIconButton Icon="@Icons.Material.Filled.Link" Color="Color.Info" title="Generar Link" OnClick="() => PrepararGeneracionLink(context)" />
@@ -421,6 +426,22 @@
         else
         {
             Snackbar.Add("El campo está vacío. Pega un link primero para probarlo.", Severity.Warning);
+        }
+    }
+    // 🔥 NUEVO: Función para encender/apagar productos con un clic
+    private async Task CambiarEstadoProducto(ProductoDto prod, bool nuevoEstado)
+    {
+        prod.Activo = nuevoEstado;
+        var response = await Http.PutAsJsonAsync($"api/Productos/{prod.Id}", prod);
+        
+        if (response.IsSuccessStatusCode)
+        {
+            Snackbar.Add($"Producto {(nuevoEstado ? "Activado" : "Inactivado")}", Severity.Success);
+        }
+        else
+        {
+            prod.Activo = !nuevoEstado; // Revertir visualmente si hay error
+            Snackbar.Add("Error al cambiar el estado del producto.", Severity.Error);
         }
     }
 }

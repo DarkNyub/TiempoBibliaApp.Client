@@ -192,6 +192,12 @@
                     }
                 </MudGrid>
             }
+            else if (_filtroActual == categoria.Nombre) 
+            {
+                <MudText Typo="Typo.h6" Align="Align.Center" Style="color: #999; font-style: italic;" Class="mb-12">
+                    No hay recursos de "@categoria.Nombre" por ahora...
+                </MudText>
+            }
         }
     }
     @* ==========================================
