@@ -20,9 +20,9 @@
         @if (!string.IsNullOrEmpty(_urlGenerada))
         {
             <div class="mt-6 pa-3" style="background-color: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                <MudText Typo="Typo.body2" Style="color: #4CAF50; font-weight: bold;" Class="mb-2">¡Imagen lista! Copia tu URL:</MudText>
+                <MudText Typo="Typo.body2" Style="color: #4CAF50; font-weight: bold; font-size: 0.875rem;" Class="mb-2" >¡Imagen lista! Copia tu URL:</MudText>
                 <MudStack Row="true" AlignItems="AlignItems.Center">
-                    <MudTextField Value="@_urlGenerada" Variant="Variant.Outlined" ReadOnly="true" Margin="Margin.Dense" />
+                    <MudTextField Value="@_urlGenerada" Variant="Variant.Outlined" ReadOnly="true" Margin="Margin.Dense"/>
                     <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" Color="Color.Primary" Variant="Variant.Filled" OnClick="CopiarEnlace" title="Copiar URL" />
                     <!-- 🔥 NUEVO: Botón para probar la imagen recién subida -->
                     <MudIconButton Icon="@Icons.Material.Filled.OpenInNew" Color="Color.Info" Variant="Variant.Filled" OnClick="ProbarEnlace" title="Probar URL" />

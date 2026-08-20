@@ -7,12 +7,14 @@ namespace TiempoBiblia.Client.Models
         public int Id { get; set; }
         public string Nombre { get; set; } = string.Empty;
         public int Orden { get; set; }
+        public bool Activo { get; set; } = true;
     }
 
     public class TagDto
     {
         public int Id { get; set; }
         public string Nombre { get; set; } = string.Empty;
+        public bool Activo { get; set; } = true;
     }
     public class ProductoTagDto
     {

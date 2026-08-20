@@ -1,0 +1,35 @@
+@page "/admin/dashboard"
+@inject NavigationManager Nav
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-8">
+    <div class="d-flex justify-center align-center mb-2">
+        <img src="images/tiempobiblia.luzy.png" alt="Tiempo Biblia Luzy" style="height: 60px; object-fit: contain;" />
+    </div>
+    <div class="d-flex align-center mb-2">    
+        <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Default" OnClick="@(() => Nav.NavigateTo("/"))" Class="mr-2" />
+        <MudText Typo="Typo.h4" Style="font-weight: bold; color: #333;">
+            Centro de Mando 🚀
+        </MudText>
+    </div>
+
+    <!-- MultiExpansion="true" permite tener varios abiertos al mismo tiempo si ella quiere -->
+    <MudExpansionPanels MultiExpansion="true" Elevation="4" Style="border-radius: 12px; overflow: hidden;">
+        
+        <!-- PANEL 1: PRODUCTOS -->
+        <MudExpansionPanel Text="📦 Gestión de Productos" Style="font-weight: bold; font-size: 1.1rem; color: #E91E63;">
+            <!-- Aquí llamamos a tu componente gigante recién convertido -->
+            <GestionProductos />
+        </MudExpansionPanel>
+
+        <!-- PANEL 2: PEDIDOS (El próximo que haremos) -->
+        <MudExpansionPanel Text="🛒 Gestión de Pedidos (Ventas)" Style="font-weight: bold; font-size: 1.1rem; color: #5D4037;">
+            <MudText>Próximamente...</MudText>
+        </MudExpansionPanel>
+
+        <!-- PANEL 3: CATEGORÍAS Y TAGS -->
+        <MudExpansionPanel Text="🏷️ Catálogos (Categorías y Palabras Claves)" Style="font-weight: bold; font-size: 1.1rem; color: #5D4037;">
+            <MudText>Próximamente...</MudText>
+        </MudExpansionPanel>
+
+    </MudExpansionPanels>
+</MudContainer>

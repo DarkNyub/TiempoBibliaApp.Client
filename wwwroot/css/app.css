@@ -260,3 +260,7 @@ code {
         padding: 1.5rem 1rem !important;
     }
 }
+
+.mud-main-content {
+    padding-top: 0px !important;
+}

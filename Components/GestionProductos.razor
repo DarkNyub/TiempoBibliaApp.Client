@@ -1,4 +1,3 @@
-@page "/admin/productos"
 @using TiempoBiblia.Client.Models
 @using System.Text.RegularExpressions
 @inject HttpClient Http
@@ -7,36 +6,28 @@
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
 
-<MudContainer MaxWidth="MaxWidth.Large" Class="mt-8">
-    <div class="d-flex justify-center mb-2">
-        <img src="images/tiempobiblia.luzy.png" alt="Tiempo Biblia Luzy" style="height: 60px; object-fit: contain;" />
-    </div>
-    <div class="d-flex justify-space-between align-center mb-2">
-        <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Default" OnClick="@(() => Nav.NavigateTo("/"))" Class="mr-2" />
-        <MudText Typo="Typo.h4" Style="font-weight: bold; color: #333;">
-            Gestión de Productos 📦
-        </MudText>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="AbrirModalCreacion">
-            Nuevo Producto
-        </MudButton>
-    </div>
-
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="">
     @if (productos == null)
     {
         <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
     }
     else
     {
-        <MudTable Items="@productos" Filter="new Func<ProductoDto,bool>(Filtrar)" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="4" Style="border-radius: 12px; overflow: hidden;">
+        <MudTable Items="@productos" Dense="true" Filter="new Func<ProductoDto,bool>(Filtrar)" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="4" Style="border-radius: 12px; overflow: hidden;">
             <ToolBarContent>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="AbrirModalCreacion">
+                    Nuevo Producto
+                </MudButton>
+                <MudSpacer />
                 <MudText Typo="Typo.h6">Catálogo</MudText>
                 <MudSpacer />
-                <MudTextField @bind-Value="textoBusqueda" Immediate="true" Placeholder="Buscar producto..." Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" />
+                <MudTextField @bind-Value="textoBusqueda" Immediate="true" Placeholder="Buscar producto..." Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Class="mt-0" Margin="Margin.Dense" />
             </ToolBarContent>
             
             <HeaderContent>
                 <MudTh>Nombre</MudTh>
                 <MudTh>Precio</MudTh>
+                <MudTh>Precio USD</MudTh>
                 <MudTh>Tipo</MudTh>
                 <MudTh>Estado</MudTh>
                 <MudTh Style="text-align: right;">Acciones</MudTh>
@@ -45,17 +36,18 @@
             <RowTemplate>
                 <MudTd DataLabel="Nombre"><strong>@context.Nombre</strong></MudTd>
                 <MudTd DataLabel="Precio">@(context.EsGratuito ? "Gratis" : $"${context.Precio}")</MudTd>
+                <MudTd DataLabel="Precio">@(context.EsGratuito ? "Gratis" : $"${context.Precio}")</MudTd>
                 <MudTd DataLabel="Tipo">
                     <MudChip T="string" Color="Color.Info" Size="Size.Small">@context.Tipo</MudChip>
                 </MudTd>
                 <!-- 🔥 NUEVO SWITCH INTERACTIVO -->
                 <MudTd DataLabel="Estado">
-                    <MudSwitch T="bool" Value="@context.Activo" ValueChanged="@((bool val) => CambiarEstadoProducto(context, val))" Color="Color.Success" />
+                    <MudSwitch  Size="Size.Small" T="bool" Value="@context.Activo" ValueChanged="@((bool val) => CambiarEstadoProducto(context, val))" Color="Color.Success" />
                 </MudTd>
                 <MudTd DataLabel="Acciones" Style="text-align: right;">
-                    <MudIconButton Icon="@Icons.Material.Filled.Link" Color="Color.Info" title="Generar Link" OnClick="() => PrepararGeneracionLink(context)" />
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" title="Editar" OnClick="() => AbrirModalEdicion(context)" />
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" title="Eliminar" OnClick="() => EliminarProducto(context)" />
+                    <MudIconButton Size="Size.Small"  Icon="@Icons.Material.Filled.Link" Color="Color.Info" title="Generar Link" OnClick="() => PrepararGeneracionLink(context)" />
+                    <MudIconButton Size="Size.Small"  Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" title="Editar" OnClick="() => AbrirModalEdicion(context)" />
+                    <MudIconButton Size="Size.Small"  Icon="@Icons.Material.Filled.Delete" Color="Color.Error" title="Eliminar" OnClick="() => EliminarProducto(context)" />
                 </MudTd>
             </RowTemplate>
             
@@ -69,22 +61,23 @@
 <!-- MODAL PARA GENERAR LINK -->
 <MudDialog @bind-Visible="mostrarModalLink" Options="dialogOptions">
     <TitleContent>
-        <MudText Typo="Typo.h6">Generar acceso para: <strong>@productoSeleccionado?.Nombre</strong></MudText>
+        <MudText Typo="Typo.subtitle1">Generar acceso para: <strong>@productoSeleccionado?.Nombre</strong></MudText>
     </TitleContent>
     <DialogContent>
-        <MudTextField @bind-Value="requestLink.CorreoCliente" Label="Referencia (Ej: +57 300...)" Variant="Variant.Outlined" AutoFocus="true" />
+        <MudTextField @bind-Value="requestLink.CorreoCliente" Label="Referencia (Ej: +57 300...)" Variant="Variant.Outlined" AutoFocus="true"  Margin="Margin.Dense" />
         @if (!string.IsNullOrEmpty(linkGenerado))
         {
             <MudAlert Severity="Severity.Success" Class="mt-4 mb-4">Link mágico creado (Expira en 24h)</MudAlert>
             <MudStack Row="true" AlignItems="AlignItems.Center">
                 <MudTextField Value="@linkGenerado" Variant="Variant.Outlined" ReadOnly="true" Margin="Margin.Dense" />
-                <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" Color="Color.Primary" Variant="Variant.Filled" OnClick="CopiarAlPortapapeles" />
+                <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" Color="Color.Primary" Variant="Variant.Filled" OnClick="CopiarAlPortapapeles" Size="Size.Small"/>
             </MudStack>
         }
+        <hr />
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="() => mostrarModalLink = false">Cerrar</MudButton>
-        <MudButton OnClick="GenerarLinkSeguro" Color="Color.Primary" Variant="Variant.Filled">Crear Link</MudButton>
+        <MudButton Size="Size.Small" OnClick="() => mostrarModalLink = false">Cerrar</MudButton>
+        <MudButton Size="Size.Small" OnClick="GenerarLinkSeguro" Color="Color.Primary" Variant="Variant.Filled">Crear Link</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -96,25 +89,26 @@
     <DialogContent>
         @if (productoEditando != null)
         {
-            <MudGrid>
+            <MudGrid Spacing="2">
                 <!-- COLUMNA IZQUIERDA: Datos Básicos -->
-                <MudItem xs="12" md="6">
+                <MudItem xs="12" md="6" Class="fontsize87">
                     <MudText Typo="Typo.subtitle2" Color="Color.Primary" Class="mb-2">Información Básica</MudText>
-                    <MudTextField @bind-Value="productoEditando.Nombre" Label="Nombre del Producto*" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
-                    <MudTextField @bind-Value="productoEditando.Descripcion" Label="Descripción" Lines="3" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
+                    <MudTextField @bind-Value="productoEditando.Nombre" Label="Nombre del Producto*" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3"  Style="font-size: 0.875rem;" />
+                    <MudTextField @bind-Value="productoEditando.Descripcion" Label="Descripción" Lines="3" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3"  Style="font-size: 0.875rem;" />
                     
-                    <div class="d-flex gap-4 mb-3">
-                        <MudNumericField @bind-Value="productoEditando.Precio" Label="Precio (COP)" Min="0" Variant="Variant.Outlined" Margin="Margin.Dense" Disabled="productoEditando.EsGratuito" />
-                        <MudCheckBox @bind-Value="productoEditando.EsGratuito" Label="Es Gratis (Free)" Color="Color.Success" />
-                    </div>
+                    <MudGrid Spacing="1" Class="mb-2">
+                        <MudItem xs="4">
+                            <MudCheckBox @bind-Value="productoEditando.EsGratuito" Label="Gratis?" Color="Color.Success"  Style="font-size: 0.875rem;" />
+                        </MudItem>
+                        <MudItem xs="4">
+                            <MudNumericField @bind-Value="productoEditando.Precio" Label="Precio (COP)" Min="0" Variant="Variant.Outlined" Margin="Margin.Dense" Disabled="productoEditando.EsGratuito" Style="font-size: 0.875rem;"  />
+                        </MudItem>
+                        <MudItem xs="4">
+                            <MudNumericField @bind-Value="productoEditando.Precio" Label="Precio (USD)" Min="0" Variant="Variant.Outlined" Margin="Margin.Dense" Disabled="productoEditando.EsGratuito" Style="font-size: 0.875rem;"  />
+                        </MudItem>
+                    </MudGrid>
 
-                    <MudTextField @bind-Value="productoEditando.Tipo" Label="Tipo (Formato)" Placeholder="Ej. Serie, Miniserie, Imprimible..." Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
-
-                    <MudTextField @bind-Value="productoEditando.ImagenUrl" Label="URL de la Imagen Principal" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" 
-                                  Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.OpenInNew" AdornmentColor="Color.Info" 
-                                  OnAdornmentClick="@(() => AbrirUrl(productoEditando.ImagenUrl))" title="Probar enlace" />
-                    
-                    <MudTextField @bind-Value="textoImagenesSecundarias" Label="Otras Imágenes (Para el Carrusel)" Placeholder="Pega los links separados por coma (,)" Lines="3" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" HelperText="Ej: url1.jpg, url2.png" />
+                    <MudTextField @bind-Value="productoEditando.Tipo" Label="Tipo (Formato)" Placeholder="Ej. Serie, Miniserie, Imprimible..." Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" Style="font-size: 0.875rem;"  />
 
                     <SubidorImagen/>
                 </MudItem>
@@ -125,10 +119,10 @@
                     
                     <MudSelect T="int" @bind-Value="productoEditando.CategoriaId" Label="Categoría Principal" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3"
                                ToStringFunc="@(id => id == 0 ? "Seleccione una categoría..." : categoriasDisponibles?.FirstOrDefault(c => c.Id == id)?.Nombre ?? "Desconocido")">
-                        <MudSelectItem T="int" Value="0">Seleccione una categoría...</MudSelectItem>
+                        <MudSelectItem T="int" Value="0">Seleccione...</MudSelectItem>
                         @if (categoriasDisponibles != null)
                         {
-                            @foreach (var cat in categoriasDisponibles)
+                            @foreach (var cat in categoriasDisponibles.Where(x => x.Activo))
                             {
                                 <MudSelectItem T="int" Value="@cat.Id">@cat.Nombre</MudSelectItem>
                             }
@@ -139,18 +133,18 @@
                                MultiSelectionTextFunc="@( _ => ObtenerNombresCategorias(productoEditando.CategoriasSecundariasIds) )">
                         @if (categoriasDisponibles != null)
                         {
-                            @foreach (var cat in categoriasDisponibles)
+                            @foreach (var cat in categoriasDisponibles.Where(x => x.Activo))
                             {
                                 <MudSelectItem T="int" Value="@cat.Id">@cat.Nombre</MudSelectItem>
                             }
                         }
                     </MudSelect>
 
-                    <MudSelect T="int" MultiSelection="true" @bind-SelectedValues="productoEditando.TagsIds" Label="Etiquetas (Tags)" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3"
+                    <MudSelect T="int" MultiSelection="true" @bind-SelectedValues="productoEditando.TagsIds" Label="Palabras Claves" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3"
                                MultiSelectionTextFunc="@( _ => ObtenerNombresTags(productoEditando.TagsIds) )">
                         @if (tagsDisponibles != null)
                         {
-                            @foreach (var tag in tagsDisponibles)
+                            @foreach (var tag in tagsDisponibles.Where(x => x.Activo))
                             {
                                 <MudSelectItem T="int" Value="@tag.Id">@tag.Nombre</MudSelectItem>
                             }
@@ -161,27 +155,31 @@
                                MultiSelectionTextFunc="@( _ => ObtenerNombresProductos(productoEditando.ProductosRelacionadosIds) )">
                         @if (productos != null)
                         {
-                            @foreach (var p in productos.Where(x => x.Id != productoEditando.Id))
+                            @foreach (var p in productos.Where(x => x.Id != productoEditando.Id && x.Activo))
                             {
                                 <MudSelectItem T="int" Value="@p.Id">@p.Nombre</MudSelectItem>
                             }
                         }
                     </MudSelect>
+
+                    <MudTextField @bind-Value="productoEditando.ImagenUrl" Label="URL de la Imagen Principal" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.OpenInNew" AdornmentColor="Color.Info" OnAdornmentClick="@(() => AbrirUrl(productoEditando.ImagenUrl))" title="Probar enlace" />
                     
-                    <MudTextField @bind-Value="productoEditando.PdfUrl" Label="URL de Drive (El imprimible)" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" HelperText="Pega el link de compartir, se formateará solo." 
+                    <MudTextField @bind-Value="productoEditando.PdfUrl" Label="URL del Drive (El imprimible)" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" HelperText="Pega el link de compartir, se formateará solo." 
                                   Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.OpenInNew" AdornmentColor="Color.Info" 
                                   OnAdornmentClick="@(() => AbrirUrl(productoEditando.PdfUrl))" title="Probar enlace" />
 
-                    <MudTextField @bind-Value="productoEditando.VideoUrl" Label="URL de YouTube (El tutorial)" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" 
+                    <MudTextField @bind-Value="productoEditando.VideoUrl" Label="URL de Video (El tutorial)" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" 
                                   Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.OpenInNew" AdornmentColor="Color.Info" 
                                   OnAdornmentClick="@(() => AbrirUrl(productoEditando.VideoUrl))" title="Probar enlace" />
+                    
+                    <MudTextField @bind-Value="textoImagenesSecundarias" Label="Otras Imágenes (Para el Carrusel)" Placeholder="Pega los links separados por coma (,)" Lines="5" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" HelperText="Ej: url1.jpg, url2.png" />
                 </MudItem>
             </MudGrid>
         }
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="() => mostrarModalEdicion = false">Cancelar</MudButton>
-        <MudButton OnClick="GuardarProducto" Color="Color.Primary" Variant="Variant.Filled">
+        <MudButton Size="Size.Small" OnClick="() => mostrarModalEdicion = false">Cancelar</MudButton>
+        <MudButton Size="Size.Small" OnClick="GuardarProducto" Color="Color.Primary" Variant="Variant.Filled">
             @(productoEditando?.Id == 0 ? "Crear Producto" : "Guardar Cambios")
         </MudButton>
     </DialogActions>
@@ -195,8 +193,8 @@
     private string textoBusqueda = "";
     private string textoImagenesSecundarias = "";
 
-    private DialogOptions dialogOptions = new() { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-    private DialogOptions dialogOptionsEdicion = new() { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+    private DialogOptions dialogOptions = new() { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+    private DialogOptions dialogOptionsEdicion = new() { CloseButton = true, MaxWidth = MaxWidth.Large, FullWidth = true };
 
     private bool mostrarModalLink = false;
     private ProductoDto? productoSeleccionado;
