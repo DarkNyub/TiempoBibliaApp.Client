@@ -216,6 +216,7 @@ namespace TiempoBiblia.Client.Models
         public string NombreCliente { get; set; } = string.Empty;
         public int Calificacion { get; set; }
         public string Comentario { get; set; } = string.Empty;
+        public bool Aprobada { get; set; }
         public DateTime FechaCreacion { get; set; }
     }
 

@@ -15,7 +15,7 @@
     {
         <MudTable Items="@productos" Dense="true" Filter="new Func<ProductoDto,bool>(Filtrar)" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="4" Style="border-radius: 12px; overflow: hidden;">
             <ToolBarContent>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="AbrirModalCreacion">
+                <MudButton Size="Size.Small"  Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="AbrirModalCreacion">
                     Nuevo Producto
                 </MudButton>
                 <MudSpacer />
@@ -47,6 +47,7 @@
                 <MudTd DataLabel="Acciones" Style="text-align: right;">
                     <MudIconButton Size="Size.Small"  Icon="@Icons.Material.Filled.Link" Color="Color.Info" title="Generar Link" OnClick="() => PrepararGeneracionLink(context)" />
                     <MudIconButton Size="Size.Small"  Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" title="Editar" OnClick="() => AbrirModalEdicion(context)" />
+                    <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Star" Color="Color.Warning" title="Moderar Reseñas" OnClick="() => AbrirModalResenas(context)" />
                     <MudIconButton Size="Size.Small"  Icon="@Icons.Material.Filled.Delete" Color="Color.Error" title="Eliminar" OnClick="() => EliminarProducto(context)" />
                 </MudTd>
             </RowTemplate>
@@ -168,7 +169,7 @@
                                   Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.OpenInNew" AdornmentColor="Color.Info" 
                                   OnAdornmentClick="@(() => AbrirUrl(productoEditando.PdfUrl))" title="Probar enlace" />
 
-                    <MudTextField @bind-Value="productoEditando.VideoUrl" Label="URL de Video (El tutorial)" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" 
+                    <MudTextField @bind-Value="productoEditando.VideoUrl" Label="URL del Video (El tutorial)" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" 
                                   Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.OpenInNew" AdornmentColor="Color.Info" 
                                   OnAdornmentClick="@(() => AbrirUrl(productoEditando.VideoUrl))" title="Probar enlace" />
                     
@@ -182,6 +183,51 @@
         <MudButton Size="Size.Small" OnClick="GuardarProducto" Color="Color.Primary" Variant="Variant.Filled">
             @(productoEditando?.Id == 0 ? "Crear Producto" : "Guardar Cambios")
         </MudButton>
+    </DialogActions>
+</MudDialog>
+
+<!-- 🔥 MODAL DE GESTIÓN DE RESEÑAS -->
+<MudDialog @bind-Visible="mostrarModalResenas" Options="new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Large, FullWidth = true }">
+    <TitleContent>
+        <MudText Typo="Typo.h6">Moderación de Reseñas: <strong>@productoSeleccionadoParaResenas?.Nombre</strong></MudText>
+    </TitleContent>
+    <DialogContent>
+        @if (resenasDelProducto == null)
+        {
+            <MudProgressLinear Color="Color.Warning" Indeterminate="true" />
+        }
+        else if (!resenasDelProducto.Any())
+        {
+            <MudAlert Severity="Severity.Info" Class="mt-2 mb-4">Este producto aún no tiene reseñas de la comunidad.</MudAlert>
+        }
+        else
+        {
+            <MudTable Items="@resenasDelProducto" Dense="true" Hover="true" Elevation="0" Style="border: 1px solid #e0e0e0; border-radius: 8px;">
+                <HeaderContent>
+                    <MudTh>Fecha</MudTh>
+                    <MudTh>Nombre</MudTh>
+                    <MudTh>Valoración</MudTh>
+                    <MudTh>Comentario</MudTh>
+                    <MudTh>Estado (Público)</MudTh>
+                </HeaderContent>
+                <RowTemplate Context="resena">
+                    <MudTd DataLabel="Fecha">@resena.FechaCreacion.ToString("dd MMM yyyy")</MudTd>
+                    <MudTd DataLabel="Nombre"><strong>@resena.NombreCliente</strong></MudTd>
+                    <MudTd DataLabel="Valoración">
+                        <MudRating SelectedValue="@resena.Calificacion" MaxValue="5" ReadOnly="true" Size="Size.Small" Color="Color.Warning" />
+                    </MudTd>
+                    <MudTd DataLabel="Comentario" Style="max-width: 300px; white-space: normal;">
+                        <MudText Typo="Typo.body2" Style="font-style: italic;">@resena.Comentario</MudText>
+                    </MudTd>
+                    <MudTd DataLabel="Estado">
+                        <MudSwitch T="bool" Size="Size.Small" Value="@resena.Aprobada" ValueChanged="@((bool val) => CambiarEstadoResena(resena, val))" Color="Color.Success" />
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton Size="Size.Small" OnClick="() => mostrarModalResenas = false">Cerrar</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -203,6 +249,10 @@
 
     private bool mostrarModalEdicion = false;
     private ProductoDto? productoEditando;
+    
+    private bool mostrarModalResenas = false;
+    private ProductoDto? productoSeleccionadoParaResenas;
+    private List<ResenaDto>? resenasDelProducto;
 
     protected override async Task OnInitializedAsync()
     {
@@ -345,10 +395,37 @@
     {
         if (productoEditando == null) return;
 
+        // 🔥 1. CREAMOS NUESTRA CANASTA RECOLECTORA DE ERRORES
+        List<string> errores = new List<string>();
+
+        // Validación de Nombre (Obligatorio y Max 300 caracteres según tu DB)
+        if (string.IsNullOrWhiteSpace(productoEditando.Nombre))
+            errores.Add("• El Nombre del producto es obligatorio.");
+        else if (productoEditando.Nombre.Length > 300)
+            errores.Add("• El Nombre no puede superar los 300 caracteres.");
+
+        // Validación de Descripción (Obligatorio)
+        if (string.IsNullOrWhiteSpace(productoEditando.Descripcion))
+            errores.Add("• Debes agregar una Descripción.");
+
+        // Validación de Tipo (Obligatorio)
+        if (string.IsNullOrWhiteSpace(productoEditando.Tipo))
+            errores.Add("• Debes especificar el Tipo (Ej. Serie, PDF, etc).");
+
+        // Validación de Categoría (Obligatorio)
         if (productoEditando.CategoriaId == 0)
+            errores.Add("• Debes seleccionar una Categoría Principal.");
+
+        // Validación de Precios y Gratis
+        if (!productoEditando.EsGratuito && productoEditando.Precio <= 0)
+            errores.Add("• Si el producto NO es gratis, el Precio debe ser mayor a 0.");
+
+        // 🔥 2. ¿HAY ERRORES? LOS AGRUPAMOS Y MOSTRAMOS TODOS JUNTOS
+        if (errores.Any())
         {
-            Snackbar.Add("Debes seleccionar una Categoría Principal", Severity.Warning);
-            return;
+            string mensajeAgrupado = "Por favor revisa lo siguiente:\n" + string.Join("\n", errores);
+            Snackbar.Add(mensajeAgrupado, Severity.Warning);
+            return; // Detenemos el guardado aquí mismo
         }
 
         // 🔥 FORMATEAMOS EL LINK DE DRIVE AUTOMÁTICAMENTE
@@ -444,6 +521,45 @@
         {
             prod.Activo = !nuevoEstado; // Revertir visualmente si hay error
             Snackbar.Add("Error al cambiar el estado del producto.", Severity.Error);
+        }
+    }
+
+    // 🔥 Método 1: Abre el modal y descarga las reseñas de ese producto
+    private async Task AbrirModalResenas(ProductoDto producto)
+    {
+        productoSeleccionadoParaResenas = producto;
+        mostrarModalResenas = true;
+        resenasDelProducto = null; // Reiniciamos a null para que salga la barrita de carga
+        
+        try
+        {
+            // Usamos el mismo endpoint que ya consume la tienda para ver las reseñas
+            resenasDelProducto = await Http.GetFromJsonAsync<List<ResenaDto>>($"api/resenas/producto/{producto.Id}") ?? new List<ResenaDto>();
+        }
+        catch
+        {
+            Snackbar.Add("Error al cargar las reseñas de este producto.", Severity.Error);
+            resenasDelProducto = new List<ResenaDto>();
+        }
+    }
+
+    // 🔥 Método 2: Apaga o enciende la reseña en tiempo real
+    private async Task CambiarEstadoResena(ResenaDto resena, bool nuevoEstado)
+    {
+        // ⚠️ Asumo que tu ResenaDto tiene la propiedad "Aprobada" (o cámbiala a "Activa")
+        resena.Aprobada = nuevoEstado; 
+        
+        // Hacemos el PUT al backend para actualizar
+        var response = await Http.PutAsJsonAsync($"api/resenas/{resena.Id}", resena);
+        
+        if (response.IsSuccessStatusCode)
+        {
+            Snackbar.Add($"Reseña {(nuevoEstado ? "Aprobada (Visible)" : "Ocultada")} con éxito", Severity.Success);
+        }
+        else
+        {
+            resena.Aprobada = !nuevoEstado; // Revertimos visualmente si el servidor falla
+            Snackbar.Add("Error al cambiar el estado de la reseña.", Severity.Error);
         }
     }
 }

@@ -264,3 +264,7 @@ code {
 .mud-main-content {
     padding-top: 0px !important;
 }
+
+.mud-snackbar-content-message {
+    white-space: pre-wrap !important;
+}
