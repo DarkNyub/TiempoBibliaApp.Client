@@ -34,7 +34,7 @@ namespace TiempoBiblia.Client.Models
         public string Nombre { get; set; } = string.Empty;
         public string Descripcion { get; set; } = string.Empty;
         public decimal Precio { get; set; }
-        
+        public decimal PrecioUsd { get; set; }
         // 🔥 CAMPOS NUEVOS AGREGADOS PARA LA EDICIÓN
         public decimal Descuento { get; set; }
         public string? PdfUrl { get; set; }

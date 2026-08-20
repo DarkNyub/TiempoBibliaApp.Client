@@ -534,7 +534,7 @@
         try
         {
             // Usamos el mismo endpoint que ya consume la tienda para ver las reseñas
-            resenasDelProducto = await Http.GetFromJsonAsync<List<ResenaDto>>($"api/resenas/producto/{producto.Id}") ?? new List<ResenaDto>();
+            resenasDelProducto = await Http.GetFromJsonAsync<List<ResenaDto>>($"api/resenas/admin/producto/{producto.Id}") ?? new List<ResenaDto>();
         }
         catch
         {
