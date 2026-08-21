@@ -16,6 +16,7 @@ var apiUrl = builder.Configuration["ApiSettings:BaseUrl"]
 // 🔥 2. INYECTAMOS EL HTTP CLIENT LIMPIO
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(apiUrl) });
 builder.Services.AddScoped<CarritoService>();
+builder.Services.AddScoped<UbicacionService>();
 
 // INYECTA MUDBLAZOR AQUÍ
 builder.Services.AddMudServices(); 

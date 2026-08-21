@@ -5,6 +5,7 @@
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
 @inject HttpClient Http
+@inject TiempoBiblia.Client.Services.UbicacionService Ubicacion
 
 <MudDialog Class="netflix-modal-dialog">
     <DialogContent>
@@ -67,7 +68,7 @@
                                Class="btn-comprar-modal"
                                Style="background-color: #E91E63; color: white; font-weight: bold; box-shadow: 0 4px 10px rgba(233, 30, 99, 0.4);"
                                OnClick="AgregarYNotificar">
-                        @(Producto.EsGratuito ? "Añadir Gratis" : $"Comprar por ${Producto.Precio}")
+                        @(Producto.EsGratuito ? "Añadir Gratis" : $"Comprar por ${(Ubicacion.EsColombia ? Producto.Precio.ToString("N0") : Producto.PrecioUsd.ToString("N2"))} {(Ubicacion.EsColombia ? "COP" : "USD")}")
                     </MudButton>
                 </div>
             </div>
@@ -137,7 +138,9 @@
                                     }
                                     else
                                     {
-                                        <MudText Typo="Typo.caption" Style="color: #E91E63; font-weight: bold;">$@prodDestino.Precio</MudText>
+                                        <MudText Typo="Typo.caption" Style="color: #E91E63; font-weight: bold;">
+                                            $@(Ubicacion.EsColombia ? prodDestino.Precio.ToString("N0") : prodDestino.PrecioUsd.ToString("N2"))
+                                        </MudText>
                                     }
                                 </div>
                             </MudPaper>

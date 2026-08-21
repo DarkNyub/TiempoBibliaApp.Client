@@ -5,6 +5,7 @@
 @inject HttpClient Http
 @inject IJSRuntime JS
 @inject ISnackbar Snackbar 
+@inject TiempoBiblia.Client.Services.UbicacionService Ubicacion
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="pt-8 pb-16 px-2 px-sm-4">
     <!-- LOGO PEQUEÑITO EN EL CARRITO -->
@@ -41,7 +42,9 @@
                         </div>
                         <div class="flex-grow-1">
                             <MudText Typo="Typo.subtitle1" Style="font-weight: bold;">@item.Producto.Nombre</MudText>
-                            <MudText Typo="Typo.body2" Style="color: #8D6E63;">$@item.Producto.Precio.ToString("N0")</MudText>
+                            <MudText Typo="Typo.body2" Style="color: #8D6E63;">
+                                $@(Ubicacion.EsColombia ? item.Producto.Precio.ToString("N0") : item.Producto.PrecioUsd.ToString("N2"))
+                            </MudText>
                         </div>
                         
                         <div class="d-flex align-center mx-2">
@@ -76,7 +79,10 @@
                 <MudPaper Elevation="2" Class="pa-3 pa-md-6" Style="border-radius: 20px; background-color: #FCE4EC;">
                     <div class="d-flex justify-space-between mb-4">
                         <MudText Typo="Typo.h5" Style="font-weight: bold;">Total a Pagar:</MudText>
-                        <MudText Typo="Typo.h5" Style="font-weight: bold; color: #E91E63;">$@CarritoService.ObtenerTotal().ToString("N0")</MudText>
+                        <MudText Typo="Typo.h5" Style="font-weight: bold; color: #E91E63;">
+                            $@(CarritoService.ObtenerTotal(Ubicacion.EsColombia).ToString(Ubicacion.EsColombia ? "N0" : "N2"))
+                            @(Ubicacion.EsColombia ? "COP" : "USD")
+                        </MudText>
                     </div>
 
                     <MudDivider Class="my-4" />
@@ -124,24 +130,28 @@
                         }
 
                         <div style="@(_procesandoPago ? "display: none;" : "")" class="mt-4">
-                            <!-- OPCIÓN 1: MERCADO PAGO -->
-                            <div style="background-color: white; border-radius: 12px; padding: 8px; margin-bottom: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); overflow: hidden;">
-                                <MudText Typo="Typo.subtitle2" Style="color: #009EE3; font-weight: bold; padding: 4px;" Class="mb-2 d-flex align-center">
-                                    <MudIcon Icon="@Icons.Material.Filled.Public" Class="mr-2" Size="Size.Small" /> 
-                                    🇨🇴 Pagos en Colombia
-                                </MudText>
-                                <div id="paymentBrick_container" style="width: 100%;"></div>
-                            </div>
-
-                            <!-- OPCIÓN 2: PAYPAL -->
-                            <div style="background-color: white; border-radius: 12px; padding: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                                <MudText Typo="Typo.subtitle2" Style="color: #003087; font-weight: bold;" Class="mb-3 d-flex align-center">
-                                    <MudIcon Icon="@Icons.Material.Filled.Public" Class="mr-2" Size="Size.Small" /> 
-                                    🌎 Pagos Internacionales (USD)
-                                </MudText>
-                                
-                                <div id="paypal-button-container" style="width: 100%; min-height: 150px; position: relative; z-index: 1;"></div>
-                            </div>
+                            @if (Ubicacion.EsColombia)
+                            {
+                                <!-- OPCIÓN 1: MERCADO PAGO SOLO PARA COLOMBIA -->
+                                <div style="background-color: white; border-radius: 12px; padding: 8px; margin-bottom: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); overflow: hidden;">
+                                    <MudText Typo="Typo.subtitle2" Style="color: #009EE3; font-weight: bold; padding: 4px;" Class="mb-2 d-flex align-center">
+                                        <MudIcon Icon="@Icons.Material.Filled.Public" Class="mr-2" Size="Size.Small" /> 
+                                        🇨🇴 Pagos en Colombia
+                                    </MudText>
+                                    <div id="paymentBrick_container" style="width: 100%;"></div>
+                                </div>
+                            }
+                            else
+                            {
+                                <!-- OPCIÓN 2: PAYPAL PARA EL RESTO DEL MUNDO -->
+                                <div style="background-color: white; border-radius: 12px; padding: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                                    <MudText Typo="Typo.subtitle2" Style="color: #003087; font-weight: bold;" Class="mb-3 d-flex align-center">
+                                        <MudIcon Icon="@Icons.Material.Filled.Public" Class="mr-2" Size="Size.Small" /> 
+                                        🌎 Pagos Internacionales (USD)
+                                    </MudText>
+                                    <div id="paypal-button-container" style="width: 100%; min-height: 150px; position: relative; z-index: 1;"></div>
+                                </div>
+                            }
                         </div>
                     }
                 </MudPaper>
@@ -196,25 +206,27 @@
 
         if (!_brickRendered)
         {
-            var total = CarritoService.ObtenerTotal();
+            var total = CarritoService.ObtenerTotal(Ubicacion.EsColombia);
             if (total > 0)
             {
                 _objRef = DotNetObjectReference.Create(this);
                 
-                // 1. Renderizamos Mercado Pago
-                string? mpKey = Config["MercadoPago:PublicKey"]; 
-                if (!string.IsNullOrEmpty(mpKey))
+                if (Ubicacion.EsColombia)
                 {
-                    await Task.Delay(100); 
-                    await JS.InvokeVoidAsync("renderMercadoPagoBrick", mpKey, total, _objRef);
+                    string? mpKey = Config["MercadoPago:PublicKey"]; 
+                    if (!string.IsNullOrEmpty(mpKey))
+                    {
+                        await Task.Delay(100); 
+                        await JS.InvokeVoidAsync("renderMercadoPagoBrick", mpKey, total, _objRef);
+                    }
                 }
-
-                // 🔥 2. Renderizamos PayPal de forma dinámica y segura
-                string? paypalKey = Config["PayPal:ClientId"];
-                if (!string.IsNullOrEmpty(paypalKey))
+                else
                 {
-                    // Le enviamos la llave como parámetro al Javascript
-                    await JS.InvokeVoidAsync("renderPayPalButton", paypalKey, _objRef);
+                    string? paypalKey = Config["PayPal:ClientId"];
+                    if (!string.IsNullOrEmpty(paypalKey))
+                    {
+                        await JS.InvokeVoidAsync("renderPayPalButton", paypalKey, _objRef);
+                    }
                 }
                 
                 _brickRendered = true;
@@ -283,9 +295,9 @@
     public async Task<string> CrearOrdenPayPalAPI()
     {
         var solicitud = new SolicitudPagoDto 
-        { 
+        {
             Titulo = "Recursos de Tiempo Biblia.Luzy", 
-            TotalAPagar = CarritoService.ObtenerTotal(),
+            TotalAPagar = CarritoService.ObtenerTotal(Ubicacion.EsColombia),
             CorreoCliente = _correoCliente.Trim().ToLower(),
             ProductosIds = CarritoService.Items.Select(i => i.Producto.Id).ToList()
         };

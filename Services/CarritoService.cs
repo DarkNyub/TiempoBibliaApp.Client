@@ -91,7 +91,7 @@ namespace TiempoBiblia.Client.Services
             NotificarEstadoCambiado();
         }
 
-        public decimal ObtenerTotal() => Items.Where(i => !i.Producto.EsGratuito).Sum(i => i.Producto.Precio * i.Cantidad);
+        public decimal ObtenerTotal(bool esColombia) => Items.Where(i => !i.Producto.EsGratuito).Sum(i => (esColombia ? i.Producto.Precio : i.Producto.PrecioUsd) * i.Cantidad);
         
         public int ObtenerCantidadItems() => Items.Sum(i => i.Cantidad);
 

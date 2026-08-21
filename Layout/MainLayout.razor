@@ -2,6 +2,7 @@
 @inject TiempoBiblia.Client.Services.CarritoService Carrito
 @inject NavigationManager Nav
 @implements IDisposable
+@inject TiempoBiblia.Client.Services.UbicacionService Ubicacion
 
 <MudThemeProvider Theme="@MiTemaPastel" />
 <MudDialogProvider />
@@ -32,6 +33,11 @@
 </style>
 
 @code {
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Ubicacion.DetectarUbicacionAsync();
+    }
 
     protected override void OnInitialized()
     {

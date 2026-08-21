@@ -36,7 +36,7 @@
             <RowTemplate>
                 <MudTd DataLabel="Nombre"><strong>@context.Nombre</strong></MudTd>
                 <MudTd DataLabel="Precio">@(context.EsGratuito ? "Gratis" : $"${context.Precio}")</MudTd>
-                <MudTd DataLabel="Precio">@(context.EsGratuito ? "Gratis" : $"${context.Precio}")</MudTd>
+                <MudTd DataLabel="Precio">@(context.EsGratuito ? "Gratis" : $"${context.PrecioUsd}")</MudTd>
                 <MudTd DataLabel="Tipo">
                     <MudChip T="string" Color="Color.Info" Size="Size.Small">@context.Tipo</MudChip>
                 </MudTd>
@@ -105,7 +105,7 @@
                             <MudNumericField @bind-Value="productoEditando.Precio" Label="Precio (COP)" Min="0" Variant="Variant.Outlined" Margin="Margin.Dense" Disabled="productoEditando.EsGratuito" Style="font-size: 0.875rem;"  />
                         </MudItem>
                         <MudItem xs="4">
-                            <MudNumericField @bind-Value="productoEditando.Precio" Label="Precio (USD)" Min="0" Variant="Variant.Outlined" Margin="Margin.Dense" Disabled="productoEditando.EsGratuito" Style="font-size: 0.875rem;"  />
+                            <MudNumericField @bind-Value="productoEditando.PrecioUsd" Label="Precio (USD)" Min="0" Variant="Variant.Outlined" Margin="Margin.Dense" Disabled="productoEditando.EsGratuito" Style="font-size: 0.875rem;"  />
                         </MudItem>
                     </MudGrid>
 
