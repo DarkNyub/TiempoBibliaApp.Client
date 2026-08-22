@@ -348,6 +348,7 @@
                 Nombre = prod.Nombre,
                 Descripcion = prod.Descripcion,
                 Precio = prod.Precio,
+                PrecioUsd = prod.PrecioUsd,
                 Descuento = prod.Descuento,
                 EsGratuito = prod.EsGratuito,
                 ImagenUrl = prod.ImagenUrl,
@@ -417,7 +418,7 @@
             errores.Add("• Debes seleccionar una Categoría Principal.");
 
         // Validación de Precios y Gratis
-        if (!productoEditando.EsGratuito && productoEditando.Precio <= 0)
+        if (!productoEditando.EsGratuito && ((productoEditando.Precio  <= 0) || (productoEditando.PrecioUsd <= 0)))
             errores.Add("• Si el producto NO es gratis, el Precio debe ser mayor a 0.");
 
         // 🔥 2. ¿HAY ERRORES? LOS AGRUPAMOS Y MOSTRAMOS TODOS JUNTOS
