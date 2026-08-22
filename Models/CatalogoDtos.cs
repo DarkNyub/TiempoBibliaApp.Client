@@ -70,6 +70,7 @@ namespace TiempoBiblia.Client.Models
         public string Nombre { get; set; } = string.Empty;
         public string Descripcion { get; set; } = string.Empty;
         public decimal Precio { get; set; }
+        public decimal PrecioUsd { get; set; }
         public decimal Descuento { get; set; }
         public bool EsGratuito { get; set; }
         public string? ImagenUrl { get; set; }
