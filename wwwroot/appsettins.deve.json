@@ -1,0 +1,11 @@
+{
+    "MercadoPago": {
+        "PublicKey": "TEST-fcb178a2-34b8-4fb3-9aa4-ca72db9096a8"
+    },
+    "ApiSettings": {
+        "BaseUrl": "https://tiempobibliaappapi-hbb2bzgvc4fudkcw.canadacentral-01.azurewebsites.net/"
+    },
+    "PayPal": {
+        "ClientId": "AdMx02ZRiEHfpO8TitUxfEXLgjSCkwfjcCf141YTtEdadKruCHUby60jZQ8sjdVsX91q_BfjcKRJxeCq"
+    }
+}
