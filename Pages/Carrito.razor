@@ -199,14 +199,19 @@
             return;
         }
 
-        _mostrarMediosPago = true;
-
         // Renderizamos el Brick de Mercado Pago
         _mostrarMediosPago = true;
 
+        // 🔥 NUEVA CONDICIONAL: SI EL CARRITO ES GRATIS
+        var total = CarritoService.ObtenerTotal(Ubicacion.EsColombia);
+        if (total == 0)
+        {
+            await ProcesarPedidoGratuitoDirecto();
+            return; // Detenemos la ejecución aquí, no dibujamos pasarelas
+        }
+
         if (!_brickRendered)
         {
-            var total = CarritoService.ObtenerTotal(Ubicacion.EsColombia);
             if (total > 0)
             {
                 _objRef = DotNetObjectReference.Create(this);
@@ -366,5 +371,45 @@
     public void Dispose()
     {
         _objRef?.Dispose();
+    }
+
+    private async Task ProcesarPedidoGratuitoDirecto()
+    {
+        try
+        {
+            _procesandoPago = true;
+            StateHasChanged();
+
+            // Usamos un objeto anónimo que coincida con el DTO del backend
+            var solicitud = new
+            {
+                CorreoCliente = _correoCliente.Trim().ToLower(),
+                ProductosIds = CarritoService.Items.Select(i => i.Producto.Id).ToList()
+            };
+
+            var response = await Http.PostAsJsonAsync("api/checkout/procesar-gratis", solicitud);
+
+            if (response.IsSuccessStatusCode)
+            {
+                // 🔥 Reutilizamos tu DTO de respuesta para extraer el ID
+                var resultado = await response.Content.ReadFromJsonAsync<RespuestaPagoBrickDto>();
+                string idPago = resultado?.IdPago ?? "desconocido";
+
+                Nav.NavigateTo($"/resultado-pago?status=approved&payment_id={idPago}");
+            }
+            else
+            {
+                Snackbar.Add("Error al procesar el pedido gratuito. Intenta más tarde.", Severity.Error);
+                _procesandoPago = false;
+                ModificarDatos();
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Fallo de conexión: {ex.Message}", Severity.Error);
+            _procesandoPago = false;
+            StateHasChanged();
+        }
     }
 }
