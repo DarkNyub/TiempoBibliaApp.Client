@@ -268,8 +268,16 @@
             if (response.IsSuccessStatusCode)
             {
                 var resultado = await response.Content.ReadFromJsonAsync<RespuestaPagoBrickDto>();
-                string idPago = resultado?.IdPago ?? "desconocido";
+                
+                // 🔥 NUEVO: Si Mercado Pago nos da una URL (PSE), llevamos al cliente al banco
+                if (!string.IsNullOrEmpty(resultado?.UrlRedireccion))
+                {
+                    Nav.NavigateTo(resultado.UrlRedireccion);
+                    return true;
+                }
 
+                // Flujo normal (Tarjetas que se aprobaron de una vez)
+                string idPago = resultado?.IdPago ?? "desconocido";
                 Nav.NavigateTo($"/resultado-pago?status=approved&payment_id={idPago}"); 
                 return true; 
             }

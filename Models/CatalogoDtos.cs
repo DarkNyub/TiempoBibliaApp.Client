@@ -158,6 +158,7 @@ namespace TiempoBiblia.Client.Models
         public string Estado { get; set; } = string.Empty;
         public string IdPago { get; set; } = string.Empty;
         public string Mensaje { get; set; } = string.Empty;
+        public string UrlRedireccion { get; set; } = string.Empty;
     }
     // 🔥 NUEVA CLASE: Para recibir las fotos adicionales
     public class ImagenProductoDto
