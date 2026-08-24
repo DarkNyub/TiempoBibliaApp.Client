@@ -357,9 +357,10 @@
     public void ErrorPayPalAPI(string error)
     {
         Snackbar.Add("Ocurrió un error con la ventanita de PayPal.", Severity.Error);
-        _procesandoPago = false;
-        ModificarDatos();
-        StateHasChanged();
+        //_procesandoPago = false;
+        //ModificarDatos();
+        //StateHasChanged();
+        Nav.NavigateTo(Nav.Uri, forceLoad: true);
     }
 
     public void Dispose()
