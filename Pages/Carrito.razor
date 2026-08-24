@@ -270,9 +270,16 @@
             }
             else
             {
-                var errorBackend = await response.Content.ReadAsStringAsync();
-                Snackbar.Add($"Error al pagar: {errorBackend}", Severity.Error, config => { config.VisibleStateDuration = 10000; });
-                return false; 
+                // 🔥 1. Leemos el error como un objeto JSON, no como texto plano
+                var resultadoError = await response.Content.ReadFromJsonAsync<RespuestaPagoBrickDto>();
+                
+                // 🔥 2. Extraemos el mensaje o ponemos uno por defecto si viene nulo
+                string mensajeMostrar = resultadoError?.Mensaje ?? "Error al procesar el pago.";
+                
+                // 🔥 3. Le agregamos tu texto personalizado
+                Snackbar.Add($"{mensajeMostrar} - Intente más tarde.", Severity.Error, config => { config.VisibleStateDuration = 10000; });
+                
+                return false;
             }
         }
         catch (Exception ex)
