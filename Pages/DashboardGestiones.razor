@@ -12,76 +12,24 @@
         </MudText>
     </div>
 
-    <MudGrid Spacing="4">
+    <!-- MultiExpansion="true" permite tener varios abiertos al mismo tiempo si ella quiere -->
+    <MudExpansionPanels MultiExpansion="true" Elevation="4" Style="border-radius: 12px; overflow: hidden;">
         
-        <!-- ============================================== -->
-        <!-- FILA SUPERIOR: 2 COLUMNAS (PRODUCTOS Y PEDIDOS)-->
-        <!-- ============================================== -->
-        
-        <!-- COLUMNA 1: PRODUCTOS (Ocupa la mitad en PC, toda en móviles) -->
-        <MudItem xs="12">
-            <!-- PANEL 1: PRODUCTOS -->
-            <MudExpansionPanels MultiExpansion="true" Elevation="4" Style="border-radius: 12px; overflow: hidden;">
-                <MudExpansionPanel Text="📦 Gestión de Productos" Style="font-weight: bold; font-size: 1.1rem; color: #E91E63;">
-                    <!-- Aquí llamamos a tu componente gigante recién convertido -->
-                    <GestionProductos />
-                </MudExpansionPanel>
-            </MudExpansionPanels>
-        </MudItem>
-        <MudItem xs="12">
-            <MudExpansionPanels MultiExpansion="true" Elevation="4" Style="border-radius: 12px; overflow: hidden;">
-                <!-- PANEL 2: PEDIDOS (El próximo que haremos) -->
-                <MudExpansionPanel Text="🛒 Gestión de Pedidos (Ventas)" Style="font-weight: bold; font-size: 1.1rem; color: #5D4037;">
-                    <GestionPedidos />
-                </MudExpansionPanel>
-            </MudExpansionPanels>
-        </MudItem>
+        <!-- PANEL 1: PRODUCTOS -->
+        <MudExpansionPanel Text="📦 Gestión de Productos" Style="font-weight: bold; font-size: 1.1rem; color: #E91E63;">
+            <!-- Aquí llamamos a tu componente gigante recién convertido -->
+            <GestionProductos />
+        </MudExpansionPanel>
 
-        <!-- ============================================== -->
-        <!-- FILA INFERIOR: 1 COLUMNA COMPLETA (CATÁLOGOS)  -->
-        <!-- ============================================== -->
-        <MudItem xs="12">
-            <MudExpansionPanels MultiExpansion="true" Elevation="4" Style="border-radius: 12px; overflow: hidden;">
-                <MudExpansionPanel Text="🏷️ Gestores de Catálogo (Categorías, Tags, etc.)" Style="font-weight: bold; font-size: 1.1rem; color: #333;">
-                    
-                    <!-- Aquí adentro armamos OTRA cuadrícula para las "cajitas" -->
-                    <MudGrid Spacing="3">
-                        
-                        <!-- Caja 1: Categorías -->
-                        <MudItem xs="12" sm="6" md="4">
-                            <MudPaper Elevation="0" Class="pa-4" Style="border: 1px solid #e0e0e0; border-radius: 8px;">
-                                <MudText Typo="Typo.h6" Class="mb-1">📁 Categorías</MudText>
-                                <MudText Typo="Typo.body2" Class="mb-3 text-muted">Gestión de categorías principales y secundarias.</MudText>
-                                <!-- Aquí llamarás a <GestionCategorias /> en el futuro -->
-                                <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary">Gestionar</MudButton>
-                            </MudPaper>
-                        </MudItem>
+        <!-- PANEL 2: PEDIDOS (El próximo que haremos) -->
+        <MudExpansionPanel Text="🛒 Gestión de Pedidos (Ventas)" Style="font-weight: bold; font-size: 1.1rem; color: #5D4037;">
+            <GestionPedidos />
+        </MudExpansionPanel>
 
-                        <!-- Caja 2: Tags -->
-                        <MudItem xs="12" sm="6" md="4">
-                            <MudPaper Elevation="0" Class="pa-4" Style="border: 1px solid #e0e0e0; border-radius: 8px;">
-                                <MudText Typo="Typo.h6" Class="mb-1">🏷️ Palabras Claves</MudText>
-                                <MudText Typo="Typo.body2" Class="mb-3 text-muted">Etiquetas (Tags) para mejorar las búsquedas.</MudText>
-                                <!-- Aquí llamarás a <GestionTags /> en el futuro -->
-                                <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary">Gestionar</MudButton>
-                            </MudPaper>
-                        </MudItem>
+        <!-- PANEL 3: CATEGORÍAS Y TAGS -->
+        <MudExpansionPanel Text="🏷️ Catálogos (Categorías y Palabras Claves)" Style="font-weight: bold; font-size: 1.1rem; color: #5D4037;">
+            <MudText>Próximamente...</MudText>
+        </MudExpansionPanel>
 
-                        <!-- Caja 3: Otro catálogo (Ej. Paquetes) -->
-                        <MudItem xs="12" sm="6" md="4">
-                            <MudPaper Elevation="0" Class="pa-4" Style="border: 1px solid #e0e0e0; border-radius: 8px;">
-                                <MudText Typo="Typo.h6" Class="mb-1">🎁 Paquetes</MudText>
-                                <MudText Typo="Typo.body2" Class="mb-3 text-muted">Agrupaciones y promociones de productos.</MudText>
-                                <!-- Aquí llamarás a <GestionPaquetes /> en el futuro -->
-                                <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary">Gestionar</MudButton>
-                            </MudPaper>
-                        </MudItem>
-
-                    </MudGrid>
-
-                </MudExpansionPanel>
-            </MudExpansionPanels>
-        </MudItem>
-
-    </MudGrid>
+    </MudExpansionPanels>
 </MudContainer>
