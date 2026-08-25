@@ -247,4 +247,9 @@ namespace TiempoBiblia.Client.Models
         [MaxLength(1000)]
         public string Comentario { get; set; } = string.Empty;
     }
+
+    public class ReenviarCorreoRequestDto
+    {
+        public string NuevoCorreo { get; set; } = string.Empty;
+    }
 } // Fin del namespace
