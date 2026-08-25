@@ -274,6 +274,13 @@
             if (response.IsSuccessStatusCode)
             {
                 var resultado = await response.Content.ReadFromJsonAsync<RespuestaPagoBrickDto>();
+
+                // 🔥 LA NUEVA VALIDACIÓN: 200 OK pero rechazado lógicamente
+                if (resultado != null && !resultado.Aprobado)
+                {
+                    Snackbar.Add(resultado.Mensaje ?? "El pago fue rechazado o no hay cupos.", Severity.Error);
+                    return false; 
+                }
                 
                 // 🔥 NUEVO: Si Mercado Pago nos da una URL (PSE), llevamos al cliente al banco
                 if (!string.IsNullOrEmpty(resultado?.UrlRedireccion))
@@ -354,6 +361,16 @@
         
         if (response.IsSuccessStatusCode)
         {
+            var resultado = await response.Content.ReadFromJsonAsync<RespuestaPagoBrickDto>();
+            
+            // 🔥 LA NUEVA VALIDACIÓN
+            if (resultado != null && !resultado.Aprobado)
+            {
+                Snackbar.Add(resultado.Mensaje ?? "Error al capturar el pago. No se te ha cobrado.", Severity.Error);
+                _procesandoPago = false;
+                StateHasChanged();
+                return;
+            }
             Nav.NavigateTo($"/resultado-pago?status=approved&payment_id={orderId}");
         }
         else
@@ -407,6 +424,16 @@
             {
                 // 🔥 Reutilizamos tu DTO de respuesta para extraer el ID
                 var resultado = await response.Content.ReadFromJsonAsync<RespuestaPagoBrickDto>();
+
+                // 🔥 LA NUEVA VALIDACIÓN: Si el backend dice 200 OK, pero Aprobado es FALSE (Ej. Cupos agotados)
+                if (resultado != null && !resultado.Aprobado)
+                {
+                    Snackbar.Add(resultado.Mensaje ?? "El pedido no pudo ser procesado.", Severity.Error);
+                    _procesandoPago = false;
+                    ModificarDatos(); // Lo devolvemos al carrito
+                    StateHasChanged();
+                    return; // ⛔ Detenemos el código aquí para que no navegue al éxito
+                }
                 string idPago = resultado?.IdPago ?? "desconocido";
 
                 Nav.NavigateTo($"/resultado-pago?status=approved&payment_id={idPago}");
