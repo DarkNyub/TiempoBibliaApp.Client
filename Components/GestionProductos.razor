@@ -13,7 +13,7 @@
     }
     else
     {
-        <MudTable Items="@productos" Dense="true" Filter="new Func<ProductoDto,bool>(Filtrar)" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="4" Style="border-radius: 12px; overflow: hidden;">
+        <MudTable Items="@productos"RowsPerPage="20" Dense="true" Filter="new Func<ProductoDto,bool>(Filtrar)" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="4" Style="border-radius: 12px; overflow: hidden;">
             <ToolBarContent>
                 <MudButton Size="Size.Small"  Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="AbrirModalCreacion">
                     Nuevo Producto
@@ -25,11 +25,11 @@
             </ToolBarContent>
             
             <HeaderContent>
-                <MudTh>Nombre</MudTh>
-                <MudTh>Precio</MudTh>
-                <MudTh>Precio USD</MudTh>
-                <MudTh>Tipo</MudTh>
-                <MudTh>Estado</MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<ProductoDto, object>(x => x.Nombre)">Nombre</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<ProductoDto, object>(x => x.Precio)">Precio</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<ProductoDto, object>(x => x.PrecioUsd)">Precio USD</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<ProductoDto, object>(x => x.Tipo)">Tipo</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<ProductoDto, object>(x => x.Activo)">Estado</MudTableSortLabel></MudTh>
                 <MudTh Style="text-align: right;">Acciones</MudTh>
             </HeaderContent>
             
@@ -261,7 +261,10 @@
 
     private async Task CargarDatos()
     {
-        productos = await Http.GetFromJsonAsync<List<ProductoDto>>("api/Productos/admin");
+        var data = await Http.GetFromJsonAsync<List<ProductoDto>>("api/Productos/admin");
+        if (data != null)
+            productos = data.OrderByDescending(p => p.Activo).ThenBy(p => p.Nombre).ToList();// 🔥 Primero los Activos (true), luego los inactivos (false), y por último por nombre
+
         categoriasDisponibles = await Http.GetFromJsonAsync<List<CategoriaDto>>("api/Categorias/admin");
         
         try {
