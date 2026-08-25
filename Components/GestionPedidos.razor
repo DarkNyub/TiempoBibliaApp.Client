@@ -1,0 +1,156 @@
+
+@using TiempoBiblia.Client.Models
+@inject HttpClient Http
+@inject ISnackbar Snackbar
+
+@if (pedidos == null)
+{
+    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-4" />
+}
+else
+{
+    <MudTable Items="@pedidos" Dense="true" Hover="true" Filter="new Func<PedidoAdminDto,bool>(FiltrarPedidos)" Elevation="0" Style="border: 1px solid #e0e0e0; border-radius: 8px;">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Historial de Ventas</MudText>
+            <MudSpacer />
+            <MudTextField @bind-Value="textoBusqueda" Immediate="true" Placeholder="Buscar correo o ID..." Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Class="mt-0" Margin="Margin.Dense" />
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh>Fecha</MudTh>
+            <MudTh>Transacción</MudTh>
+            <MudTh>Cliente</MudTh>
+            <MudTh>Pasarela</MudTh>
+            <MudTh>Total</MudTh>
+            <MudTh>Estado</MudTh>
+            <MudTh Style="text-align: right;">Acciones</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Fecha">@context.FechaCreacion.ToString("dd MMM yy")</MudTd>
+            <MudTd DataLabel="Transacción">
+                <MudText Typo="Typo.caption" Style="font-family: monospace;">@context.TransaccionGatewayId</MudText>
+            </MudTd>
+            <MudTd DataLabel="Cliente"><strong>@context.CorreoCliente</strong></MudTd>
+            <MudTd DataLabel="Pasarela">
+                <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Outlined">@context.Pasarela</MudChip>
+            </MudTd>
+            <MudTd DataLabel="Total"><strong>$@context.TotalCobrado.ToString("N2") @context.Moneda</strong></MudTd>
+            <MudTd DataLabel="Estado">
+                <MudChip T="string" Size="Size.Small" Color="@(context.Estado == "approved" ? Color.Success : Color.Warning)">@context.Estado</MudChip>
+            </MudTd>
+            <MudTd DataLabel="Acciones" Style="text-align: right;">
+                <!-- Botón Acordeón -->
+                <MudButton Size="Size.Small" Variant="Variant.Outlined" Color="Color.Dark" OnClick="@(() => AlternarAcordeon(context.Id))" Class="mr-2">
+                    @(filasExpandidas.Contains(context.Id) ? "Ocultar" : "Ver Detalles")
+                </MudButton>
+                <!-- Botón Reenviar Correo -->
+                <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.MarkEmailRead" Color="Color.Warning" title="Reenviar Links al Cliente" OnClick="() => ReenviarCorreo(context.Id)" Disabled="@procesandoReenvio" />
+            </MudTd>
+        </RowTemplate>
+        
+        <!-- 🔥 EL ACORDEÓN MÁGICO (Se dibuja debajo de la fila si está expandida) -->
+        <ChildRowContent>
+            @if (filasExpandidas.Contains(context.Id))
+            {
+                <MudTr>
+                    <td colspan="7">
+                        <MudCard Elevation="0" Class="pa-4" Style="background-color: #fafafa; border-left: 4px solid #E91E63;">
+                            <MudText Typo="Typo.subtitle2" Class="mb-2">Productos Comprados (@context.CantidadProductos):</MudText>
+                            <ul style="list-style-type: square; margin-left: 20px;">
+                                @if (context.Detalles != null && context.Detalles.Any())
+                                {
+                                    @foreach (var det in context.Detalles)
+                                    {
+                                        <li>
+                                            <MudText Typo="Typo.body2">
+                                                @det.NombreProductoHistorico - <strong>$@det.PrecioUnitarioPagado.ToString("N2")</strong>
+                                            </MudText>
+                                        </li>
+                                    }
+                                }
+                                else
+                                {
+                                    <MudText Typo="Typo.caption">No hay detalles (Pudo ser una prueba gratuita).</MudText>
+                                }
+                            </ul>
+                            @if (!string.IsNullOrEmpty(context.Franquicia))
+                            {
+                                <MudText Typo="Typo.caption" Class="mt-3 d-block text-muted">
+                                    <MudIcon Icon="@Icons.Material.Filled.CreditCard" Size="Size.Small" Class="mr-1" />
+                                    Tarjeta: @context.Franquicia (**** @context.Ultimos4Digitos)
+                                </MudText>
+                            }
+                        </MudCard>
+                    </td>
+                </MudTr>
+            }
+        </ChildRowContent>
+        <PagerContent>
+            <MudTablePager RowsPerPageString="Ventas por página:" />
+        </PagerContent>
+    </MudTable>
+}
+
+@code {
+    private List<PedidoAdminDto>? pedidos;
+    private string textoBusqueda = "";
+    private HashSet<int> filasExpandidas = new(); // Guarda los IDs de las filas abiertas
+    private bool procesandoReenvio = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarPedidos();
+    }
+
+    private async Task CargarPedidos()
+    {
+        try
+        {
+            pedidos = await Http.GetFromJsonAsync<List<PedidoAdminDto>>("api/Pedidos/admin");
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("Error al cargar el historial de ventas.", Severity.Error);
+        }
+    }
+
+    private bool FiltrarPedidos(PedidoAdminDto p)
+    {
+        if (string.IsNullOrWhiteSpace(textoBusqueda)) return true;
+        if (p.CorreoCliente.Contains(textoBusqueda, StringComparison.OrdinalIgnoreCase)) return true;
+        if (p.TransaccionGatewayId.Contains(textoBusqueda, StringComparison.OrdinalIgnoreCase)) return true;
+        return false;
+    }
+
+    private void AlternarAcordeon(int id)
+    {
+        if (filasExpandidas.Contains(id))
+            filasExpandidas.Remove(id);
+        else
+            filasExpandidas.Add(id);
+    }
+
+    private async Task ReenviarCorreo(int id)
+    {
+        procesandoReenvio = true;
+        try
+        {
+            var response = await Http.PostAsync($"api/Pedidos/{id}/reenviar-correo", null);
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("¡Correo reenviado con éxito al cliente!", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add("Error al reenviar el correo. Verifica que existan links activos.", Severity.Error);
+            }
+        }
+        catch
+        {
+            Snackbar.Add("Fallo de conexión al intentar reenviar.", Severity.Error);
+        }
+        finally
+        {
+            procesandoReenvio = false;
+        }
+    }
+}

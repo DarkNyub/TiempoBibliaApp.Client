@@ -195,21 +195,29 @@ namespace TiempoBiblia.Client.Models
     
     public class PedidoAdminDto
     {
+        public int Id { get; set; }
         public DateTime FechaCreacion { get; set; }
-
         public string TransaccionGatewayId { get; set; } = string.Empty;
-
         public string CorreoCliente { get; set; } = string.Empty;
-
         public int CantidadProductos { get; set; }
-
         public string Pasarela { get; set; } = string.Empty;
-
         public decimal TotalCobrado { get; set; }
-
         public string Moneda { get; set; } = string.Empty;
-
         public string Estado { get; set; } = string.Empty;
+        
+        // 🔥 Para auditoría visual
+        public string? Franquicia { get; set; }
+        public string? Ultimos4Digitos { get; set; }
+
+        // 🔥 La lista para el Acordeón
+        public List<PedidoDetalleAdminDto> Detalles { get; set; } = new();
+    }
+
+    public class PedidoDetalleAdminDto
+    {
+        public int ProductoId { get; set; }
+        public string NombreProductoHistorico { get; set; } = string.Empty;
+        public decimal PrecioUnitarioPagado { get; set; }
     }
 
     // DTO para leer las reseñas que vienen del servidor
