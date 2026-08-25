@@ -20,20 +20,16 @@
         
         <!-- COLUMNA 1: PRODUCTOS (Ocupa la mitad en PC, toda en móviles) -->
         <MudItem xs="12" md="6">
-            <MudExpansionPanels MultiExpansion="true" Elevation="4" Style="border-radius: 12px; overflow: hidden;">
-                <MudExpansionPanel Text="📦 Gestión de Productos" Expanded="true" Style="font-weight: bold; font-size: 1.1rem; color: #E91E63;">
-                    <GestionProductos />
-                </MudExpansionPanel>
-            </MudExpansionPanels>
-        </MudItem>
+            <!-- PANEL 1: PRODUCTOS -->
+            <MudExpansionPanel Text="📦 Gestión de Productos" Style="font-weight: bold; font-size: 1.1rem; color: #E91E63;">
+                <!-- Aquí llamamos a tu componente gigante recién convertido -->
+                <GestionProductos />
+            </MudExpansionPanel>
 
-        <!-- COLUMNA 2: PEDIDOS -->
-        <MudItem xs="12" md="6">
-            <MudExpansionPanels MultiExpansion="true" Elevation="4" Style="border-radius: 12px; overflow: hidden;">
-                <MudExpansionPanel Text="🛒 Gestión de Pedidos (Ventas)" Expanded="true" Style="font-weight: bold; font-size: 1.1rem; color: #5D4037;">
-                    <GestionPedidos />
-                </MudExpansionPanel>
-            </MudExpansionPanels>
+            <!-- PANEL 2: PEDIDOS (El próximo que haremos) -->
+            <MudExpansionPanel Text="🛒 Gestión de Pedidos (Ventas)" Style="font-weight: bold; font-size: 1.1rem; color: #5D4037;">
+                <GestionPedidos />
+            </MudExpansionPanel>
         </MudItem>
 
         <!-- ============================================== -->
@@ -81,5 +77,6 @@
                 </MudExpansionPanel>
             </MudExpansionPanels>
         </MudItem>
+
     </MudGrid>
 </MudContainer>
