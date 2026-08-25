@@ -94,8 +94,12 @@
                             1. ¿A dónde enviamos tus recursos?
                         </MudText>
                         
-                        <MudTextField @bind-Value="_correoCliente" Label="Tu correo electrónico" Variant="Variant.Outlined" InputType="InputType.Email" Required="true" Class="mb-3" />
-                        <MudTextField @bind-Value="_confirmacionCorreo" Label="Confirma tu correo" Variant="Variant.Outlined" InputType="InputType.Email" Required="true" Class="mb-4" />
+                        <MudTextField @bind-Value="_correoCliente" Label="Tu correo electrónico" Variant="Variant.Outlined" InputType="InputType.Email" Required="true" Class="mb-3"  Margin="Margin.Dense" />
+                        <MudTextField @bind-Value="_confirmacionCorreo" Label="Confirma tu correo" Variant="Variant.Outlined" InputType="InputType.Email" Required="true" Class="mb-4"  Margin="Margin.Dense" />
+                        @if (Ubicacion.EsColombia)
+                        {
+                            <MudTextField @bind-Value="_celularCliente" Label="Número de celular (Para pago con Nequi/PSE)" Variant="Variant.Outlined" Required="true" Class="mb-4" Margin="Margin.Dense" />
+                        }
 
                         <MudCheckBox T="bool" @bind-Value="_aceptaTerminos" Color="Color.Primary" Class="mb-4">
                             <MudText Typo="Typo.body2">
@@ -166,6 +170,7 @@
 
     private string _correoCliente = string.Empty;
     private string _confirmacionCorreo = string.Empty;
+    private string _celularCliente = string.Empty;
     private bool _aceptaTerminos = false;
     private bool _mostrarMediosPago = false;
     private bool _procesandoPago = false;
@@ -260,6 +265,7 @@
             {
                 FormData = formDataBricks,
                 CorreoCliente = _correoCliente.Trim().ToLower(),
+                CelularCliente = _celularCliente.Trim(),
                 ProductosIds = CarritoService.Items.Select(i => i.Producto.Id).ToList()
             };
 

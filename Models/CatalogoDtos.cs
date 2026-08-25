@@ -189,6 +189,7 @@ namespace TiempoBiblia.Client.Models
         public object FormData { get; set; } = new();
         public object OrderId { get; set; } = new();
         public string CorreoCliente { get; set; } = string.Empty;
+        public string CelularCliente { get; set; } = string.Empty;
         public List<int> ProductosIds { get; set; } = new();
     }
     
