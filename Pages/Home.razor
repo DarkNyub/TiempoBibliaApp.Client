@@ -2,6 +2,7 @@
 @using TiempoBiblia.Client.Models
 @inject HttpClient Http
 @inject IDialogService _dialogService
+@inject TiempoBiblia.Client.Services.UbicacionService Ubicacion
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="pt-8 pb-16">
 
@@ -68,7 +69,7 @@
                 if (_filtroActual != "Todos" && _filtroActual != catNovedad.Nombre) continue;
 
                 // 🔥 LÓGICA: Buscar en principal o secundarias
-                var productosNovedad = productos.Where(p => p.CategoriaId == catNovedad.Id || (p.CategoriasSecundariasIds != null && p.CategoriasSecundariasIds.Contains(catNovedad.Id))).ToList();
+                var productosNovedad = productos.Where(p => (p.CategoriaId == catNovedad.Id || (p.CategoriasSecundariasIds != null && p.CategoriasSecundariasIds.Contains(catNovedad.Id))) && (Ubicacion.EsColombia || !string.Equals(p.Tipo, "presencial", StringComparison.OrdinalIgnoreCase))).ToList();
 
                 <div class="cinta-categoria mt-8">
                     <MudText Typo="Typo.h4" Align="Align.Center" Class="fuente-pacifico" Style="color: white; letter-spacing: 2px;">
@@ -154,7 +155,8 @@
             // Filtramos si el usuario seleccionó una categoría específica
             if (_filtroActual != "Todos" && _filtroActual != categoria.Nombre) continue;
 
-            var productosCat = productos.Where(p => p.CategoriaId == categoria.Id || (p.CategoriasSecundariasIds != null && p.CategoriasSecundariasIds.Contains(categoria.Id))).ToList();
+            // 🔥 LÓGICA FILTRO: Buscar en principal/secundarias Y ocultar presenciales si no está en Colombia
+            var productosCat = productos.Where(p => (p.CategoriaId == categoria.Id || (p.CategoriasSecundariasIds != null && p.CategoriasSecundariasIds.Contains(categoria.Id))) && (Ubicacion.EsColombia || !string.Equals(p.Tipo, "presencial", StringComparison.OrdinalIgnoreCase))).ToList();
 
             if (productosCat.Any())
             {
