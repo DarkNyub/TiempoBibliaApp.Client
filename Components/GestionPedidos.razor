@@ -12,10 +12,14 @@
     {
         <MudTable Items="@pedidos" Dense="true" Hover="true" Filter="new Func<PedidoAdminDto,bool>(FiltrarPedidos)" Elevation="0" Style="border: 1px solid #e0e0e0; border-radius: 8px;">
             <ToolBarContent>
-                <MudText Typo="Typo.h6">Historial de Ventas</MudText>
-                <MudSpacer />
-                <MudTextField @bind-Value="textoBusqueda" Immediate="true" Placeholder="Buscar correo o ID..." Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Class="mt-0" Margin="Margin.Dense" />
-            </ToolBarContent>
+            <MudText Typo="Typo.h6">Historial de Ventas</MudText>
+            
+            <!-- 🔥 NUEVO BOTÓN DE ACTUALIZAR -->
+            <MudIconButton Icon="@Icons.Material.Filled.Refresh" Color="Color.Primary" OnClick="RefrescarTabla" title="Actualizar datos" Class="ml-4" />
+            
+            <MudSpacer />
+            <MudTextField @bind-Value="textoBusqueda" Immediate="true" Placeholder="Buscar correo o ID..." Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Class="mt-0" Margin="Margin.Dense" />
+        </ToolBarContent>
             <HeaderContent>
                 <MudTh>Fecha</MudTh>
                 <MudTh>Transacción</MudTh>
@@ -179,5 +183,15 @@
         }
         catch { Snackbar.Add("Fallo de conexión.", Severity.Error); }
         finally { procesandoReenvio = false; }
+    }
+    // 🔥 NUEVA FUNCIÓN PARA REFRESCAR
+    private async Task RefrescarTabla()
+    {
+        pedidos = null; // Dispara la animación de carga visualmente
+        StateHasChanged(); // Obliga al frontend a redibujarse
+        
+        await CargarPedidos(); // Trae los datos frescos de la BD
+        
+        Snackbar.Add("Historial actualizado", Severity.Success);
     }
 }

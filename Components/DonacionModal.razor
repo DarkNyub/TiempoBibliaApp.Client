@@ -1,0 +1,96 @@
+@using TiempoBiblia.Client.Models
+@inject TiempoBiblia.Client.Services.UbicacionService Ubicacion
+
+<MudDialog Style="border-radius: 20px; overflow: hidden; padding: 0;">
+    <DialogContent>
+        <div class="d-flex flex-column align-center text-center pa-4">
+            <!-- Icono principal -->
+            <MudIcon Icon="@Icons.Material.Filled.Favorite" Color="Color.Secondary" Style="font-size: 4rem;" Class="mb-4" />
+            
+            <MudText Typo="Typo.h5" Style="font-weight: bold; color: #E91E63;" Class="mb-2">
+                ¡Gracias por tu corazón! 💕
+            </MudText>
+            
+            <MudText Typo="Typo.body2" Style="color: #5D4037;" Class="mb-6">
+                Tu apoyo voluntario nos ayuda a seguir creando recursos y llevando la Palabra de Dios a más personas. Elige el monto con el que deseas bendecir este ministerio:
+            </MudText>
+
+            @if (Ubicacion.EsColombia)
+            {
+                <!-- 🇨🇴 BOTONES PARA COLOMBIA (MERCADO PAGO) -->
+                <MudText Typo="Typo.subtitle2" Class="mb-3" Style="color: #009EE3; font-weight: bold;">
+                    Pago seguro vía Mercado Pago / Nequi / PSE
+                </MudText>
+                
+                <MudGrid Spacing="2" Justify="Justify.Center" Class="mb-4">
+                    <MudItem xs="6">
+                        <MudButton Href="https://mpago.li/1nr2pwi" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Style="border-radius: 20px; font-weight: bold;">
+                            $ 5.000 COP
+                        </MudButton>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudButton Href="https://mpago.li/2UZ54dy" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Style="border-radius: 20px; font-weight: bold;">
+                            $ 15.000 COP
+                        </MudButton>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudButton Href="https://mpago.li/1gzyfHB" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Style="border-radius: 20px; font-weight: bold;">
+                            $ 45.000 COP
+                        </MudButton>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudButton Href="https://link.mercadopago.com.co/tiempobiblialuzy" Target="_blank" Variant="Variant.Outlined" Color="Color.Primary" FullWidth="true" Style="border-radius: 20px; font-weight: bold; border-width: 2px;">
+                            Otro monto...
+                        </MudButton>
+                    </MudItem>
+                </MudGrid>
+            }
+            else
+            {
+                <!-- 🌎 BOTONES INTERNACIONALES (PAYPAL) -->
+                <MudText Typo="Typo.subtitle2" Class="mb-3" Style="color: #003087; font-weight: bold;">
+                    Pago seguro internacional vía PayPal
+                </MudText>
+                
+                <MudGrid Spacing="2" Justify="Justify.Center" Class="mb-4">
+                    <MudItem xs="6">
+                        <MudButton Href="https://paypal.me/TiempoBibliaLuzy/5" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Style="border-radius: 20px; font-weight: bold;">
+                            $ 5 USD
+                        </MudButton>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudButton Href="https://paypal.me/TiempoBibliaLuzy/10" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Style="border-radius: 20px; font-weight: bold;">
+                            $ 10 USD
+                        </MudButton>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudButton Href="https://paypal.me/TiempoBibliaLuzy/20" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Style="border-radius: 20px; font-weight: bold;">
+                            $ 20 USD
+                        </MudButton>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudButton Href="https://paypal.me/TiempoBibliaLuzy" Target="_blank" Variant="Variant.Outlined" Color="Color.Primary" FullWidth="true" Style="border-radius: 20px; font-weight: bold; border-width: 2px;">
+                            Otro monto...
+                        </MudButton>
+                    </MudItem>
+                </MudGrid>
+            }
+            
+            <MudText Typo="Typo.caption" Style="color: #999;">
+                Serás redirigido a una plataforma segura. No guardamos tus datos financieros.
+            </MudText>
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cerrar" Color="Color.Dark" Variant="Variant.Text" Size="Size.Small" Class="mr-2 mb-2">Cerrar</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
+
+    private void Cerrar()
+    {
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+}

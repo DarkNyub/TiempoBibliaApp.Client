@@ -141,6 +141,17 @@
                         <MudText Typo="Typo.body1" Align="Align.Justify" Class="mb-6" Style="color: #5D4037;">
                             <strong>Bienvenida a TiempoBiblia.Luzy, un espacio creado con amor, fe y propósito.</strong> 💕📖✨
                         </MudText>
+                        <!-- 🔥 NUEVO: BOTÓN DE DONACIÓN -->
+                        <div class="d-flex justify-center mt-2">
+                            <MudButton Variant="Variant.Filled" 
+                                       Color="Color.Secondary" 
+                                       Size="Size.Large" 
+                                       StartIcon="@Icons.Material.Filled.Favorite" 
+                                       Style="border-radius: 30px; font-weight: bold; padding: 12px 30px; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(233, 30, 99, 0.3);" 
+                                       OnClick="AbrirModalDonacion">
+                                Apoya este ministerio
+                            </MudButton>
+                        </div>
                     </MudItem>
                 </MudGrid>
             </div>
@@ -271,5 +282,17 @@
         var parameters = new DialogParameters<ProductoDetalleModal> { { x => x.Producto, producto } };
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true, NoHeader = true, BackgroundClass = "netflix-modal-backdrop" };
         await _dialogService.ShowAsync<ProductoDetalleModal>("", parameters, options);
+    }
+    // 🔥 NUEVO MÉTODO PARA ABRIR EL MODAL DE DONACIÓN
+    private async Task AbrirModalDonacion()
+    {
+        var options = new DialogOptions { 
+            CloseButton = false, // Lo quitamos arriba porque pusimos uno abajo en el diseño
+            MaxWidth = MaxWidth.Small, 
+            FullWidth = true, 
+            NoHeader = true, // Le quitamos la cabecera gris por defecto de MudBlazor
+            BackgroundClass = "netflix-modal-backdrop" 
+        };
+        await _dialogService.ShowAsync<DonacionModal>("", options);
     }
 }
