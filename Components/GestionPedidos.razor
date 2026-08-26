@@ -16,7 +16,6 @@
             
             <!-- 🔥 NUEVO BOTÓN DE ACTUALIZAR -->
             <MudIconButton Icon="@Icons.Material.Filled.Refresh" Color="Color.Primary" OnClick="RefrescarTabla" title="Actualizar datos" Class="ml-4" />
-            
             <MudSpacer />
             <MudTextField @bind-Value="textoBusqueda" Immediate="true" Placeholder="Buscar correo o ID..." Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Class="mt-0" Margin="Margin.Dense" />
         </ToolBarContent>
@@ -36,7 +35,7 @@
                 </MudTd>
                 <MudTd DataLabel="Cliente"><strong>@context.CorreoCliente</strong></MudTd>
                 <MudTd DataLabel="Pasarela">
-                    <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Outlined">@context.Pasarela</MudChip>
+                    <MudChip T="string" Size="Size.Small" Color="@(context.Pasarela switch { "MercadoPago" => Color.Warning, "PayPal" => Color.Info, "Gratuito" => Color.Secondary, _ => Color.Default })" Variant="Variant.Outlined">@context.Pasarela</MudChip>
                 </MudTd>
                 <MudTd DataLabel="Total"><strong>$@context.TotalCobrado.ToString("N2") @context.Moneda</strong></MudTd>
                 <MudTd DataLabel="Estado">
