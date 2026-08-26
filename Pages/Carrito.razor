@@ -99,15 +99,8 @@
                         @if (Ubicacion.EsColombia)
                         {
                             <MudTextField @bind-Value="_celularCliente" Label="Número de celular (Para pago con Nequi/PSE)" Variant="Variant.Outlined" Required="true" Class="mb-4" Margin="Margin.Dense" />
-                        
-                            <MudGrid Spacing="2" Class="mb-3">
-                                <MudItem xs="12" sm="6">
-                                    <MudTextField @bind-Value="_nombreCliente" Label="Tu Nombre" Variant="Variant.Outlined" Required="true" Margin="Margin.Dense" />
-                                </MudItem>
-                                <MudItem xs="12" sm="6">
-                                    <MudTextField @bind-Value="_apellidoCliente" Label="Tus Apellidos" Variant="Variant.Outlined" Required="true" Margin="Margin.Dense" />
-                                </MudItem>
-                            </MudGrid>
+                            <MudTextField @bind-Value="_nombreCliente" Label="Tu Nombre" Variant="Variant.Outlined" Required="true" Class="mb-4" Margin="Margin.Dense" />
+                            <MudTextField @bind-Value="_apellidoCliente" Label="Tus Apellidos" Variant="Variant.Outlined" Required="true" Class="mb-4" Margin="Margin.Dense" />
                         }
 
                         <MudCheckBox T="bool" @bind-Value="_aceptaTerminos" Color="Color.Primary" Class="mb-4">
