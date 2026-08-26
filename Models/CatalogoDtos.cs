@@ -254,4 +254,10 @@ namespace TiempoBiblia.Client.Models
     {
         public string NuevoCorreo { get; set; } = string.Empty;
     }
+    // 🔥 NUEVA CLASE PARA ATRAPAR ERRORES GENÉRICOS DEL BACKEND
+    public class RespuestaErrorApiDto
+    {
+        public string Mensaje { get; set; } = string.Empty;
+        public string Detalle { get; set; } = string.Empty;
+    }
 } // Fin del namespace

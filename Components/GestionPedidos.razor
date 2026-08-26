@@ -179,10 +179,27 @@
                 mostrarModalReenviar = false;
                 await CargarPedidos(); // Refrescamos para ver el nuevo correo en la tabla
             }
-            else Snackbar.Add("Error al reenviar.", Severity.Error);
+            else 
+            {
+                // 🔥 NUEVO: Desempaquetamos el error real del backend
+                var errorInfo = await response.Content.ReadFromJsonAsync<RespuestaErrorApiDto>();
+                
+                // Si viene un detalle específico lo mostramos, si no, mostramos el mensaje corto
+                string mensajeMostrar = !string.IsNullOrWhiteSpace(errorInfo?.Detalle) 
+                                        ? errorInfo.Detalle 
+                                        : (errorInfo?.Mensaje ?? "Error desconocido al reenviar.");
+                
+                Snackbar.Add(mensajeMostrar, Severity.Error);
+            }
         }
-        catch { Snackbar.Add("Fallo de conexión.", Severity.Error); }
-        finally { procesandoReenvio = false; }
+        catch 
+        { 
+            Snackbar.Add("Fallo de conexión con el servidor.", Severity.Error); 
+        }
+        finally 
+        { 
+            procesandoReenvio = false; 
+        }
     }
     // 🔥 NUEVA FUNCIÓN PARA REFRESCAR
     private async Task RefrescarTabla()

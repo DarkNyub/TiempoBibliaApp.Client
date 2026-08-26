@@ -7,7 +7,9 @@
         
         @if (Status == "approved")
         {
-            <!-- PANTALLA DE ÉXITO -->
+            <!-- ========================================== -->
+            <!-- PANTALLA DE ÉXITO (Tarjetas Inmediatas)    -->
+            <!-- ========================================== -->
             <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Style="font-size: 6rem;" Class="mb-4" />
             <MudText Typo="Typo.h4" Style="font-weight: bold; color: #5D4037;" Class="mb-2">¡Pago Exitoso! 🎉</MudText>
             
@@ -20,20 +22,42 @@
             </MudAlert>
 
             <MudText Typo="Typo.body2" Class="mb-6" Style="color: #999;">
-                Tu número de pedido/recibo es: <strong style="color: #5D4037;">#@PaymentId</strong>
+                Tu número de recibo es: <strong style="color: #5D4037;">#@PaymentId</strong>
             </MudText>
 
             <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Size="Size.Large" OnClick="@(() => Nav.NavigateTo("/"))" Style="border-radius: 30px;">
                 Volver a la Tienda
             </MudButton>
         }
+        else if (Status == "pending" || Status == "in_process")
+        {
+            <!-- ========================================== -->
+            <!-- PANTALLA DE PENDIENTE (PSE / Transferencias)-->
+            <!-- ========================================== -->
+            <MudIcon Icon="@Icons.Material.Filled.HourglassTop" Color="Color.Warning" Style="font-size: 6rem;" Class="mb-4" />
+            <MudText Typo="Typo.h4" Style="font-weight: bold; color: #F57F17;" Class="mb-2">Pago en Proceso ⏳</MudText>
+            
+            <MudText Typo="Typo.body1" Class="mb-4" Style="color: #8D6E63; font-size: 1.1rem;">
+                Tu transferencia está siendo validada por el banco. Esto es completamente normal y puede tomar unos minutos.
+            </MudText>
+            
+            <MudAlert Severity="Severity.Warning" Class="mb-6 mt-2" Style="text-align: left;">
+                No te preocupes, en cuanto el banco nos confirme la transacción, <strong>te enviaremos tus recursos automáticamente al correo</strong>. ¡No necesitas hacer nada más!
+            </MudAlert>
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Size="Size.Large" OnClick="@(() => Nav.NavigateTo("/"))" Style="border-radius: 30px;">
+                Ir a la página principal
+            </MudButton>
+        }
         else
         {
-            <!-- PANTALLA DE RECHAZO O PENDIENTE -->
+            <!-- ========================================== -->
+            <!-- PANTALLA DE RECHAZO REAL                   -->
+            <!-- ========================================== -->
             <MudIcon Icon="@Icons.Material.Filled.ErrorOutline" Color="Color.Error" Style="font-size: 6rem;" Class="mb-4" />
             <MudText Typo="Typo.h4" Style="font-weight: bold; color: #d32f2f;" Class="mb-2">Pago Rechazado</MudText>
             <MudText Typo="Typo.body1" Class="mb-6" Style="color: #8D6E63;">
-                El banco no autorizó la transacción o está pendiente de revisión manual. No te preocupes, no se te ha cobrado nada.
+                El banco no autorizó la transacción por falta de fondos o seguridad. No te preocupes, no se te ha cobrado nada.
             </MudText>
             
             <MudButton Variant="Variant.Filled" Color="Color.Dark" FullWidth="true" Size="Size.Large" OnClick="@(() => Nav.NavigateTo("/carrito"))" Style="border-radius: 30px;">
@@ -49,9 +73,9 @@
 
     protected override void OnInitialized()
     {
-        if (Status == "approved")
+        // Solo vaciamos el carrito si el pago ya fue aprobado o si está pendiente en el banco
+        if (Status == "approved" || Status == "pending" || Status == "in_process")
         {
-            // 🔥 Como el backend ya procesó todo el pedido, vaciamos el carrito del cliente
             CarritoService.VaciarCarrito();
         }
     }
