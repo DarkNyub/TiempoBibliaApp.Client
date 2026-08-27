@@ -201,11 +201,12 @@
             Snackbar.Add("Los correos no coinciden. Por favor, verifícalos.", Severity.Error);
             return;
         }
-
-        if (string.IsNullOrWhiteSpace(_nombreCliente) || string.IsNullOrWhiteSpace(_apellidoCliente))
-        {
-            Snackbar.Add("Por favor ingresa tu nombre y apellido.", Severity.Warning);
-            return;
+        if (Ubicacion.EsColombia){
+            if (string.IsNullOrWhiteSpace(_nombreCliente) || string.IsNullOrWhiteSpace(_apellidoCliente))
+            {
+                Snackbar.Add("Por favor ingresa tu nombre y apellido.", Severity.Warning);
+                return;
+            }
         }
 
         if (!_aceptaTerminos)
