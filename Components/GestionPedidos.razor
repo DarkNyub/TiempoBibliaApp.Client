@@ -17,7 +17,9 @@
             <!-- 🔥 NUEVO BOTÓN DE ACTUALIZAR -->
             <MudIconButton Icon="@Icons.Material.Filled.Refresh" Color="Color.Primary" OnClick="RefrescarTabla" title="Actualizar datos" Class="ml-4" />
             <MudSpacer />
-            <MudIconButton Icon="@Icons.Material.Filled.Refresh" Color="Color.Primary" OnClick="AbrirModalNuevoPedido" title="Cargar Pedido Manual" Class="ml-4" />
+            <MudButton Size="Size.Small"  Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="AbrirModalNuevoPedido">
+                Cargar Pedido Manual
+            </MudButton>
             <MudSpacer />
             <MudTextField @bind-Value="textoBusqueda" Immediate="true" Placeholder="Buscar correo o ID..." Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Class="mt-0" Margin="Margin.Dense" />
         </ToolBarContent>
