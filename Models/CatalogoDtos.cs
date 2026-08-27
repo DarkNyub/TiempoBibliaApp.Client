@@ -260,4 +260,13 @@ namespace TiempoBiblia.Client.Models
         public string Mensaje { get; set; } = string.Empty;
         public string Detalle { get; set; } = string.Empty;
     }
+    public class CrearPedidoManualDto
+    {
+        public string CorreoCliente { get; set; } = string.Empty;
+        public string TransaccionGatewayId { get; set; } = string.Empty;
+        public string Pasarela { get; set; } = "MercadoPago"; // Por defecto
+        public decimal TotalCobrado { get; set; }
+        public string Moneda { get; set; } = "COP";
+        public IReadOnlyCollection<int> ProductosIds { get; set; } = new List<int>();
+    }
 } // Fin del namespace

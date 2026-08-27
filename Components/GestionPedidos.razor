@@ -17,6 +17,8 @@
             <!-- 🔥 NUEVO BOTÓN DE ACTUALIZAR -->
             <MudIconButton Icon="@Icons.Material.Filled.Refresh" Color="Color.Primary" OnClick="RefrescarTabla" title="Actualizar datos" Class="ml-4" />
             <MudSpacer />
+            <MudIconButton Icon="@Icons.Material.Filled.Refresh" Color="Color.Primary" OnClick="AbrirModalNuevoPedido" title="Cargar Pedido Manual" Class="ml-4" />
+            <MudSpacer />
             <MudTextField @bind-Value="textoBusqueda" Immediate="true" Placeholder="Buscar correo o ID..." Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Class="mt-0" Margin="Margin.Dense" />
         </ToolBarContent>
             <HeaderContent>
@@ -110,6 +112,57 @@
     </DialogActions>
 </MudDialog>
 
+<!-- 🔥 MODAL PARA INGRESAR PEDIDO MANUAL -->
+<MudDialog @bind-Visible="mostrarModalManual" Options="new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true }">
+    <TitleContent>
+        <MudText Typo="Typo.h6">Crear Pedido Manual 🛠️</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudGrid Spacing="2">
+            <MudItem xs="12" md="6">
+                <MudTextField @bind-Value="nuevoPedido.CorreoCliente" Label="Correo del Cliente" Variant="Variant.Outlined" Required="true" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudTextField @bind-Value="nuevoPedido.TransaccionGatewayId" Label="ID de Transacción (Manual)" Variant="Variant.Outlined" Required="true" Margin="Margin.Dense" />
+            </MudItem>
+            
+            <MudItem xs="12" md="4">
+                <MudSelect T="string" @bind-Value="nuevoPedido.Pasarela" Label="Pasarela" Variant="Variant.Outlined" Margin="Margin.Dense">
+                    <MudSelectItem Value="@("MercadoPago")">MercadoPago</MudSelectItem>
+                    <MudSelectItem Value="@("PayPal")">PayPal</MudSelectItem>
+                    <MudSelectItem Value="@("Gratuito")">Gratuito</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudNumericField @bind-Value="nuevoPedido.TotalCobrado" Label="Total Cobrado" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudSelect T="string" @bind-Value="nuevoPedido.Moneda" Label="Moneda" Variant="Variant.Outlined" Margin="Margin.Dense">
+                    <MudSelectItem Value="@("COP")">COP</MudSelectItem>
+                    <MudSelectItem Value="@("USD")">USD</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+
+            <MudItem xs="12">
+                <MudSelect T="int" MultiSelection="true" @bind-SelectedValues="nuevoPedido.ProductosIds" Label="Productos Comprados" Variant="Variant.Outlined" Margin="Margin.Dense"
+                           MultiSelectionTextFunc="@( _ => ObtenerNombresProductosSeleccionados(nuevoPedido.ProductosIds) )">
+                    @if (productosDisponibles != null)
+                    {
+                        @foreach (var p in productosDisponibles.Where(x => x.Activo))
+                        {
+                            <MudSelectItem T="int" Value="@p.Id">@p.Nombre</MudSelectItem>
+                        }
+                    }
+                </MudSelect>
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Size="Size.Small" OnClick="() => mostrarModalManual = false">Cancelar</MudButton>
+        <MudButton Size="Size.Small" Color="Color.Primary" Variant="Variant.Filled" OnClick="EjecutarPedidoManual" Disabled="procesandoManual">Guardar Pedido</MudButton>
+    </DialogActions>
+</MudDialog>
+
 @code {
     private List<PedidoAdminDto>? pedidos;
     private string textoBusqueda = "";
@@ -120,9 +173,17 @@
     private int pedidoReenviarId = 0;
     private string correoEdicion = "";
 
+    private bool mostrarModalManual = false;
+    private bool procesandoManual = false;
+    private CrearPedidoManualDto nuevoPedido = new();
+    private List<ProductoDto>? productosDisponibles;
+
     protected override async Task OnInitializedAsync()
     {
         await CargarPedidos();
+        // Cargar los productos para el MultiSelect
+        try { productosDisponibles = await Http.GetFromJsonAsync<List<ProductoDto>>("api/Productos/admin"); } 
+        catch { productosDisponibles = new List<ProductoDto>(); }
     }
 
     private async Task CargarPedidos()
@@ -210,4 +271,44 @@
         
         Snackbar.Add("Historial actualizado", Severity.Success);
     }
+    private void AbrirModalNuevoPedido()
+{
+    nuevoPedido = new CrearPedidoManualDto(); // Limpiamos el formulario
+    mostrarModalManual = true;
+}
+
+private string ObtenerNombresProductosSeleccionados(IEnumerable<int> ids)
+{
+    if (productosDisponibles == null || !ids.Any()) return "Ninguno seleccionado";
+    var nombres = productosDisponibles.Where(p => ids.Contains(p.Id)).Select(p => p.Nombre);
+    return string.Join(", ", nombres);
+}
+
+private async Task EjecutarPedidoManual()
+{
+    if (string.IsNullOrWhiteSpace(nuevoPedido.CorreoCliente) || string.IsNullOrWhiteSpace(nuevoPedido.TransaccionGatewayId) || !nuevoPedido.ProductosIds.Any())
+    {
+        Snackbar.Add("Faltan datos obligatorios (Correo, ID o Productos).", Severity.Warning);
+        return;
+    }
+
+    procesandoManual = true;
+    try
+    {
+        var response = await Http.PostAsJsonAsync("api/Pedidos/manual", nuevoPedido);
+        if (response.IsSuccessStatusCode)
+        {
+            Snackbar.Add("¡Pedido manual registrado y correos enviados!", Severity.Success);
+            mostrarModalManual = false;
+            await CargarPedidos(); 
+        }
+        else 
+        {
+            var errorInfo = await response.Content.ReadFromJsonAsync<RespuestaErrorApiDto>();
+            Snackbar.Add(errorInfo?.Mensaje ?? "Error al guardar.", Severity.Error);
+        }
+    }
+    catch { Snackbar.Add("Error de conexión.", Severity.Error); }
+    finally { procesandoManual = false; }
+}
 }
