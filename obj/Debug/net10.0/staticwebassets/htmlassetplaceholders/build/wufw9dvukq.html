@@ -1,12 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
+<script>
+    // 🔥 CAMBIA ESTE NÚMERO CADA VEZ QUE SUBAS UNA ACTUALIZACIÓN IMPORTANTE
+    const versionActual = "1.0.1";
+    const versionGuardada = localStorage.getItem("appVersion");
+
+    if (versionGuardada !== versionActual) {
+        // 1. Limpiamos el registro para que no se quede en un bucle infinito
+        localStorage.setItem("appVersion", versionActual);
+
+        // 2. Destruimos la caché profunda (donde Blazor guarda las .dll viejas)
+        if ('caches' in window) {
+            caches.keys().then(function (nombres) {
+                for (let nombre of nombres) {
+                    caches.delete(nombre);
+                }
+            }).then(function () {
+                // 3. Forzamos la recarga de la página limpia saltándose la caché
+                window.location.reload(true);
+            });
+        } else {
+            // Recarga normal de respaldo por si el navegador es viejo
+            window.location.reload(true);
+        }
+    }
+</script>
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Tiempobiblia - Luzy</title>
     <base href="/" />
-    <link href="_framework/dotnet.zhldp4d78l.js" rel="preload" as="script" fetchpriority="high" crossorigin="anonymous" integrity="sha256-F4eo0HBcoNoCrd3utx68VcRTB4+WU5QPJmS4IMilElM=" />
+    <link href="_framework/dotnet.x7u817xl8q.js" rel="preload" as="script" fetchpriority="high" crossorigin="anonymous" integrity="sha256-/bcGltxSeVNj8tRn+CFduBE+/fuXzifH6Pc9LZIzvXs=" />
     <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="css/app.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
@@ -20,7 +45,7 @@
     "./_framework/blazor.webassembly.js": "./_framework/blazor.webassembly.958z1vx7fr.js",
     "./_framework/dotnet.native.js": "./_framework/dotnet.native.vzj2a6aakt.js",
     "./_framework/dotnet.runtime.js": "./_framework/dotnet.runtime.zbexyp8zrs.js",
-    "./_framework/dotnet.js": "./_framework/dotnet.zhldp4d78l.js",
+    "./_framework/dotnet.js": "./_framework/dotnet.x7u817xl8q.js",
     "./cropper.min.js": "./cropper.min.ogc5s1ivpz.js",
     "./cropperJsInterop.min.js": "./cropperJsInterop.min.kdmqmppme6.js",
     "./lib/bootstrap/dist/js/bootstrap.bundle.js": "./lib/bootstrap/dist/js/bootstrap.bundle.2d0rqesrp0.js",
@@ -42,12 +67,12 @@
     "./_content/MudBlazor/MudBlazor.min.obq49z3y15.js": "sha256-RCP1u+n2DiNin+A6Edw6xsfWpI03aYyzU8pijagzeGQ=",
     "./_framework/blazor.webassembly.958z1vx7fr.js": "sha256-A59Tr9HqEhHMu8kU7kruLI9ayw5MRS6Lvc6z7jCbghk=",
     "./_framework/blazor.webassembly.js": "sha256-A59Tr9HqEhHMu8kU7kruLI9ayw5MRS6Lvc6z7jCbghk=",
-    "./_framework/dotnet.js": "sha256-F4eo0HBcoNoCrd3utx68VcRTB4+WU5QPJmS4IMilElM=",
+    "./_framework/dotnet.js": "sha256-/bcGltxSeVNj8tRn+CFduBE+/fuXzifH6Pc9LZIzvXs=",
     "./_framework/dotnet.native.js": "sha256-RezASHv+dbqV50cFnld76YiLhk4B+BjMAKs/euUdNyE=",
     "./_framework/dotnet.native.vzj2a6aakt.js": "sha256-RezASHv+dbqV50cFnld76YiLhk4B+BjMAKs/euUdNyE=",
     "./_framework/dotnet.runtime.js": "sha256-MZMguyke9CroSQl+L/SHIGFkPTD+LtYGXkXjAvwWx40=",
     "./_framework/dotnet.runtime.zbexyp8zrs.js": "sha256-MZMguyke9CroSQl+L/SHIGFkPTD+LtYGXkXjAvwWx40=",
-    "./_framework/dotnet.zhldp4d78l.js": "sha256-F4eo0HBcoNoCrd3utx68VcRTB4+WU5QPJmS4IMilElM=",
+    "./_framework/dotnet.x7u817xl8q.js": "sha256-/bcGltxSeVNj8tRn+CFduBE+/fuXzifH6Pc9LZIzvXs=",
     "./cropper.min.js": "sha256-WO5Zy4plL/Vm2Pya758t2ZGWFdQ+cpPDavAzeyvdqgY=",
     "./cropper.min.ogc5s1ivpz.js": "sha256-WO5Zy4plL/Vm2Pya758t2ZGWFdQ+cpPDavAzeyvdqgY=",
     "./cropperJsInterop.min.js": "sha256-yN1IOctrL7NrrqQ5fr40Nw7KgunTFnSk5GANHDyidPM=",

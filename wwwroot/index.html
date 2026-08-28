@@ -1,5 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
+<script>
+    // 🔥 CAMBIA ESTE NÚMERO CADA VEZ QUE SUBAS UNA ACTUALIZACIÓN IMPORTANTE
+    const versionActual = "1.0.1";
+    const versionGuardada = localStorage.getItem("appVersion");
+
+    if (versionGuardada !== versionActual) {
+        // 1. Limpiamos el registro para que no se quede en un bucle infinito
+        localStorage.setItem("appVersion", versionActual);
+
+        // 2. Destruimos la caché profunda (donde Blazor guarda las .dll viejas)
+        if ('caches' in window) {
+            caches.keys().then(function (nombres) {
+                for (let nombre of nombres) {
+                    caches.delete(nombre);
+                }
+            }).then(function () {
+                // 3. Forzamos la recarga de la página limpia saltándose la caché
+                window.location.reload(true);
+            });
+        } else {
+            // Recarga normal de respaldo por si el navegador es viejo
+            window.location.reload(true);
+        }
+    }
+</script>
 
 <head>
     <meta charset="utf-8" />
