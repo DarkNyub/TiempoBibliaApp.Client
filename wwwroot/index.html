@@ -1,8 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <script>
+    // 🔥 LIMPIAPARABRISAS DE UTMs Y RASTREADORES DE REDES SOCIALES
+    (function () {
+        if (window.location.search.includes("utm_") || window.location.search.includes("igshid") || window.location.search.includes("fbclid")) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const keysToDelete = [];
+
+            // Identificamos toda la basura que inyecta Meta/Google
+            urlParams.forEach((value, key) => {
+                if (key.startsWith("utm_") || key === "fbclid" || key === "igshid") {
+                    keysToDelete.push(key);
+                }
+            });
+
+            // La borramos de la memoria
+            keysToDelete.forEach(key => urlParams.delete(key));
+
+            // Reconstruimos la URL limpia
+            const newSearch = urlParams.toString();
+            const newUrl = window.location.pathname + (newSearch ? '?' + newSearch : '') + window.location.hash;
+
+            // Cambiamos la URL en el navegador sin recargar la página
+            window.history.replaceState(null, '', newUrl);
+        }
+    })();
+</script>
+<script>
     // 🔥 CAMBIA ESTE NÚMERO CADA VEZ QUE SUBAS UNA ACTUALIZACIÓN IMPORTANTE
-    const versionActual = "1.0.1";
+    const versionActual = "1.0.2";
     const versionGuardada = localStorage.getItem("appVersion");
 
     if (versionGuardada !== versionActual) {
