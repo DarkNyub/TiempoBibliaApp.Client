@@ -21,18 +21,33 @@ namespace TiempoBiblia.Client.Services
         // ==========================================
         public void CargarCarritoGuardado()
         {
-            var json = _js.Invoke<string>("localStorage.getItem", "tiempobiblia_carrito");
-            if (!string.IsNullOrEmpty(json))
+            try
             {
-                Items = JsonSerializer.Deserialize<List<CarritoItem>>(json) ?? new();
-                NotificarEstadoCambiado();
+                var json = _js.Invoke<string>("localStorage.getItem", "tiempobiblia_carrito");
+                if (!string.IsNullOrEmpty(json))
+                {
+                    Items = JsonSerializer.Deserialize<List<CarritoItem>>(json) ?? new();
+                    NotificarEstadoCambiado();
+                }
+            }
+            catch
+            {
+                // Si el navegador de IG bloquea el acceso, lo ignoramos.
+                // El carrito funcionará en la memoria RAM durante esta sesión.
             }
         }
 
         private void GuardarCarrito()
         {
-            var json = JsonSerializer.Serialize(Items);
-            _js.InvokeVoid("localStorage.setItem", "tiempobiblia_carrito", json);
+            try
+            {
+                var json = JsonSerializer.Serialize(Items);
+                _js.InvokeVoid("localStorage.setItem", "tiempobiblia_carrito", json);
+            }
+            catch
+            {
+                // Fallback silencioso: si no nos deja guardar, al menos no rompemos la página.
+            }
         }
 
         // ==========================================
