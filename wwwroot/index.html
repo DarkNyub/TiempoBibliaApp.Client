@@ -28,7 +28,7 @@
 </script>
 <script>
     // 🔥 CAMBIA ESTE NÚMERO CADA VEZ QUE SUBAS UNA ACTUALIZACIÓN IMPORTANTE
-    const versionActual = "1.0.3";
+    const versionActual = "1.0.4";
     const versionGuardada = localStorage.getItem("appVersion");
 
     if (versionGuardada !== versionActual) {
@@ -149,7 +149,7 @@
                 customization: {
                     visual: { style: { theme: 'default' } },
                     paymentMethods: {
-                        bankTransfer: "all",  // 🔥 Habilita PSE (Se aprueba de inmediato)
+                        //bankTransfer: "all",  // 🔥 Habilita PSE (Se aprueba de inmediato)
                         creditCard: "all",    // 🔥 Tarjetas de Crédito
                         debitCard: "all",     // 🔥 Tarjetas de Débito
                         mercadoPago: "all"    // 🔥 Saldo en cuenta de Mercado Pago
