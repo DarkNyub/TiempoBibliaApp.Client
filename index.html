@@ -28,7 +28,7 @@
 </script>
 <script>
     // 🔥 CAMBIA ESTE NÚMERO CADA VEZ QUE SUBAS UNA ACTUALIZACIÓN IMPORTANTE
-    const versionActual = "1.0.3";
+    const versionActual = "1.0.4";
     const versionGuardada = localStorage.getItem("appVersion");
 
     if (versionGuardada !== versionActual) {
@@ -57,7 +57,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Tiempobiblia - Luzy</title>
     <base href="/" />
-    <link href="_framework/dotnet.k5abopnxmg.js" rel="preload" as="script" fetchpriority="high" crossorigin="anonymous" integrity="sha256-KNRvb3Ik7TcQwQW5WZ//U7M/OUapB3z+4ebCexeHCtU=" />
+    <link href="_framework/dotnet.vgs2csmnv7.js" rel="preload" as="script" fetchpriority="high" crossorigin="anonymous" integrity="sha256-n5i980dIoZ5cC+f2RqMTb0gRQ4EYgJXOpaGdAzK48qE=" />
     <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="css/app.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
@@ -65,20 +65,20 @@
     <script type="importmap">{
   "imports": {
     "./_framework/blazor.webassembly.js": "./_framework/blazor.webassembly.958z1vx7fr.js",
-    "./_framework/dotnet.js": "./_framework/dotnet.k5abopnxmg.js",
     "./_framework/dotnet.native.js": "./_framework/dotnet.native.b6l13xorvf.js",
-    "./_framework/dotnet.runtime.js": "./_framework/dotnet.runtime.v06hirbjsv.js"
+    "./_framework/dotnet.runtime.js": "./_framework/dotnet.runtime.v06hirbjsv.js",
+    "./_framework/dotnet.js": "./_framework/dotnet.vgs2csmnv7.js"
   },
   "scopes": {},
   "integrity": {
     "./_framework/blazor.webassembly.958z1vx7fr.js": "sha256-A59Tr9HqEhHMu8kU7kruLI9ayw5MRS6Lvc6z7jCbghk=",
     "./_framework/blazor.webassembly.js": "sha256-A59Tr9HqEhHMu8kU7kruLI9ayw5MRS6Lvc6z7jCbghk=",
-    "./_framework/dotnet.js": "sha256-KNRvb3Ik7TcQwQW5WZ//U7M/OUapB3z+4ebCexeHCtU=",
-    "./_framework/dotnet.k5abopnxmg.js": "sha256-KNRvb3Ik7TcQwQW5WZ//U7M/OUapB3z+4ebCexeHCtU=",
+    "./_framework/dotnet.js": "sha256-n5i980dIoZ5cC+f2RqMTb0gRQ4EYgJXOpaGdAzK48qE=",
     "./_framework/dotnet.native.b6l13xorvf.js": "sha256-jZddobLBM2C3lQhYQ61xSQJ/WqD3eQCO3RzoHGaOjx0=",
     "./_framework/dotnet.native.js": "sha256-jZddobLBM2C3lQhYQ61xSQJ/WqD3eQCO3RzoHGaOjx0=",
     "./_framework/dotnet.runtime.js": "sha256-QbnqrZGHtGq7wudS17/AYEPpH9JkphrsyVllD6JHmds=",
-    "./_framework/dotnet.runtime.v06hirbjsv.js": "sha256-QbnqrZGHtGq7wudS17/AYEPpH9JkphrsyVllD6JHmds="
+    "./_framework/dotnet.runtime.v06hirbjsv.js": "sha256-QbnqrZGHtGq7wudS17/AYEPpH9JkphrsyVllD6JHmds=",
+    "./_framework/dotnet.vgs2csmnv7.js": "sha256-n5i980dIoZ5cC+f2RqMTb0gRQ4EYgJXOpaGdAzK48qE="
   }
 }</script>
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
@@ -167,7 +167,7 @@
                 customization: {
                     visual: { style: { theme: 'default' } },
                     paymentMethods: {
-                        bankTransfer: "all",  // 🔥 Habilita PSE (Se aprueba de inmediato)
+                        //bankTransfer: "all",  // 🔥 Habilita PSE (Se aprueba de inmediato)
                         creditCard: "all",    // 🔥 Tarjetas de Crédito
                         debitCard: "all",     // 🔥 Tarjetas de Débito
                         mercadoPago: "all"    // 🔥 Saldo en cuenta de Mercado Pago
