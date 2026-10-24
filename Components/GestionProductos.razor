@@ -265,7 +265,7 @@
     {
         var data = await Http.GetFromJsonAsync<List<ProductoDto>>("api/Productos/admin");
         if (data != null)
-            productos = data.OrderByDescending(p => p.Activo).ThenBy(p => p.Id).ToList();// 🔥 Primero los Activos (true), luego los inactivos (false), y por último por nombre
+            productos = data.OrderByDescending(p => p.Activo).ThenByDescending(p => p.Id).ToList();// 🔥 Primero los Activos (true), luego los inactivos (false), y por último por Id desc 
 
         categoriasDisponibles = await Http.GetFromJsonAsync<List<CategoriaDto>>("api/Categorias/admin");
         
